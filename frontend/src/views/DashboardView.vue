@@ -108,44 +108,6 @@
         </div>
       </div>
 
-      <!-- Sidebar Right (Announcements & Events) -->
-      <div class="dashboard-sidebar-right">
-        <div class="card">
-          <div class="card-header">
-            <h3>Pengumuman Terbaru</h3>
-            <router-link to="/announcements" class="text-xs font-semibold"
-              >Lihat Semua</router-link
-            >
-          </div>
-          <div class="card-body no-padding">
-            <div
-              v-if="dashboardStore.recentAnnouncements.length === 0"
-              class="empty-announcements p-6"
-            >
-              <BellIcon :size="24" class="empty-icon" />
-              <span>Tidak ada pengumuman terbaru saat ini.</span>
-            </div>
-            <div v-else class="announcements-list">
-              <div
-                v-for="ann in dashboardStore.recentAnnouncements"
-                :key="ann.id"
-                class="announcement-item"
-              >
-                <div class="announcement-meta">
-                  <span class="badge badge-success text-xs">Pengumuman</span>
-                  <span class="ann-time text-xs">{{
-                    formatDate(ann.createdAt)
-                  }}</span>
-                </div>
-                <h4 class="announcement-title mt-1">{{ ann.title }}</h4>
-                <p class="announcement-excerpt text-muted text-sm">
-                  {{ truncateText(ann.content, 80) }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>

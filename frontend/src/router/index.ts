@@ -8,8 +8,6 @@ import TeachersPage from '../features/teachers/TeachersPage.vue'
 import SchedulePage from '../features/schedule/SchedulePage.vue'
 import AttendancePage from '../features/attendance/AttendancePage.vue'
 import GradesPage from '../features/grades/GradesPage.vue'
-import AnnouncementsPage from '../features/announcements/AnnouncementsPage.vue'
-import CommunicationPage from '../features/communication/CommunicationPage.vue'
 import BillingPage from '../features/billing/BillingPage.vue'
 import ClassesPage from '../features/classes/ClassesPage.vue'
 import EkskulPage from '../features/ekskul/EkskulPage.vue'
@@ -63,19 +61,9 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, roles: ALL_ROLES }
   },
   {
-    path: '/communication',
-    component: CommunicationPage,
-    meta: { requiresAuth: true, roles: ALL_ROLES }
-  },
-  {
     path: '/billing',
     component: BillingPage,
     meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas', 'siswa', 'orang_tua'] }
-  },
-  {
-    path: '/announcements',
-    component: AnnouncementsPage,
-    meta: { requiresAuth: true, roles: ALL_ROLES }
   },
   {
     path: '/ekskul',

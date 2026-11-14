@@ -30,33 +30,6 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
       <!-- Main Content Column -->
       <div class="lg:col-span-2 space-y-6 sm:space-y-8">
-        <!-- Announcements -->
-        <div class="clean-card overflow-hidden">
-          <div class="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-2">
-            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Pengumuman Terbaru</h2>
-            <RouterLink to="/announcements" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors py-2 -my-2 px-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">Lihat Semua</RouterLink>
-          </div>
-          <div class="divide-y divide-slate-50">
-            <div v-for="announcement in dashboardStore.latestAnnouncements" :key="announcement.id" class="p-4 sm:p-6 hover:bg-slate-50/50 transition-colors">
-              <div class="flex items-start gap-4">
-                <div :class="['w-2 h-2 mt-2 rounded-full shrink-0', announcement.category === 'urgent' ? 'bg-rose-500' : announcement.category === 'warning' ? 'bg-amber-500' : 'bg-indigo-500']"></div>
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center justify-between gap-2 mb-1">
-                    <h3 class="text-sm font-bold text-slate-900 truncate">{{ announcement.title }}</h3>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shrink-0" :class="announcement.category === 'urgent' ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600'">
-                      {{ announcement.category }}
-                    </span>
-                  </div>
-                  <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">{{ announcement.content }}</p>
-                </div>
-              </div>
-            </div>
-            <div v-if="dashboardStore.latestAnnouncements.length === 0" class="p-8 sm:p-12 text-center text-slate-500 text-sm italic">
-              Tidak ada pengumuman hari ini.
-            </div>
-          </div>
-        </div>
-
         <!-- Attendance Overview (Simple Bar Chart) -->
         <div class="clean-card p-4 sm:p-6">
           <div class="flex items-center justify-between mb-8">

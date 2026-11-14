@@ -6,7 +6,6 @@ const endpoints = [
   '/api/grades',
   '/api/attendances',
   '/api/schedules',
-  '/api/announcements',
   '/api/bills'
 ];
 

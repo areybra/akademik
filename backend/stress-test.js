@@ -12,7 +12,6 @@ const ENDPOINTS = [
   '/api/grades',
   '/api/attendances',
   '/api/schedules',
-  '/api/announcements',
   '/api/bills',
   '/api/settings/help-contacts',
 ];

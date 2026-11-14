@@ -68,12 +68,6 @@ const schedules = [
   ['sched-012', 'XII TKJ 1', '13:00 - 14:30', 'Bahasa Indonesia', 'Agus Setiawan, M.Pd.', 'R-303']
 ];
 
-const announcements = [
-  ['ann-001', 'Ujian Tengah Semester Ganjil', 'UTS dilaksanakan 18-22 November 2026. Siswa wajib membawa kartu ujian.', 'Administrator', 'akademik', iso(daysAgo(1))],
-  ['ann-002', 'Pembayaran SPP Bulan November', 'Batas akhir pembayaran SPP November adalah 15 November 2026.', 'Administrator', 'keuangan', iso(daysAgo(2))],
-  ['ann-003', 'Praktik Kerja Lapangan Kelas XII', 'Sosialisasi PKL untuk kelas XII akan diadakan di aula sekolah hari Jumat.', 'Budi Santoso, S.Kom.', 'info', iso(daysAgo(4))]
-];
-
 const subjects = ['Matematika', 'Bahasa Indonesia', 'Pemrograman Web'];
 const attendanceStatuses = ['hadir', 'hadir', 'hadir', 'hadir', 'izin', 'hadir', 'alfa', 'hadir', 'hadir', 'hadir'];
 
@@ -124,15 +118,6 @@ function seedSchedules() {
   );
   let added = 0;
   for (const s of schedules) added += insert.run(...s).changes;
-  return added;
-}
-
-function seedAnnouncements() {
-  const insert = db.prepare(
-    'INSERT OR IGNORE INTO announcements (id, title, content, author, category, created_at) VALUES (?, ?, ?, ?, ?, ?)'
-  );
-  let added = 0;
-  for (const a of announcements) added += insert.run(...a).changes;
   return added;
 }
 
@@ -285,7 +270,6 @@ const run = db.transaction(() => ({
   students: seedStudents(),
   teachers: seedTeachers(),
   schedules: seedSchedules(),
-  announcements: seedAnnouncements(),
   grades: seedGrades(),
   attendances: seedAttendances(),
   bills: seedBills(),

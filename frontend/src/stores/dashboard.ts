@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Announcement } from '../types'
 import { useStudentStore } from './student'
 import { useTeacherStore } from './teacher'
 import { useAttendanceStore } from './attendance'
-import { useAnnouncementStore } from './announcement'
 
 export const useDashboardStore = defineStore('dashboard', () => {
   const loading = ref(false)
@@ -13,7 +11,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const studentStore = useStudentStore()
   const teacherStore = useTeacherStore()
   const attendanceStore = useAttendanceStore()
-  const announcementStore = useAnnouncementStore()
 
   const studentsCount = computed(() => studentStore.students.length)
   const teachersCount = computed(() => teacherStore.teachers.length)
@@ -32,23 +29,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   })
 
-  const latestAnnouncements = computed(() => {
-    return [...announcementStore.announcements]
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-      .slice(0, 5) as Announcement[]
-  })
-
   const fetchDashboardData = async () => {
     loading.value = true
     // Fetch everything we need for the dashboard in parallel
     await Promise.all([
       studentStore.fetchStudents(),
       teacherStore.fetchTeachers(),
-      attendanceStore.fetchAttendances(),
-      announcementStore.fetchAnnouncements()
+      attendanceStore.fetchAttendances()
     ])
     loading.value = false
   }
@@ -58,7 +45,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
     studentsCount,
     teachersCount,
     attendanceTodayStats,
-    latestAnnouncements,
     fetchDashboardData
   }
 })
