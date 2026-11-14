@@ -31,6 +31,7 @@
               type="password"
               placeholder="••••••••"
               required
+              toggle-password
             />
           </div>
 
