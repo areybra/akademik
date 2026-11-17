@@ -9,13 +9,15 @@
           Rekapitulasi pencapaian akademik siswa SMK
         </p>
       </div>
-      <Button v-if="canEdit" variant="primary" size="lg" @click="openAddModal">
-        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        Input Nilai
-      </Button>
-      <Button v-if="canEdit" variant="outline" size="lg" class="no-print" @click="exportGrades">Ekspor CSV</Button>
+      <div v-if="canEdit" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:justify-end">
+        <Button variant="primary" size="lg" @click="openAddModal">
+          <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Input Nilai
+        </Button>
+        <Button variant="outline" size="lg" class="no-print" @click="exportGrades">Ekspor CSV</Button>
+      </div>
     </div>
 
     <!-- Filters Bar -->

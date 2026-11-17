@@ -9,15 +9,17 @@
           Pemantauan kehadiran siswa harian
         </p>
       </div>
-      <Button v-if="canEdit" variant="primary" @click="saveAttendance" class="shadow-lg shadow-indigo-100 min-w-[140px]">
-        <span class="flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-1.5-1.5M12 14l3-3m-3 4v-7" />
-          </svg>
-          Simpan Rekap
-        </span>
-      </Button>
-      <Button v-if="canEdit" variant="outline" class="no-print" @click="exportAttendance">Ekspor CSV</Button>
+      <div v-if="canEdit" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:justify-end">
+        <Button variant="primary" @click="saveAttendance" class="shadow-lg shadow-indigo-100 min-w-[140px]">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-1.5-1.5M12 14l3-3m-3 4v-7" />
+            </svg>
+            Simpan Rekap
+          </span>
+        </Button>
+        <Button variant="outline" class="no-print" @click="exportAttendance">Ekspor CSV</Button>
+      </div>
     </div>
 
     <!-- Controls Bar -->
