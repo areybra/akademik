@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../database');
 const authenticateToken = require('../middleware/auth');
 const authorizeRoles = require('../middleware/roleCheck');
+const upload = require('../middleware/upload');
 const { studentScope } = require('../scope');
 
 // GET /api/students — ambil semua siswa
@@ -41,18 +42,18 @@ router.get('/:id', authenticateToken, (req, res) => {
 
 // POST /api/students — tambah siswa
 router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), (req, res) => {
-  const { name, niup, gender, class: studentClass, status } = req.body;
+  const { name, niup, nisn, gender, tgl_lahir, tmp_lahir, class: studentClass, provinsi, kabupaten, kecamatan, negara, foto_siswa, status } = req.body;
 
   if (!name || !niup || !gender || !studentClass) {
-    return res.status(400).json({ message: 'Data tidak lengkap' });
+    return res.status(400).json({ message: 'Data wajib (name, niup, gender, class) tidak lengkap' });
   }
 
   const id = `std-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   try {
     db.prepare(`
-      INSERT INTO students (id, name, niup, gender, class, status)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(id, name, niup, gender, studentClass, status || 'siswa aktif');
+      INSERT INTO students (id, name, niup, nisn, gender, tgl_lahir, tmp_lahir, class, provinsi, kabupaten, kecamatan, negara, foto_siswa, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(id, name, niup, nisn, gender, tgl_lahir, tmp_lahir, studentClass, provinsi || '', kabupaten || '', kecamatan || '', negara || 'Indonesia', foto_siswa || '', status || 'siswa aktif');
 
     const newStudent = db.prepare('SELECT * FROM students WHERE id = ?').get(id);
     res.status(201).json(newStudent);
@@ -66,7 +67,7 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_
 
 // PUT /api/students/:id — update siswa
 router.put('/:id', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), (req, res) => {
-  const { name, niup, gender, class: studentClass, status } = req.body;
+  const { name, niup, nisn, gender, tgl_lahir, tmp_lahir, class: studentClass, provinsi, kabupaten, kecamatan, negara, foto_siswa, status } = req.body;
   const { id } = req.params;
 
   const existing = db.prepare('SELECT * FROM students WHERE id = ?').get(id);
@@ -74,13 +75,21 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staf
 
   try {
     db.prepare(`
-      UPDATE students SET name = ?, niup = ?, gender = ?, class = ?, status = ?
+      UPDATE students SET name = ?, niup = ?, nisn = ?, gender = ?, tgl_lahir = ?, tmp_lahir = ?, class = ?, provinsi = ?, kabupaten = ?, kecamatan = ?, negara = ?, foto_siswa = ?, status = ?
       WHERE id = ?
     `).run(
       name ?? existing.name,
       niup ?? existing.niup,
+      nisn ?? existing.nisn,
       gender ?? existing.gender,
+      tgl_lahir ?? existing.tgl_lahir,
+      tmp_lahir ?? existing.tmp_lahir,
       studentClass ?? existing.class,
+      provinsi ?? existing.provinsi,
+      kabupaten ?? existing.kabupaten,
+      kecamatan ?? existing.kecamatan,
+      negara ?? existing.negara,
+      foto_siswa ?? existing.foto_siswa,
       status ?? existing.status,
       id
     );
@@ -110,15 +119,30 @@ router.post('/bulk', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'st
   }
 
   const insertStudent = db.prepare(`
-    INSERT OR IGNORE INTO students (id, name, niup, gender, class, status)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT OR IGNORE INTO students (id, name, niup, nisn, gender, tgl_lahir, tmp_lahir, class, provinsi, kabupaten, kecamatan, negara, foto_siswa, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const bulkInsert = db.transaction((students) => {
     const results = [];
     for (const s of students) {
       const id = `std-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      insertStudent.run(id, s.name, s.niup, s.gender, s.class, s.status || 'siswa aktif');
+      insertStudent.run(
+        id,
+        s.name,
+        s.niup,
+        s.nisn || '',
+        s.gender,
+        s.tgl_lahir || '',
+        s.tmp_lahir || '',
+        s.class,
+        s.provinsi || 'Indonesia',
+        s.kabupaten || '',
+        s.kecamatan || '',
+        s.negara || 'Indonesia',
+        s.foto_siswa || '',
+        s.status || 'siswa aktif'
+      );
       results.push({ ...s, id });
     }
     return results;
@@ -130,6 +154,16 @@ router.post('/bulk', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'st
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+});
+
+// POST /api/students/upload-foto — upload foto siswa
+router.post('/upload-foto', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), upload.single('foto'), (req, res) => {
+  // Multer middleware sudah diproses di server.js, ambil filename dari req.file
+  if (!req.file) {
+    return res.status(400).json({ message: 'File tidak diunggah' });
+  }
+  const fotoPath = `/uploads/${req.file.filename}`; // Path relativ untuk frontend
+  res.json({ filename: req.file.filename, path: fotoPath });
 });
 
 module.exports = router;

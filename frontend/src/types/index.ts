@@ -23,18 +23,34 @@ export interface Student {
   id: string
   name: string
   niup: string
+  nisn: string
   class: string
   status: 'siswa aktif' | 'siswa berhenti' | 'siswa lulus'
   gender: 'L' | 'P'
+  tgl_lahir: string
+  tmp_lahir: string
+  provinsi: string
+  kabupaten: string
+  kecamatan: string
+  negara: string
+  foto_siswa: string
 }
 
 export interface Teacher {
   id: string
   name: string
   niup: string
+  nip?: string
   gender: 'L' | 'P'
+  pangkat?: string
+  pendidikan?: string
   subjects: string[]
   classes: string[]
+  foto_guru?: string
+  provinsi?: string
+  kabupaten?: string
+  kecamatan?: string
+  negara?: string
 }
 
 export interface Announcement {

@@ -139,4 +139,58 @@ if (!userColumns.includes('roles')) {
   db.exec('ALTER TABLE users ADD COLUMN roles TEXT');
 }
 
+// Migrasi kolom baru untuk tabel students (nisn, foto, alamat)
+const studentColumns = db.prepare('PRAGMA table_info(students)').all().map((c) => c.name);
+if (!studentColumns.includes('nisn')) {
+  db.exec('ALTER TABLE students ADD COLUMN nisn TEXT');
+}
+if (!studentColumns.includes('tgl_lahir')) {
+  db.exec('ALTER TABLE students ADD COLUMN tgl_lahir TEXT');
+}
+if (!studentColumns.includes('tmp_lahir')) {
+  db.exec('ALTER TABLE students ADD COLUMN tmp_lahir TEXT');
+}
+if (!studentColumns.includes('foto_siswa')) {
+  db.exec('ALTER TABLE students ADD COLUMN foto_siswa TEXT');
+}
+if (!studentColumns.includes('provinsi')) {
+  db.exec('ALTER TABLE students ADD COLUMN provinsi TEXT');
+}
+if (!studentColumns.includes('kabupaten')) {
+  db.exec('ALTER TABLE students ADD COLUMN kabupaten TEXT');
+}
+if (!studentColumns.includes('kecamatan')) {
+  db.exec('ALTER TABLE students ADD COLUMN kecamatan TEXT');
+}
+if (!studentColumns.includes('negara')) {
+  db.exec('ALTER TABLE students ADD COLUMN negara TEXT DEFAULT \"Indonesia\"');
+}
+
+// Migrasi kolom baru untuk tabel teachers (nip, pangkat, foto, alamat)
+const teacherColumns = db.prepare('PRAGMA table_info(teachers)').all().map((c) => c.name);
+if (!teacherColumns.includes('nip')) {
+  db.exec('ALTER TABLE teachers ADD COLUMN nip TEXT');
+}
+if (!teacherColumns.includes('pangkat')) {
+  db.exec('ALTER TABLE teachers ADD COLUMN pangkat TEXT');
+}
+if (!teacherColumns.includes('pendidikan')) {
+  db.exec('ALTER TABLE teachers ADD COLUMN pendidikan TEXT');
+}
+if (!teacherColumns.includes('foto_guru')) {
+  db.exec('ALTER TABLE teachers ADD COLUMN foto_guru TEXT');
+}
+if (!teacherColumns.includes('provinsi')) {
+  db.exec('ALTER TABLE teachers ADD COLUMN provinsi TEXT DEFAULT \"Indonesia\"');
+}
+if (!teacherColumns.includes('kabupaten')) {
+  db.exec('ALTER TABLE teachers ADD COLUMN kabupaten TEXT DEFAULT \"Indonesia\"');
+}
+if (!teacherColumns.includes('kecamatan')) {
+  db.exec('ALTER TABLE teachers ADD COLUMN kecamatan TEXT DEFAULT \"Indonesia\"');
+}
+if (!teacherColumns.includes('negara')) {
+  db.exec('ALTER TABLE teachers ADD COLUMN negara TEXT DEFAULT \"Indonesia\"');
+}
+
 module.exports = db;

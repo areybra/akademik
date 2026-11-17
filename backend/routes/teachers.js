@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../database');
 const authenticateToken = require('../middleware/auth');
 const authorizeRoles = require('../middleware/roleCheck');
+const upload = require('../middleware/upload');
 
 // Helper: parse JSON fields
 function parseTeacher(t) {
@@ -38,18 +39,18 @@ router.get('/:id', authenticateToken, (req, res) => {
 
 // POST /api/teachers
 router.post('/', authenticateToken, authorizeRoles('admin'), (req, res) => {
-  const { name, niup, gender, subjects, classes } = req.body;
+  const { name, niup, nip, gender, pangkat, pendidikan, subjects, classes, foto_guru, provinsi, kabupaten, kecamatan, negara } = req.body;
 
   if (!name || !niup || !gender) {
-    return res.status(400).json({ message: 'Data tidak lengkap' });
+    return res.status(400).json({ message: 'Data wajib (name, niup, gender) tidak lengkap' });
   }
 
   const id = `teacher-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   try {
     db.prepare(`
-      INSERT INTO teachers (id, name, niup, gender, subjects, classes)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(id, name, niup, gender, JSON.stringify(subjects || []), JSON.stringify(classes || []));
+      INSERT INTO teachers (id, name, niup, nip, gender, pangkat, pendidikan, subjects, classes, foto_guru, provinsi, kabupaten, kecamatan, negara)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(id, name, niup, nip, gender, pangkat || '', pendidikan || '', JSON.stringify(subjects || []), JSON.stringify(classes || []), foto_guru || '', provinsi || 'Indonesia', kabupaten || 'Indonesia', kecamatan || 'Indonesia', negara || 'Indonesia');
 
     const newTeacher = parseTeacher(db.prepare('SELECT * FROM teachers WHERE id = ?').get(id));
     res.status(201).json(newTeacher);
@@ -63,7 +64,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), (req, res) => {
 
 // PUT /api/teachers/:id
 router.put('/:id', authenticateToken, authorizeRoles('admin'), (req, res) => {
-  const { name, niup, gender, subjects, classes } = req.body;
+  const { name, niup, nip, gender, pangkat, pendidikan, subjects, classes, foto_guru, provinsi, kabupaten, kecamatan, negara } = req.body;
   const { id } = req.params;
 
   const existing = db.prepare('SELECT * FROM teachers WHERE id = ?').get(id);
@@ -73,14 +74,22 @@ router.put('/:id', authenticateToken, authorizeRoles('admin'), (req, res) => {
 
   try {
     db.prepare(`
-      UPDATE teachers SET name = ?, niup = ?, gender = ?, subjects = ?, classes = ?
+      UPDATE teachers SET name = ?, niup = ?, nip = ?, gender = ?, pangkat = ?, pendidikan = ?, subjects = ?, classes = ?, foto_guru = ?, provinsi = ?, kabupaten = ?, kecamatan = ?, negara = ?
       WHERE id = ?
     `).run(
       name ?? existingParsed.name,
       niup ?? existingParsed.niup,
+      nip ?? existingParsed.nip,
       gender ?? existingParsed.gender,
+      pangkat ?? existingParsed.pangkat,
+      pendidikan ?? existingParsed.pendidikan,
       JSON.stringify(subjects ?? existingParsed.subjects),
       JSON.stringify(classes ?? existingParsed.classes),
+      foto_guru ?? existingParsed.foto_guru,
+      provinsi ?? existingParsed.provinsi,
+      kabupaten ?? existingParsed.kabupaten,
+      kecamatan ?? existingParsed.kecamatan,
+      negara ?? existingParsed.negara,
       id
     );
 
@@ -109,12 +118,21 @@ router.post('/bulk', authenticateToken, authorizeRoles('admin'), (req, res) => {
   }
 
   const upsertTeacher = db.prepare(`
-    INSERT INTO teachers (id, name, niup, gender, subjects, classes)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO teachers (id, name, niup, nip, gender, pangkat, pendidikan, subjects, classes, foto_guru, provinsi, kabupaten, kecamatan, negara)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(niup) DO UPDATE SET
       name = excluded.name,
+      nip = excluded.nip,
       gender = excluded.gender,
-      subjects = excluded.subjects
+      pangkat = excluded.pangkat,
+      pendidikan = excluded.pendidikan,
+      subjects = excluded.subjects,
+      classes = excluded.classes,
+      foto_guru = excluded.foto_guru,
+      provinsi = excluded.provinsi,
+      kabupaten = excluded.kabupaten,
+      kecamatan = excluded.kecamatan,
+      negara = excluded.negara
   `);
 
   const bulkInsert = db.transaction((teachers) => {
@@ -122,7 +140,22 @@ router.post('/bulk', authenticateToken, authorizeRoles('admin'), (req, res) => {
     for (const t of teachers) {
       const exists = db.prepare('SELECT id FROM teachers WHERE niup = ?').get(t.niup);
       const id = exists ? exists.id : `teacher-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      upsertTeacher.run(id, t.name, t.niup, t.gender, JSON.stringify(t.subjects || []), JSON.stringify(t.classes || []));
+      upsertTeacher.run(
+        id,
+        t.name,
+        t.niup,
+        t.nip || '',
+        t.gender,
+        t.pangkat || '',
+        t.pendidikan || '',
+        JSON.stringify(t.subjects || []),
+        JSON.stringify(t.classes || []),
+        t.foto_guru || '',
+        t.provinsi || 'Indonesia',
+        t.kabupaten || 'Indonesia',
+        t.kecamatan || 'Indonesia',
+        t.negara || 'Indonesia'
+      );
       if (exists) updated++; else added++;
     }
     return { added, updated };
@@ -134,6 +167,15 @@ router.post('/bulk', authenticateToken, authorizeRoles('admin'), (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+});
+
+// POST /api/teachers/upload-foto — upload foto guru
+router.post('/upload-foto', authenticateToken, authorizeRoles('admin'), upload.single('foto'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'File tidak diunggah' });
+  }
+  const fotoPath = `/uploads/${req.file.filename}`;
+  res.json({ filename: req.file.filename, path: fotoPath });
 });
 
 module.exports = router;

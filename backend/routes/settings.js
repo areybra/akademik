@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database');
 const authenticateToken = require('../middleware/auth');
+const { hasRole } = require('../scope');
 
 const authorizeAdmin = (req, res, next) => {
-    if (!req.user || req.user.role !== 'admin') {
+    if (!req.user || !hasRole(req.user, 'admin')) {
         return res.status(403).json({ message: 'Akses ditolak: hanya admin yang bisa mengubah pengaturan.' });
     }
     next();

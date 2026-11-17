@@ -161,6 +161,83 @@
         </div>
         <Input v-model="subjectsInput" label="Mata Pelajaran" placeholder="Gunakan koma sebagai pemisah" />
         <Input v-model="classesInput" label="Daftar Kelas" placeholder="Contoh: X RPL 1, XI TKJ 2" />
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="clean-label">NIP</label>
+            <Input v-model="formData.nip" type="text" placeholder="Nomor Induk Pendidik" />
+          </div>
+          <div>
+            <label class="clean-label">Pangkat</label>
+            <Input v-model="formData.pangkat" type="text" placeholder="Contoh: SE, S.Pd, M.Pd" />
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="clean-label">Pendidikan Terakhir</label>
+            <Input v-model="formData.pendidikan" type="text" placeholder="Contoh: S1, S2, Magister" />
+          </div>
+          <div>
+            <label class="clean-label">Foto Guru</label>
+            <div class="flex items-center gap-2">
+              <!-- Tombol pilih file -->
+              <button
+                type="button"
+                id="foto-guru-btn"
+                class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
+              >
+                <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M4 6h16m10 0v6a2 2 0 01-2 2H8a2 2 0 01-2-2v-6m12 0v6a2 2 0 01-2 2H10a2 2 0 01-2-2v-6" />
+                </svg>
+                Pilih Foto
+              </button>
+              <!-- Input file tersembunyi -->
+              <input
+                type="file"
+                id="foto-guru-input"
+                accept="image/*"
+                class="hidden"
+                @change="handleFotoGuruChange"
+              />
+            </div>
+            <!-- Preview foto jika ada -->
+            <div v-if="formData.foto_guru" class="ml-4 flex items-center gap-2">
+              <img
+                :src="'/uploads/' + formData.foto_guru"
+                alt="Preview Foto"
+                class="w-10 h-10 rounded-lg object-cover"
+              />
+              <span class="text-xs text-indigo-600">{{ formData.foto_guru }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="clean-label">Provinsi</label>
+            <select v-model="formData.provinsi" class="clean-input appearance-none cursor-pointer">
+              <option value="Indonesia">Indonesia</option>
+            </select>
+          </div>
+          <div>
+            <label class="clean-label">Kabupaten/Kota</label>
+            <Input v-model="formData.kabupaten" type="text" placeholder="Kabupaten/Kota" />
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="clean-label">Kecamatan</label>
+            <Input v-model="formData.kecamatan" type="text" placeholder="Kecamatan" />
+          </div>
+          <div>
+            <label class="clean-label">Negara</label>
+            <select v-model="formData.negara" class="clean-input appearance-none cursor-pointer">
+              <option value="Indonesia">Indonesia</option>
+            </select>
+          </div>
+        </div>
       </div>
     </Modal>
 
@@ -168,37 +245,87 @@
     <Modal
       :is-open="showImportModal"
       title="Impor Data Guru Masal"
-      confirm-text="Proses Impor"
+      subtitle="Ikuti 3 langkah berikut: baca petunjuk, unduh template CSV, lalu unggah file."
+      confirm-text="Konfirmasi Import"
       @close="closeImportModal"
       @confirm="processImport"
     >
-      <div class="space-y-6">
-        <div class="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
-          <p class="text-[11px] font-bold text-indigo-700 uppercase tracking-wider mb-1">Petunjuk Format</p>
-          <p class="text-xs text-indigo-600 leading-relaxed">
-            Copy kolom dari Excel (<b>Nama, NIUP, Bidang Studi, Kelas, Email</b>) lalu paste di bawah.
-            Satu baris untuk satu guru. Pemisah otomatis terdeteksi (Tab atau Koma).
+      <div class="space-y-5">
+        <!-- STEP 1: Keterangan (paling atas) -->
+        <div class="p-5 bg-amber-50 border border-amber-100 rounded-2xl">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-black">1</span>
+            <p class="text-sm font-black text-amber-900">Petunjuk Pengisian</p>
+          </div>
+          <ol class="text-xs text-amber-800 leading-relaxed space-y-1 list-decimal list-inside">
+            <li>Unduh template <strong>CSV</strong> dengan tombol pada langkah 2</li>
+            <li>Buka file dengan Excel atau Google Sheets</li>
+            <li>Isi setiap kolom, lalu simpan kembali sebagai <strong>.csv</strong></li>
+            <li>Unggah file CSV melalui form pada langkah 3</li>
+          </ol>
+          <div class="mt-3 pt-3 border-t border-amber-200/60">
+            <p class="text-[11px] font-bold text-amber-900/70 mb-1">Urutan kolom:</p>
+            <p class="text-[11px] text-amber-700 font-mono leading-relaxed break-words">
+              Nama, NIUP, NIP, Pangkat, Pendidikan, Gender (L/P), Mata Pelajaran, Kelas, Foto, Provinsi, Kabupaten, Kecamatan, Negara
+            </p>
+          </div>
+        </div>
+
+        <!-- STEP 2: Unduh Template CSV (tengah) -->
+        <div class="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-black">2</span>
+            <p class="text-sm font-black text-emerald-900">Unduh Template CSV</p>
+          </div>
+          <Button variant="secondary" size="sm" class="w-full" @click="downloadTemplate">
+            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Unduh Template (.csv)
+          </Button>
+          <p class="text-[11px] text-emerald-700/70 mt-2">File yang diunduh: <strong>teachers_sample.csv</strong></p>
+        </div>
+
+        <!-- STEP 3: Unggah File (paling bawah) -->
+        <div class="p-5 bg-indigo-50/70 border border-indigo-100 rounded-2xl">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-black">3</span>
+            <p class="text-sm font-black text-indigo-900">Unggah File CSV</p>
+          </div>
+          <input
+            ref="csvFileInput"
+            type="file"
+            accept=".csv,text/csv"
+            @change="onFileChange"
+            class="block w-full text-sm text-surface-700 bg-white rounded-xl border border-indigo-200 cursor-pointer file:mr-4 file:py-2.5 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+          />
+          <p class="text-[11px] text-indigo-700/70 mt-2">
+            Pilih file berformat <strong>.csv</strong> hasil pengisian template di atas.
           </p>
         </div>
 
-        <div>
-          <label class="block text-[11px] font-black text-surface-400 uppercase tracking-widest mb-2 px-1">Tempel Data Guru</label>
-          <textarea
-            v-model="importRawData"
-            rows="10"
-            class="w-full px-5 py-4 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all font-mono"
-            placeholder="Contoh:&#10;Drs. Ahmad Yani	197508...	Matematika	XII RPL 1, XII RPL 2	ahmad@email.com"
-          ></textarea>
-        </div>
-
+        <!-- Pratinjau setelah upload -->
         <div v-if="importPreview.length > 0" class="space-y-3">
-          <p class="text-[11px] font-black text-surface-400 uppercase tracking-widest px-1">Pratinjau ({{ importPreview.length }} Guru)</p>
+          <div class="flex items-center justify-between px-1">
+            <p class="text-[11px] font-black text-surface-500 uppercase tracking-widest">Pratinjau ({{ importPreview.length }} Guru)</p>
+            <button class="text-[11px] font-bold text-rose-500 hover:underline" @click="clearPreview">Hapus</button>
+          </div>
           <div class="max-h-48 overflow-y-auto border border-surface-200 rounded-xl divide-y divide-surface-100">
             <div v-for="(p, i) in importPreview" :key="i" class="px-4 py-2 text-[11px] flex justify-between items-center">
               <span class="font-bold text-surface-900">{{ p.name }}</span>
-              <span class="text-surface-500">{{ p.niup }} | {{ p.subjects.join(', ') }}</span>
+              <span class="text-surface-500">{{ p.niup }} | {{ p.nip }} | {{ p.pangkat }}</span>
             </div>
           </div>
+        </div>
+
+        <!-- Tombol konfirmasi -->
+        <div v-if="importPreview.length > 0" class="pt-4 border-t border-surface-200">
+          <Button variant="primary" class="w-full" @click="processImport">
+            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Konfirmasi Import ({{ importPreview.length }} guru)
+          </Button>
         </div>
       </div>
     </Modal>
@@ -206,7 +333,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useTeacherStore } from '../../stores/teacher'
 import type { Teacher } from '../../types'
@@ -253,71 +380,24 @@ const showModal = ref(false)
 const editingTeacher = ref<Teacher | null>(null)
 const classesInput = ref('')
 const subjectsInput = ref('')
-const formData = reactive({ name: '', niup: '', gender: 'L' as 'L' | 'P' })
+const formData = reactive({ 
+  name: '', 
+  niup: '', 
+  nip: '', 
+  pangkat: '', 
+  pendidikan: '', 
+  gender: 'L' as 'L' | 'P',
+  foto_guru: '',
+  provinsi: 'Indonesia',
+  kabupaten: '',
+  kecamatan: '',
+  negara: 'Indonesia'
+})
 
 // Import State
 const showImportModal = ref(false)
-const importRawData = ref('')
 const importPreview = ref<Teacher[]>([])
-
-watch(importRawData, (val) => {
-  if (!val.trim()) {
-    importPreview.value = []
-    return
-  }
-
-  const lines = val.trim().split('\n')
-  if (lines.length === 0) return
-
-  // Detect headers from the first line
-  const firstLine = lines[0].toLowerCase()
-  let niupIdx = 0, nameIdx = 1, genderIdx = 6, subjectIdx = 16
-
-  if (firstLine.includes('niup') || firstLine.includes('nama')) {
-    const headers = lines[0].split('\t')
-    if (headers.length < 2) lines[0].split(',')
-    
-    headers.forEach((h, i) => {
-      const head = h.toLowerCase().trim()
-      if (head === 'niup') niupIdx = i
-      if (head === 'nama' || head === 'nama_lengkap') nameIdx = i
-      if (head.includes('kelamin') || head === 'jenis_kelamin') genderIdx = i
-      // Prioritize 'materi_ajar' or the last column containing 'materi'
-      if (head === 'materi_ajar' || (head.includes('materi') && !head.includes('total'))) subjectIdx = i
-    })
-    // Remove the header line from processing
-    lines.shift()
-  }
-
-  const parsed = lines.map(line => {
-    let parts = line.split('\t')
-    if (parts.length < 2) parts = line.split(',')
-    
-    if (parts.length >= 2) {
-      const niup = parts[niupIdx]?.trim() || ''
-      const name = parts[nameIdx]?.trim() || ''
-      
-      const genderRaw = parts[genderIdx]?.trim().toUpperCase() || ''
-      const gender = genderRaw === 'P' || genderRaw.startsWith('PEREMPUAN') ? 'P' : 'L'
-      
-      const subjectRaw = parts[subjectIdx]?.trim() || ''
-      // Remove quotes and split by comma, semicolon, or newline
-      const subjects = subjectRaw.replace(/"/g, '').split(/[,\n;]/).map(s => s.trim()).filter(Boolean)
-      
-      return {
-        id: `teacher-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        name,
-        niup,
-        gender,
-        subjects,
-        classes: [] as string[]
-      }
-    }
-    return null
-  }).filter((p): p is Teacher => p !== null)
-
-  importPreview.value = parsed
-})
+const csvFileInput = ref<HTMLInputElement | null>(null)
 
 const openAddModal = () => {
   editingTeacher.value = null
@@ -372,24 +452,207 @@ const deleteTeacher = async (id: string) => {
 }
 
 const openImportModal = () => {
-  importRawData.value = ''
   importPreview.value = []
+  if (csvFileInput.value) csvFileInput.value.value = ''
   showImportModal.value = true
 }
 
 const closeImportModal = () => {
   showImportModal.value = false
+  importPreview.value = []
+  if (csvFileInput.value) csvFileInput.value.value = ''
 }
 
+const clearPreview = () => {
+  importPreview.value = []
+  if (csvFileInput.value) csvFileInput.value.value = ''
+}
+
+// Download template CSV (menghasilkan file .csv asli, bukan HTML)
+const downloadTemplate = async () => {
+  const fallbackCsv = [
+    'Nama,NIUP,NIP,Pangkat,Pendidikan,Gender (L/P),Mata Pelajaran,Kelas,Foto,Provinsi,Kabupaten,Kecamatan,Negara',
+    'Ahmad Fauzi,NIUP001,198501012010011001,Pembina,T S1,L,Matematika;Fisika,X RPL,guru_ahmad.jpg,Jawa Barat,Bandung,Kecamatan Bandung,Indonesia',
+    'Siti Aminah,NIUP002,199002022015012002,Muda,S1,P,Bahasa Inggris;Bahasa Indonesia,X TKJ,guru_siti.jpg,Jawa Timur,Surabaya,Kecamatan Surabaya,Indonesia'
+  ].join('\n')
+
+  let csvText = fallbackCsv
+  try {
+    const res = await fetch('/teachers_sample.csv')
+    if (res.ok) {
+      const text = await res.text()
+      if (text && text.toLowerCase().includes('nama')) csvText = text
+    }
+  } catch {
+    // pakai fallback bila fetch gagal
+  }
+
+  const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'teachers_sample.csv'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+// Method ketika file dipilih
+const onFileChange = (event: any) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  if (!file.name.toLowerCase().endsWith('.csv')) {
+    alert('Hanya file CSV yang diizinkan!')
+    return
+  }
+
+  const reader = new FileReader()
+  reader.onload = (e: any) => {
+    const content = e.target.result
+    parseCSV(content)
+  }
+  reader.readAsText(file)
+}
+
+// Parse satu baris CSV dengan dukungan tanda kutip
+const parseCsvLine = (line: string): string[] => {
+  const result: string[] = []
+  let current = ''
+  let inQuotes = false
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"'
+        i++
+      } else {
+        inQuotes = !inQuotes
+      }
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current)
+      current = ''
+    } else {
+      current += ch
+    }
+  }
+  result.push(current)
+  return result.map(v => v.trim())
+}
+
+// Parsing fungsi CSV
+const parseCSV = (content: string) => {
+  const lines = content.replace(/\r/g, '').trim().split('\n').filter(l => l.trim() !== '')
+  importPreview.value = []
+
+  if (lines.length === 0) return
+
+  const firstLine = lines[0].toLowerCase()
+  const isHeader = firstLine.includes('nama') || firstLine.includes('name')
+  const startIdx = isHeader ? 1 : 0
+
+  for (let i = startIdx; i < lines.length; i++) {
+    const parts = parseCsvLine(lines[i])
+    if (parts.length < 3 || !parts[0]) continue
+
+    const name = parts[0] || ''
+    const niup = parts[1] || ''
+    const nip = parts[2] || ''
+    const pangkat = parts[3] || ''
+    const pendidikan = parts[4] || ''
+    const gender = (parts[5] || '').toUpperCase().startsWith('P') ? 'P' : 'L'
+    const subjectsRaw = parts[6] || ''
+    const subjects = subjectsRaw.replace(/"/g, '').split(/[;|]/).map(s => s.trim()).filter(Boolean)
+    const classesRaw = parts[7] || ''
+    const classes = classesRaw.replace(/"/g, '').split(/[;|]/).map(c => c.trim()).filter(Boolean)
+    const foto_guru = parts[8] || ''
+    const provinsi = parts[9] || 'Indonesia'
+    const kabupaten = parts[10] || 'Indonesia'
+    const kecamatan = parts[11] || 'Indonesia'
+    const negara = parts[12] || 'Indonesia'
+
+    importPreview.value.push({
+      id: `tmp-${Date.now()}-${i}`,
+      name,
+      niup,
+      nip,
+      pangkat,
+      pendidikan,
+      gender,
+      subjects,
+      classes,
+      foto_guru,
+      provinsi,
+      kabupaten,
+      kecamatan,
+      negara
+    })
+  }
+}
+
+// Method proses import
 const processImport = async () => {
   if (importPreview.value.length === 0) {
     alert('Tidak ada data valid yang terdeteksi.')
     return
   }
 
-  // Not implementing bulk add for now since it's not strictly required and we don't have a bulk API yet
-  // Ideally, we'd add a bulkAdd method to teacherStore and /teachers/bulk endpoint
-  alert('Fitur impor dari Excel belum didukung secara penuh pada versi API saat ini.')
-  closeImportModal()
+  try {
+    const response = await fetch('http://localhost:3000/api/teachers/bulk', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + (localStorage.getItem('token') || localStorage.getItem('auth_token') || '')
+      },
+      body: JSON.stringify({ teachers: importPreview.value })
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      alert('Gagal mengimpor data: ' + (result.message || 'Unknown error'))
+      return
+    }
+
+    await teacherStore.fetchTeachers()
+    alert('Berhasil mengimpor: ' + (result.message || 'data guru'))
+    closeImportModal()
+  } catch (err: any) {
+    alert('Gagal mengimpor data: ' + (err?.message || 'Unknown error'))
+  }
+}
+
+const handleFotoGuruChange = async (event: any) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  // Validasi sederhana
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Ukuran foto melebihi 2MB')
+    return
+  }
+
+  const fd = new FormData()
+  fd.append('foto', file)
+
+  try {
+    const response = await fetch('http://localhost:3000/api/upload', {
+      method: 'POST',
+      body: fd
+    })
+
+    const result = await response.json()
+
+    if (response.ok && result.filename) {
+      formData.foto_guru = result.filename
+      alert('Foto berhasil diupload!')
+    } else {
+      alert('Gagal upload foto: ' + (result.message || 'Unknown error'))
+    }
+  } catch (error) {
+    alert('Terjadi kesalahan saat upload')
+    console.error('Upload error:', error)
+  }
 }
 </script>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Import Siswa - HTML Format</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { border: 1px solid #ddd; border-radius: 8px; padding: 20px; background: #f9f9f9; }
+        h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .row { margin-bottom: 15px; }
+        .label { font-weight: bold; display: inline-block; width: 30%; }
+        .input { width: 70%; padding: 8px; margin-left: 2px; border: 1px solid #ccc; border-radius: 4px; }
+        .note { color: #666; font-size: 0.9em; margin-top: 10px; }
+        .btn { display: inline-block; padding: 10px 20px; background: #2d3748; color: white; text-decoration: none; border-radius: 4px; margin: 5px; }
+        .btn-secondary { background: #4a5568; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Template Import Data Siswa</h2>
+        
+        <p class="note">Isikan data di bawah ini, lalu <strong>Copy Semua</strong> dan <strong>Paste ke Excel/Sheets</strong> untuk disimpan sebagai file CSV.</p>
+        
+        <div class="row">
+            <span class="label">Nama Lengkap</span>
+            <input class="input" type="text" placeholder="Contoh: Andi Wijaya">
+        </div>
+        
+        <div class="row">
+            <span class="label">NIUP</span>
+            <input class="input" type="text" placeholder="Contoh: NIUP001">
+        </div>
+        
+        <div class="row">
+            <span class="label">NISN</span>
+            <input class="input" type="text" placeholder="Contoh: 1234567890">
+        </div>
+        
+        <div class="row">
+            <span class="label">Tempat Lahir</span>
+            <input class="input" type="text" placeholder="Contoh: Jakarta">
+        </div>
+        
+        <div class="row">
+            <span class="label">Tanggal Lahir</span>
+            <input class="input" type="date" placeholder="YYYY-MM-DD">
+        </div>
+        
+        <div class="row">
+            <span class="label">Jenis Kelamin</span>
+            <select class="input" style="width: 70%;">
+                <option value="L">Laki-laki</option>
+                <option value="P">Perempuan</option>
+            </select>
+        </div>
+        
+        <div class="row">
+            <span class="label">Kelas</span>
+            <input class="input" type="text" placeholder="Contoh: X RPL">
+        </div>
+        
+        <div class="row">
+            <span class="label">Provinsi</span>
+            <input class="input" type="text" value="Indonesia" readonly>
+        </div>
+        
+        <div class="row">
+            <span class="label">Kabupaten/Kota</span>
+            <input class="input" type="text" placeholder="Contoh: Jakarta Selatan">
+        </div>
+        
+        <div class="row">
+            <span class="label">Kecamatan</span>
+            <input class="input" type="text" placeholder="Contoh: Kecamatan Selatan">
+        </div>
+        
+        <div class="row">
+            <span class="label">Negara</span>
+            <input class="input" type="text" value="Indonesia" readonly>
+        </div>
+        
+        <div class="row">
+            <span class="label">Foto (path opsional)</span>
+            <input class="input" type="text" placeholder="Contoh: foto_andi.jpg">
+        </div>
+        
+        <div class="row">
+            <span class="label">Status</span>
+            <select class="input" style="width: 70%;">
+                <option value="siswa aktif">Siswa Aktif</option>
+                <option value="siswa berhenti">Siswa Berhenti</option>
+                <option value="siswa lulus">Siswa Lulus</option>
+            </select>
+        </div>
+        
+        <hr>
+        <h3>Data Contoh:</h3>
+        <div style="background: white; padding: 15px; border-radius: 4; margin: 10px 0;">
+            <strong>Andi Wijaya</strong> | NIUP: NIUP001 | NISN: 1234567890 | TgL: 2005-01-15 | tmp: Jakarta | L | X RPL | Indonesia | Jakarta Selatan | Kecamatan Selatan | Indonesia | foto_andi.jpg | siswa aktif<br>
+            <strong>Budi Santoso</strong> | NIUP: NIUP002 | NISN: 2345678901 | TgL: 2004-05-20 | tmp: Medan | LP | X TKJ | Indonesia | Medan | Kecamatan Medan | Indonesia | foto_budi.jpg | siswa aktif
+        </div>
+        
+        <hr>
+        <h3>Cara Menggunakan:</h3>
+        <ol>
+            <li>Isikan data di formulir di atas</li>
+            <li>Copy semua baris data (termasuk baris contoh)</li>
+            <li>Paste ke Excel atau Google Sheets</li>
+            <li>Simpan sebagai file CSV (Format: Nama,NIUP,NISN,TgL,tmp,Gender,Kelas,Provinsi,Kabupaten,Kecamatan,Negara,Foto,Status)</li>
+            <li>Unggah file CSV melalui fitur Impor Data di sistem</li>
+        </ol>
+        
+        <a href="students_sample.csv" class="btn btn-secondary" download>Download Template CSV</a>
+        <a href="student_sample.html" class="btn" target="_blank">Lihat Template HTML</a>
+    </div>
+</body>
+</html>
