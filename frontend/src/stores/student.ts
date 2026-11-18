@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Student } from '../types'
 import { useApi } from '../composables/useApi'
+import { sortClassNames } from '../utils/classes'
 
 export const useStudentStore = defineStore('student', () => {
   const students = ref<Student[]>([])
@@ -47,7 +48,7 @@ export const useStudentStore = defineStore('student', () => {
 
   const classes = computed(() => {
     const uniqueClasses = new Set(students.value.map(s => s.class))
-    return Array.from(uniqueClasses).sort()
+    return sortClassNames(Array.from(uniqueClasses))
   })
 
   const levels = computed(() => {

@@ -6,7 +6,7 @@
         <h1 class="text-3xl font-black text-surface-900 tracking-tight">Manajemen Siswa</h1>
         <p class="text-surface-500 mt-1 flex items-center gap-2 font-medium">
           <span class="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse"></span>
-          {{ studentStore.filteredStudents.length }} Siswa terverifikasi dalam database
+          {{ filteredStudentsList.length }} Siswa terverifikasi dalam database
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
@@ -139,7 +139,7 @@
     </div>
 
     <!-- Content Area -->
-    <div v-if="studentStore.filteredStudents.length === 0" class="premium-card p-8 sm:p-12 text-center">
+    <div v-if="filteredStudentsList.length === 0" class="premium-card p-8 sm:p-12 text-center">
        <div class="w-20 h-20 bg-surface-100 rounded-full flex items-center justify-center mx-auto mb-6 border border-surface-200">
          <svg class="w-10 h-10 text-surface-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -169,7 +169,7 @@
            </thead>
            <tbody class="divide-y divide-surface-100">
              <tr
-               v-for="student in filteredStudentsList"
+               v-for="student in paginatedStudents"
                :key="student.id"
                class="hover:bg-surface-50/80 transition-all duration-300 group"
              >
@@ -180,12 +180,12 @@
                        v-if="student.foto_siswa && !failedPhotos[student.id]"
                        :src="photoUrl(student.foto_siswa)"
                        :alt="'Foto ' + student.name"
-                       class="w-11 h-11 rounded-2xl object-cover border border-surface-200 bg-surface-100"
+                       class="w-10 aspect-[4/6] rounded-xl object-cover border border-surface-200 bg-surface-100"
                        @error="markPhotoFailed(student.id)"
                      />
                      <div
                        v-else
-                       class="w-11 h-11 rounded-2xl bg-brand-50 text-brand-600 border border-brand-100 flex items-center justify-center text-sm font-black uppercase"
+                       class="w-10 aspect-[4/6] rounded-xl bg-brand-50 text-brand-600 border border-brand-100 flex items-center justify-center text-sm font-black uppercase"
                      >
                        {{ initials(student.name) }}
                      </div>
@@ -266,6 +266,15 @@
        </div>
      </div>
 
+     <Pagination
+       :page="currentPage"
+       :page-size="pageSize"
+       :total="filteredStudentsList.length"
+       label="siswa"
+       @update:page="currentPage = $event"
+       @update:page-size="pageSize = $event"
+     />
+
      <!-- Modal Form -->
      <Modal
        :is-open="showModal"
@@ -299,7 +308,7 @@
              class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
              required
            >
-             <option v-for="c in studentStore.classes" :key="c" :value="c">{{ c }}</option>
+             <option v-for="c in sortedClasses" :key="c" :value="c">{{ c }}</option>
            </select>
            <p v-if="formErrors.class" class="mt-2 text-[10px] text-rose-500 font-bold uppercase tracking-widest px-1">{{ formErrors.class }}</p>
          </div>
@@ -455,7 +464,7 @@
              <img
                :src="photoUrl(formData.foto_siswa)"
                alt="Preview foto siswa"
-               class="w-14 h-14 rounded-xl object-cover border border-surface-200 bg-surface-100"
+               class="w-12 aspect-[4/6] rounded-lg object-cover border border-surface-200 bg-surface-100"
              />
              <span class="text-xs text-surface-500 break-all">{{ formData.foto_siswa }}</span>
            </div>
@@ -480,12 +489,12 @@
              v-if="detailStudent.foto_siswa && !failedPhotos[detailStudent.id]"
              :src="photoUrl(detailStudent.foto_siswa)"
              :alt="'Foto ' + detailStudent.name"
-             class="w-24 h-24 rounded-2xl object-cover border border-surface-200 bg-surface-100 shrink-0"
+             class="w-24 aspect-[4/6] rounded-2xl object-cover border border-surface-200 bg-surface-100 shrink-0"
              @error="markPhotoFailed(detailStudent.id)"
            />
            <div
              v-else
-             class="w-24 h-24 rounded-2xl bg-brand-50 text-brand-600 border border-brand-100 flex items-center justify-center text-2xl font-black uppercase shrink-0"
+             class="w-24 aspect-[4/6] rounded-2xl bg-brand-50 text-brand-600 border border-brand-100 flex items-center justify-center text-2xl font-black uppercase shrink-0"
            >
              {{ initials(detailStudent.name) }}
            </div>
@@ -652,6 +661,8 @@ import type { Student } from '../../types'
 import Input from '../../components/ui/Input.vue'
 import Button from '../../components/ui/Button.vue'
 import Modal from '../../components/ui/Modal.vue'
+import Pagination from '../../components/ui/Pagination.vue'
+import { sortClassNames } from '../../utils/classes'
 import { useExport } from '../../composables/useExport'
 import { useAuthStore } from '../../stores/auth'
 
@@ -681,6 +692,8 @@ const majorFilter = ref('')
 const provinceFilter = ref('')
 const kabupatenFilter = ref('')
 const showFilters = ref(false)
+const currentPage = ref(1)
+const pageSize = ref(20)
 
 const UPLOAD_BASE = 'http://localhost:3000/uploads'
 
@@ -705,7 +718,7 @@ const allLevels = computed(() => {
       .filter(s => s && s.class)
       .map(s => s.class.split(' ')[0])
   )
-  return Array.from(uniqueLevels).filter(Boolean).sort()
+  return sortClassNames(Array.from(uniqueLevels).filter(Boolean))
 })
 
 const allMajors = computed(() => {
@@ -841,6 +854,26 @@ const filteredStudentsList = computed(() => {
     const matchKabupaten = !kabupatenFilter.value || (s.kabupaten || '') === kabupatenFilter.value
     return matchGender && matchStatus && matchLevel && matchMajor && matchProvince && matchKabupaten
   })
+})
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredStudentsList.value.length / pageSize.value)))
+
+const paginatedStudents = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredStudentsList.value.slice(start, start + pageSize.value)
+})
+
+const sortedClasses = computed(() => sortClassNames(studentStore.classes))
+
+watch(
+  [levelFilter, majorFilter, genderFilter, statusFilter, provinceFilter, kabupatenFilter, () => studentStore.searchQuery],
+  () => { currentPage.value = 1 }
+)
+
+watch(pageSize, () => { currentPage.value = 1 })
+
+watch(totalPages, (total) => {
+  if (currentPage.value > total) currentPage.value = total
 })
 
 const formData = reactive({

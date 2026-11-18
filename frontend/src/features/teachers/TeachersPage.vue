@@ -137,7 +137,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            <tr v-for="teacher in filteredTeachers" :key="teacher.id" class="hover:bg-slate-50/50 transition-colors">
+            <tr v-for="teacher in paginatedTeachers" :key="teacher.id" class="hover:bg-slate-50/50 transition-colors">
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3 min-w-0">
                   <div class="shrink-0">
@@ -145,12 +145,12 @@
                       v-if="teacher.foto_guru && !failedPhotos[teacher.id]"
                       :src="photoUrl(teacher.foto_guru)"
                       :alt="'Foto ' + teacher.name"
-                      class="w-10 h-10 rounded-full object-cover border border-slate-200 bg-slate-100"
+                      class="w-9 aspect-[4/6] rounded-lg object-cover border border-slate-200 bg-slate-100"
                       @error="markPhotoFailed(teacher.id)"
                     />
                     <div
                       v-else
-                      class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-xs font-black uppercase"
+                      class="w-9 aspect-[4/6] rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-xs font-black uppercase"
                     >
                       {{ initials(teacher.name) }}
                     </div>
@@ -199,19 +199,19 @@
 
     <!-- Grid Mode -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-      <div v-for="teacher in filteredTeachers" :key="teacher.id" class="clean-card p-4 sm:p-6 group">
+      <div v-for="teacher in paginatedTeachers" :key="teacher.id" class="clean-card p-4 sm:p-6 group">
         <div class="flex items-start justify-between gap-3 mb-4">
           <div class="shrink-0">
             <img
               v-if="teacher.foto_guru && !failedPhotos[teacher.id]"
               :src="photoUrl(teacher.foto_guru)"
               :alt="'Foto ' + teacher.name"
-              class="w-14 h-14 rounded-2xl object-cover border border-slate-200 bg-slate-100"
+              class="w-16 aspect-[4/6] rounded-xl object-cover border border-slate-200 bg-slate-100"
               @error="markPhotoFailed(teacher.id)"
             />
             <div
               v-else
-              class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-sm font-black uppercase"
+              class="w-16 aspect-[4/6] rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-sm font-black uppercase"
             >
               {{ initials(teacher.name) }}
             </div>
@@ -253,6 +253,15 @@
         </div>
       </div>
     </div>
+
+    <Pagination
+      :page="currentPage"
+      :page-size="pageSize"
+      :total="filteredTeachers.length"
+      label="guru"
+      @update:page="currentPage = $event"
+      @update:page-size="pageSize = $event"
+    />
 
     <!-- Modal -->
     <Modal
@@ -330,7 +339,7 @@
               <img
                 :src="photoUrl(formData.foto_guru)"
                 alt="Preview Foto"
-                class="w-12 h-12 rounded-xl object-cover border border-slate-200 bg-slate-100"
+                class="w-12 aspect-[4/6] rounded-lg object-cover border border-slate-200 bg-slate-100"
               />
               <span class="text-xs text-indigo-600 break-all">{{ formData.foto_guru }}</span>
             </div>
@@ -382,12 +391,12 @@
             v-if="detailTeacher.foto_guru && !failedPhotos[detailTeacher.id]"
             :src="photoUrl(detailTeacher.foto_guru)"
             :alt="'Foto ' + detailTeacher.name"
-            class="w-24 h-24 rounded-2xl object-cover border border-slate-200 bg-slate-100 shrink-0"
+            class="w-24 aspect-[4/6] rounded-2xl object-cover border border-slate-200 bg-slate-100 shrink-0"
             @error="markPhotoFailed(detailTeacher.id)"
           />
           <div
             v-else
-            class="w-24 h-24 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-2xl font-black uppercase shrink-0"
+            class="w-24 aspect-[4/6] rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-2xl font-black uppercase shrink-0"
           >
             {{ initials(detailTeacher.name) }}
           </div>
@@ -554,6 +563,8 @@ import type { Teacher } from '../../types'
 import Button from '../../components/ui/Button.vue'
 import Modal from '../../components/ui/Modal.vue'
 import Input from '../../components/ui/Input.vue'
+import Pagination from '../../components/ui/Pagination.vue'
+import { sortClassNames } from '../../utils/classes'
 
 const authStore = useAuthStore()
 const teacherStore = useTeacherStore()
@@ -573,6 +584,8 @@ const filterProvinsi = ref('')
 const filterKabupaten = ref('')
 const showFilters = ref(false)
 const viewMode = ref<'table' | 'grid'>('table')
+const currentPage = ref(1)
+const pageSize = ref(20)
 
 const UPLOAD_BASE = 'http://localhost:3000/uploads'
 
@@ -608,7 +621,7 @@ const uniqueClasses = computed(() => {
       t.classes.forEach(c => classes.add(c))
     }
   })
-  return Array.from(classes).sort()
+  return sortClassNames(Array.from(classes))
 })
 
 const allProvinces = computed(() => {
@@ -687,6 +700,24 @@ const filteredTeachers = computed(() => {
     const matchesKabupaten = !filterKabupaten.value || (t.kabupaten || '') === filterKabupaten.value
     return matchesSearch && matchesSubject && matchesClass && matchesGender && matchesProvinsi && matchesKabupaten
   })
+})
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredTeachers.value.length / pageSize.value)))
+
+const paginatedTeachers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredTeachers.value.slice(start, start + pageSize.value)
+})
+
+watch(
+  [searchQuery, filterSubject, filterClass, filterGender, filterProvinsi, filterKabupaten],
+  () => { currentPage.value = 1 }
+)
+
+watch(pageSize, () => { currentPage.value = 1 })
+
+watch(totalPages, (total) => {
+  if (currentPage.value > total) currentPage.value = total
 })
 
 const showModal = ref(false)

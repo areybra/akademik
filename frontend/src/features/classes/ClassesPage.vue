@@ -157,6 +157,7 @@ import Button from '../../components/ui/Button.vue'
 import Modal from '../../components/ui/Modal.vue'
 import Input from '../../components/ui/Input.vue'
 import { useAuthStore } from '../../stores/auth'
+import { compareClassNames } from '../../utils/classes'
 
 const studentStore = useStudentStore()
 const teacherStore = useTeacherStore()
@@ -171,12 +172,12 @@ const editingClass = ref<Class | null>(null)
 
 const filteredClasses = computed(() => {
   return classes.value.filter(cls => {
-    const matchesSearch = !searchQuery.value || 
+    const matchesSearch = !searchQuery.value ||
       cls.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       cls.teacher.toLowerCase().includes(searchQuery.value.toLowerCase())
     const matchesMajor = !filterMajor.value || cls.major === filterMajor.value
     return matchesSearch && matchesMajor
-  })
+  }).sort((a, b) => compareClassNames(a.name, b.name))
 })
 
 const formData = reactive({
