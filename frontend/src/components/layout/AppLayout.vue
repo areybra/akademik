@@ -1,11 +1,11 @@
 <template>
-  <div class="flex h-screen bg-slate-50 overflow-hidden">
+  <div class="flex h-screen bg-canvas overflow-hidden">
     <!-- Overlay for mobile -->
-    <div v-if="isMobileMenuOpen" class="fixed inset-0 bg-slate-900/50 z-40 lg:hidden" @click="isMobileMenuOpen = false"></div>
+    <div v-if="isMobileMenuOpen" class="fixed inset-0 bg-black/50 z-40 lg:hidden" @click="isMobileMenuOpen = false"></div>
     
-    <!-- Sidebar (Light Professional) -->
+    <!-- Sidebar -->
     <aside
-      class="w-64 flex flex-col h-full bg-white border-r border-slate-200 z-50 transition-all duration-300 fixed lg:static inset-y-0 left-0 overflow-hidden"
+      class="w-64 flex flex-col h-full bg-sidebar border-r border-sidebar-border z-50 transition-all duration-300 fixed lg:static inset-y-0 left-0 overflow-hidden"
       :class="[
         isSidebarCollapsed ? 'lg:w-0 lg:border-r-0' : 'lg:w-64',
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
@@ -13,19 +13,19 @@
       aria-label="Navigasi utama"
     >
       <!-- Logo Section -->
-      <div class="h-16 flex items-center px-6 border-b border-slate-100">
+      <div class="h-16 flex items-center px-6 border-b border-sidebar-border">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center border border-slate-100 shadow-sm">
+          <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center border border-sidebar-border shadow-sm">
             <img src="../../assets/logo-nj.jpg" alt="SMK Nurul Jadid" class="w-full h-full object-cover" />
           </div>
-          <span class="text-sm font-bold tracking-tight text-slate-900 uppercase">Akademik <span class="text-indigo-600">SMK</span></span>
+          <span class="text-sm font-bold tracking-tight text-sidebar-ink uppercase">Akademik <span class="text-sidebar-accent">SMK</span></span>
         </div>
       </div>
 
       <!-- Navigation -->
       <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         <template v-for="group in navigationItems" :key="group.category">
-          <h2 class="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+          <h2 class="px-3 py-2 text-[10px] font-bold text-sidebar-muted uppercase tracking-wider mb-1">
             {{ group.category }}
           </h2>
           <RouterLink
@@ -35,8 +35,8 @@
             class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
             :class="[
               isActive(item.path) 
-                ? 'bg-indigo-50 text-indigo-700' 
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                ? 'bg-sidebar-active text-sidebar-active-ink' 
+                : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-ink'
             ]"
             @click="isMobileMenuOpen = false"
           >
@@ -47,17 +47,17 @@
       </nav>
 
       <!-- User Profile (Bottom) -->
-      <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+      <div class="p-4 border-t border-sidebar-border bg-sidebar-footer">
         <div class="flex items-center gap-3 mb-4">
-          <img :src="authStore.user?.avatar" class="w-9 h-9 rounded-full object-cover border border-slate-200" />
+          <img :src="authStore.user?.avatar" class="w-9 h-9 rounded-full object-cover border border-sidebar-border" />
           <div class="min-w-0">
-            <p class="text-xs font-semibold text-slate-900 truncate">{{ authStore.user?.name }}</p>
-            <p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{{ userRolesLabel }}</p>
+            <p class="text-xs font-semibold text-sidebar-ink truncate">{{ authStore.user?.name }}</p>
+            <p class="text-[10px] font-medium text-sidebar-muted uppercase tracking-wider">{{ userRolesLabel }}</p>
           </div>
         </div>
         <button 
           @click="handleLogout"
-          class="w-full h-10 flex items-center justify-center gap-2 px-3 text-xs font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
+          class="w-full h-10 flex items-center justify-center gap-2 px-3 text-xs font-semibold text-sidebar-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
         >
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -70,7 +70,7 @@
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Top Bar -->
-      <header class="h-16 flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200 shrink-0">
+      <header class="h-16 flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 bg-panel border-b border-line shrink-0">
         <div class="flex items-center gap-4 min-w-0">
           <button
             @click="toggleSidebar"
@@ -98,6 +98,7 @@
             <span class="hidden sm:inline text-[10px] font-bold uppercase tracking-wider">Live</span>
           </div>
           <div class="hidden sm:block h-8 w-px bg-slate-200"></div>
+          <ThemeSwitcher />
           <button aria-label="Notifikasi" class="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -120,6 +121,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
+import ThemeSwitcher from '../ui/ThemeSwitcher.vue'
 import type { UserRole } from '../../types'
 
 const authStore = useAuthStore()

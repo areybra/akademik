@@ -5,10 +5,21 @@
       <p class="text-sm text-slate-500 mt-0.5">Kelola konfigurasi sistem yang tampil untuk pengguna.</p>
     </div>
 
+    <section class="clean-card p-4 sm:p-6 space-y-5">
+      <div>
+        <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Tampilan &amp; Tema</h2>
+        <p class="text-xs text-slate-500 mt-1">
+          Pilih palet warna aplikasi. Perubahan langsung diterapkan dan tersimpan di perangkat ini.
+        </p>
+      </div>
+      <ThemeSwitcher variant="inline" />
+    </section>
+
     <HelpContactsSettings />
   </div>
 </template>
 
 <script setup lang="ts">
 import HelpContactsSettings from './HelpContactsSettings.vue'
+import ThemeSwitcher from '../../components/ui/ThemeSwitcher.vue'
 </script>

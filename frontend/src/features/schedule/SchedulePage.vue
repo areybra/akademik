@@ -44,7 +44,7 @@
 
     <!-- Schedule by Classes -->
     <div class="space-y-12">
-      <div class="flex items-center justify-between rounded-card border border-surface-200/60 bg-white px-4 py-2 lg:hidden">
+      <div class="flex items-center justify-between rounded-card border border-surface-200/60 bg-panel px-4 py-2 lg:hidden">
         <span class="text-[11px] font-bold uppercase tracking-widest text-surface-500">Geser tabel untuk kolom lain</span>
         <svg class="w-4 h-4 text-surface-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />

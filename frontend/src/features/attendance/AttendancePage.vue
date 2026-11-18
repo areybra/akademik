@@ -23,7 +23,7 @@
     </div>
 
     <!-- Controls Bar -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-end bg-white p-4 sm:p-6 rounded-card border border-slate-200/60 shadow-sm">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-end bg-panel p-4 sm:p-6 rounded-card border border-slate-200/60 shadow-sm">
       <div class="space-y-2">
         <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Pilih Tanggal</label>
         <div class="relative">
@@ -69,15 +69,15 @@
       
       <!-- Stats Quick View -->
       <div class="flex items-center gap-2 p-2 bg-slate-50 rounded-2xl border border-slate-100">
-         <div class="flex-1 text-center py-2 px-1 bg-white rounded-xl shadow-sm border border-slate-200/50">
+         <div class="flex-1 text-center py-2 px-1 bg-panel rounded-xl shadow-sm border border-slate-200/50">
             <p class="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Hadir</p>
             <p class="text-sm font-extrabold text-slate-900 tabular-nums">{{ stats.present }}</p>
          </div>
-         <div class="flex-1 text-center py-2 px-1 bg-white rounded-xl shadow-sm border border-slate-200/50">
+         <div class="flex-1 text-center py-2 px-1 bg-panel rounded-xl shadow-sm border border-slate-200/50">
             <p class="text-[9px] font-bold text-amber-500 uppercase tracking-widest">Izin</p>
             <p class="text-sm font-extrabold text-slate-900 tabular-nums">{{ stats.permission }}</p>
          </div>
-         <div class="flex-1 text-center py-2 px-1 bg-white rounded-xl shadow-sm border border-slate-200/50">
+         <div class="flex-1 text-center py-2 px-1 bg-panel rounded-xl shadow-sm border border-slate-200/50">
             <p class="text-[9px] font-bold text-rose-500 uppercase tracking-widest">Alfa</p>
             <p class="text-sm font-extrabold text-slate-900 tabular-nums">{{ stats.absent }}</p>
          </div>
@@ -85,7 +85,7 @@
     </div>
 
     <!-- Attendance Table -->
-    <div class="bg-white border border-slate-200/60 rounded-card shadow-sm overflow-hidden">
+    <div class="bg-panel border border-slate-200/60 rounded-card shadow-sm overflow-hidden">
       <div class="flex items-center justify-between border-b border-slate-100 px-4 py-2 lg:hidden">
         <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Geser tabel untuk kolom lain</span>
         <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -151,9 +151,9 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-      <div class="group bg-white p-4 sm:p-6 rounded-card border border-slate-200/60 shadow-sm hover:border-emerald-300 transition-all duration-300">
+      <div class="group bg-panel p-4 sm:p-6 rounded-card border border-slate-200/60 shadow-sm hover:border-emerald-300 transition-all duration-300">
         <div class="flex items-center justify-between mb-4">
-          <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+          <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:bg-solid-emerald group-hover:text-white transition-colors">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
@@ -164,9 +164,9 @@
         <p class="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-2">Siswa Hadir</p>
       </div>
 
-      <div class="group bg-white p-4 sm:p-6 rounded-card border border-slate-200/60 shadow-sm hover:border-amber-300 transition-all duration-300">
+      <div class="group bg-panel p-4 sm:p-6 rounded-card border border-slate-200/60 shadow-sm hover:border-amber-300 transition-all duration-300">
         <div class="flex items-center justify-between mb-4">
-          <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+          <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 group-hover:bg-solid-amber group-hover:text-white transition-colors">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -177,9 +177,9 @@
         <p class="text-xs font-bold text-amber-500 uppercase tracking-widest mt-2">Siswa Berhalangan</p>
       </div>
 
-      <div class="group bg-white p-4 sm:p-6 rounded-card border border-slate-200/60 shadow-sm hover:border-rose-300 transition-all duration-300">
+      <div class="group bg-panel p-4 sm:p-6 rounded-card border border-slate-200/60 shadow-sm hover:border-rose-300 transition-all duration-300">
         <div class="flex items-center justify-between mb-4">
-          <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-colors">
+          <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 group-hover:bg-solid-rose group-hover:text-white transition-colors">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>

@@ -1,12 +1,12 @@
 export const CHART_COLORS = {
-  indigo: '#4f46e5',
-  indigoSoft: '#a5b4fc',
+  indigo: 'var(--chart-accent)',
+  indigoSoft: 'var(--chart-accent-soft)',
   emerald: '#10b981',
   amber: '#f59e0b',
   rose: '#f43f5e',
   sky: '#0ea5e9',
   violet: '#8b5cf6',
-  slate: '#94a3b8'
+  slate: 'var(--chart-label)'
 }
 
 export const formatNumber = (value: number) =>

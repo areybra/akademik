@@ -3,11 +3,11 @@
     <Transition name="modal">
       <div v-if="isOpen" class="fixed inset-0 z-[100] overflow-y-auto">
         <!-- Backdrop -->
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="$emit('close')"></div>
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @click="$emit('close')"></div>
 
         <!-- Modal Container -->
         <div class="flex min-h-full items-center justify-center p-4">
-          <div role="dialog" aria-modal="true" :aria-labelledby="titleId" class="relative bg-white rounded-modal shadow-elevated w-full overflow-hidden transform transition-all border border-slate-200" :class="sizeClass">
+          <div role="dialog" aria-modal="true" :aria-labelledby="titleId" class="relative bg-panel rounded-modal shadow-elevated w-full overflow-hidden transform transition-all border border-line" :class="sizeClass">
             <!-- Header -->
             <div class="px-4 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
               <div class="min-w-0">

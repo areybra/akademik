@@ -1,4 +1,17 @@
 /** @type {import('tailwindcss').Config} */
+
+// Setiap warna tema merujuk ke CSS variable berisi triplet RGB
+// sehingga modifier opacity (mis. bg-panel/80) tetap bekerja.
+const withAlpha = (variable) => `rgb(var(${variable}) / <alpha-value>)`
+
+const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
+
+const palette = (prefix) =>
+  Object.fromEntries(STEPS.map((step) => [step, withAlpha(`--${prefix}-${step}`)]))
+
+const tone = palette('tone')
+const accent = palette('accent')
+
 module.exports = {
   content: [
     "./index.html",
@@ -7,34 +20,63 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Professional Indigo Palette
-        brand: {
-          50: '#f5f7ff',
-          100: '#ebf0fe',
-          200: '#ced9fd',
-          300: '#a1b6fb',
-          400: '#6d8df7',
-          500: '#4f46e5', // Primary Professional Indigo
-          600: '#4338ca',
-          700: '#3730a3',
-          800: '#312e81',
-          900: '#1e1b4b',
-          950: '#0f172a',
+        // Skala netral: canvas, panel, border, dan teks.
+        // `surface` dipertahankan sebagai alias agar halaman lama ikut bertema.
+        slate: tone,
+        surface: tone,
+
+        // Skala aksen: latar tint, border, teks aksen, dan sorotan.
+        // `brand` dipertahankan sebagai alias agar halaman lama ikut bertema.
+        indigo: accent,
+        brand: accent,
+
+        // Warna status (makna tetap sama di semua tema).
+        emerald: palette('emerald'),
+        amber: palette('amber'),
+        rose: palette('rose'),
+        sky: palette('sky'),
+
+        // Token semantik
+        canvas: withAlpha('--canvas'),
+        panel: withAlpha('--panel'),
+        line: withAlpha('--line'),
+        ink: withAlpha('--ink'),
+        muted: withAlpha('--muted'),
+
+        cta: {
+          DEFAULT: withAlpha('--cta'),
+          hover: withAlpha('--cta-hover'),
+          ink: withAlpha('--cta-ink'),
         },
-        // Clean Slate Surface
-        surface: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617',
-        }
+
+        danger: {
+          DEFAULT: withAlpha('--danger'),
+          hover: withAlpha('--danger-hover'),
+          ink: withAlpha('--danger-ink'),
+        },
+
+        sidebar: {
+          DEFAULT: withAlpha('--sidebar'),
+          ink: withAlpha('--sidebar-ink'),
+          muted: withAlpha('--sidebar-muted'),
+          accent: withAlpha('--sidebar-accent'),
+          active: withAlpha('--sidebar-active'),
+          'active-ink': withAlpha('--sidebar-active-ink'),
+          hover: withAlpha('--sidebar-hover'),
+          border: withAlpha('--sidebar-border'),
+          footer: withAlpha('--sidebar-footer'),
+        },
+
+        // Aksen solid untuk elemen yang harus tetap pekat di mode gelap.
+        solid: {
+          emerald: '#047857',
+          amber: '#b45309',
+          rose: '#e11d48',
+          sky: '#0284c7',
+        },
+      },
+      ringOffsetColor: {
+        DEFAULT: withAlpha('--panel'),
       },
       fontFamily: {
         sans: ['Inter', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],

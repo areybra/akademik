@@ -3,7 +3,7 @@
     <div class="w-full max-w-[420px]">
       <!-- Logo & Branding -->
       <div class="text-center mb-10">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-xl border border-slate-100 shadow-clean mb-6 overflow-hidden p-1">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-panel rounded-xl border border-slate-100 shadow-clean mb-6 overflow-hidden p-1">
           <img src="../../assets/logo-nj.jpg" alt="SMK Nurul Jadid" class="w-full h-full object-contain" />
         </div>
         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Akademik SMK</h1>
@@ -11,7 +11,7 @@
       </div>
 
       <!-- Login Card -->
-      <div class="bg-white border border-slate-200 rounded-xl shadow-clean p-8">
+      <div class="bg-panel border border-slate-200 rounded-xl shadow-clean p-8">
         <form @submit.prevent="handleLogin" class="space-y-5">
           <Input
             v-model="email"
@@ -48,7 +48,7 @@
         <div class="relative my-8">
           <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div>
           <div class="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold">
-            <span class="bg-white px-4 text-slate-400">Akun Percobaan</span>
+            <span class="bg-panel px-4 text-slate-400">Akun Percobaan</span>
           </div>
         </div>
 

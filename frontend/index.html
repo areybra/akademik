@@ -5,6 +5,21 @@
     <link rel="icon" href="/src/assets/logo-nj.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistem Akademik SMK</title>
+    <script>
+      // Terapkan tema sebelum render pertama agar tidak ada kilatan warna.
+      (function () {
+        var themes = ['light-indigo', 'light-navy', 'light-sage', 'dark-indigo', 'dark-teal', 'dark-plum']
+        var theme = 'light-indigo'
+        try {
+          var stored = localStorage.getItem('akademik-theme')
+          if (stored && themes.indexOf(stored) !== -1) theme = stored
+        } catch (error) {
+          /* localStorage tidak tersedia, gunakan tema default */
+        }
+        document.documentElement.setAttribute('data-theme', theme)
+        document.documentElement.style.colorScheme = theme.indexOf('dark') === 0 ? 'dark' : 'light'
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

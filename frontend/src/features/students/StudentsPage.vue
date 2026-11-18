@@ -17,7 +17,7 @@
           {{ showFilters ? 'Sembunyikan Filter' : 'Filter' }}
           <span
             v-if="activeFilterCount > 0"
-            class="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-600 text-white text-[10px] font-black"
+            class="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-cta text-cta-ink text-[10px] font-black"
           >
             {{ activeFilterCount }}
           </span>
@@ -574,7 +574,7 @@
          <!-- STEP 1: Keterangan (paling atas) -->
          <div class="p-5 bg-amber-50 border border-amber-100 rounded-2xl">
            <div class="flex items-center gap-2 mb-3">
-             <span class="flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-black">1</span>
+             <span class="flex items-center justify-center w-6 h-6 rounded-full bg-solid-amber text-white text-xs font-black">1</span>
              <p class="text-sm font-black text-amber-900">Petunjuk Pengisian</p>
            </div>
            <ol class="text-xs text-amber-800 leading-relaxed space-y-1 list-decimal list-inside">
@@ -594,7 +594,7 @@
          <!-- STEP 2: Unduh Template CSV (tengah) -->
          <div class="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl">
            <div class="flex items-center gap-2 mb-3">
-             <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-black">2</span>
+             <span class="flex items-center justify-center w-6 h-6 rounded-full bg-solid-emerald text-white text-xs font-black">2</span>
              <p class="text-sm font-black text-emerald-900">Unduh Template CSV</p>
            </div>
            <Button variant="secondary" size="sm" class="w-full" @click="downloadTemplate">
@@ -609,7 +609,7 @@
          <!-- STEP 3: Unggah File (paling bawah) -->
          <div class="p-5 bg-indigo-50/70 border border-indigo-100 rounded-2xl">
            <div class="flex items-center gap-2 mb-3">
-             <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-black">3</span>
+             <span class="flex items-center justify-center w-6 h-6 rounded-full bg-cta text-cta-ink text-xs font-black">3</span>
              <p class="text-sm font-black text-indigo-900">Unggah File CSV</p>
            </div>
            <input
@@ -617,7 +617,7 @@
              type="file"
              accept=".csv,text/csv"
              @change="onFileChange"
-             class="block w-full text-sm text-surface-700 bg-white rounded-xl border border-indigo-200 cursor-pointer file:mr-4 file:py-2.5 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+             class="block w-full text-sm text-surface-700 bg-panel rounded-xl border border-indigo-200 cursor-pointer file:mr-4 file:py-2.5 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-cta file:text-cta-ink hover:file:bg-cta-hover focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
            />
            <p class="text-[11px] text-indigo-700/70 mt-2">
              Pilih file berformat <strong>.csv</strong> hasil pengisian template di atas.

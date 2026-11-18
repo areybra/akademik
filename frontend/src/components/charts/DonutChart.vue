@@ -2,7 +2,7 @@
   <div :class="stacked ? 'flex flex-col' : 'flex flex-col sm:flex-row'" class="items-center gap-5">
     <div class="relative shrink-0" :style="{ width: `${size}px`, height: `${size}px` }">
       <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90" aria-hidden="true">
-        <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" :stroke-width="thickness" />
+        <circle cx="50" cy="50" r="42" fill="none" stroke="var(--chart-track)" :stroke-width="thickness" />
         <circle
           v-for="segment in computedSegments"
           :key="segment.label"

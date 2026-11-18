@@ -40,7 +40,7 @@
           :y1="tick"
           x2="100"
           :y2="tick"
-          stroke="#e2e8f0"
+          stroke="var(--chart-grid)"
           stroke-width="1"
           vector-effect="non-scaling-stroke"
         />
@@ -91,13 +91,13 @@
         ></span>
 
         <div
-          class="absolute z-10 pointer-events-none rounded-lg bg-slate-900/95 text-white shadow-lg px-3 py-2 text-[11px] whitespace-nowrap"
-          :style="{ left: `${tooltipLeft}%`, top: '0px', transform: 'translate(-50%, 4px)' }"
+          class="absolute z-10 pointer-events-none rounded-lg shadow-lg px-3 py-2 text-[11px] whitespace-nowrap"
+          :style="{ left: `${tooltipLeft}%`, top: '0px', transform: 'translate(-50%, 4px)', backgroundColor: 'var(--chart-tooltip-bg)', color: 'var(--chart-tooltip-ink)' }"
         >
           <p class="font-bold mb-1">{{ labels[activeIndex] }}</p>
           <div v-for="s in series" :key="`tip-${s.name}`" class="flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: s.color }"></span>
-            <span class="text-slate-300">{{ s.name }}</span>
+            <span class="text-white/70">{{ s.name }}</span>
             <span class="ml-3 font-bold tabular-nums">{{ valueFormatter(s.values[activeIndex] ?? 0) }}</span>
           </div>
         </div>

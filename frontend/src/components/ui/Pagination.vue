@@ -12,7 +12,7 @@
         <span class="sr-only">Data per halaman</span>
         <select
           :value="pageSize"
-          class="px-2.5 py-1.5 pr-7 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-600 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+          class="px-2.5 py-1.5 pr-7 bg-panel border border-slate-300 rounded-lg text-xs font-bold text-slate-600 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
           @change="onPageSizeChange"
         >
           <option v-for="size in pageSizeOptions" :key="size" :value="size">{{ size }} / halaman</option>
@@ -40,7 +40,7 @@
           type="button"
           class="min-w-[32px] h-8 px-2 rounded-lg text-xs font-bold tabular-nums transition-colors"
           :class="item === page
-            ? 'bg-indigo-600 text-white shadow-sm'
+            ? 'bg-cta text-cta-ink shadow-sm'
             : 'text-slate-500 hover:text-indigo-600 hover:bg-indigo-50'"
           :aria-current="item === page ? 'page' : undefined"
           @click="goTo(item)"

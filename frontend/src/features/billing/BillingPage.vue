@@ -9,7 +9,7 @@
       <button
         v-if="canEdit"
         @click="openCreateBillModal"
-        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 transition-colors"
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-cta-ink bg-cta rounded-lg shadow-sm hover:bg-cta-hover transition-colors"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -87,7 +87,7 @@
               <button
                 v-if="canPay && bill.status === 'requested'"
                 @click="openUploadProofModal(bill)"
-                class="px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700"
+                class="px-4 py-2 text-sm font-semibold rounded-xl bg-cta text-cta-ink hover:bg-cta-hover"
               >
                 Unggah Bukti Bayar
               </button>

@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import './styles/themes.css';
 
 @tailwind base;
 @tailwind components;
@@ -7,11 +8,13 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    background-color: rgb(var(--canvas));
   }
 
   body {
-    @apply antialiased min-h-screen bg-slate-50 text-slate-900;
+    @apply antialiased min-h-screen bg-canvas text-slate-900;
     font-family: 'Inter', sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   /* Keyboard focus must always be visible (WCAG 2.4.7) */
@@ -24,10 +27,17 @@
   }
 }
 
+/* Offset focus ring mengikuti warna panel agar tidak ada halo putih di mode gelap */
+*,
+::before,
+::after {
+  --tw-ring-offset-color: rgb(var(--panel));
+}
+
 @layer components {
   /* Professional Card Component */
   .clean-card {
-    @apply bg-white border border-slate-200 shadow-subtle rounded-card transition-all duration-200;
+    @apply bg-panel border border-line shadow-subtle rounded-card transition-all duration-200;
   }
 
   .clean-card:hover {
@@ -36,7 +46,7 @@
 
   /* Alias kept for pages that already use premium-card (audit rule 5) */
   .premium-card {
-    @apply bg-white border border-slate-200 shadow-subtle rounded-card transition-all duration-200;
+    @apply bg-panel border border-line shadow-subtle rounded-card transition-all duration-200;
   }
 
   .premium-card:hover {
@@ -45,11 +55,11 @@
 
   /* Professional Button Component */
   .clean-btn-primary {
-    @apply bg-indigo-600 text-white px-4 py-2 rounded-button font-semibold text-sm hover:bg-indigo-700 transition-colors shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2;
+    @apply bg-cta text-cta-ink px-4 py-2 rounded-button font-semibold text-sm hover:bg-cta-hover transition-colors shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2;
   }
 
   .clean-btn-secondary {
-    @apply bg-white text-slate-700 px-4 py-2 rounded-button font-semibold text-sm border border-slate-300 hover:bg-slate-50 transition-colors active:scale-[0.98] flex items-center justify-center gap-2;
+    @apply bg-panel text-slate-700 px-4 py-2 rounded-button font-semibold text-sm border border-slate-300 hover:bg-slate-50 transition-colors active:scale-[0.98] flex items-center justify-center gap-2;
   }
 
   .clean-btn-ghost {
@@ -58,7 +68,7 @@
 
   /* Input Styling Overrides */
   .clean-input {
-    @apply w-full px-3 py-2 bg-white border border-slate-300 rounded-button text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all;
+    @apply w-full px-3 py-2 bg-panel border border-slate-300 rounded-button text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all;
   }
 
   .clean-label {
@@ -101,7 +111,9 @@
   header {
     display: none !important
   }
+  html,
   body {
-    background: white !important
+    background: white !important;
+    color: #0f172a !important
   }
 }
