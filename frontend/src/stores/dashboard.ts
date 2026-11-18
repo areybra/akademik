@@ -1,50 +1,76 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { useStudentStore } from './student'
-import { useTeacherStore } from './teacher'
-import { useAttendanceStore } from './attendance'
+import { ref } from 'vue'
+import type { DashboardSummary } from '../types'
+import { useApi } from '../composables/useApi'
+
+export const DASHBOARD_POLL_INTERVAL = 60_000
 
 export const useDashboardStore = defineStore('dashboard', () => {
+  const summary = ref<DashboardSummary | null>(null)
   const loading = ref(false)
+  const refreshing = ref(false)
+  const error = ref<string | null>(null)
+  const lastUpdated = ref<Date | null>(null)
+  const { fetchWithAuth } = useApi()
 
-  // We can inject other stores to access their data
-  const studentStore = useStudentStore()
-  const teacherStore = useTeacherStore()
-  const attendanceStore = useAttendanceStore()
+  let pollTimer: ReturnType<typeof setInterval> | null = null
 
-  const studentsCount = computed(() => studentStore.students.length)
-  const teachersCount = computed(() => teacherStore.teachers.length)
-
-  const attendanceTodayStats = computed(() => {
-    const today = new Date().toISOString().split('T')[0]
-    const todayAttendances = attendanceStore.attendances.filter(
-      (a: any) => a.date === today
-    )
-
-    return {
-      total: todayAttendances.length,
-      present: todayAttendances.filter((a: any) => a.status === 'hadir').length,
-      absent: todayAttendances.filter((a: any) => a.status === 'alfa').length,
-      permission: todayAttendances.filter((a: any) => a.status === 'izin').length
+  const fetchSummary = async (silent = false) => {
+    if (!summary.value) {
+      loading.value = true
+    } else if (!silent) {
+      refreshing.value = true
     }
-  })
 
-  const fetchDashboardData = async () => {
-    loading.value = true
-    // Fetch everything we need for the dashboard in parallel
-    await Promise.all([
-      studentStore.fetchStudents(),
-      teacherStore.fetchTeachers(),
-      attendanceStore.fetchAttendances()
-    ])
+    const { data, error: fetchError } = await fetchWithAuth('/dashboard/summary')
+
+    if (fetchError) {
+      error.value = fetchError
+    } else if (data) {
+      summary.value = data as DashboardSummary
+      lastUpdated.value = new Date()
+      error.value = null
+    }
+
     loading.value = false
+    refreshing.value = false
+  }
+
+  const onVisibilityChange = () => {
+    if (typeof document !== 'undefined' && !document.hidden) {
+      fetchSummary(true)
+    }
+  }
+
+  const startPolling = () => {
+    if (typeof window === 'undefined' || pollTimer) return
+
+    pollTimer = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return
+      fetchSummary(true)
+    }, DASHBOARD_POLL_INTERVAL)
+
+    document.addEventListener('visibilitychange', onVisibilityChange)
+  }
+
+  const stopPolling = () => {
+    if (pollTimer) {
+      clearInterval(pollTimer)
+      pollTimer = null
+    }
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
   }
 
   return {
+    summary,
     loading,
-    studentsCount,
-    teachersCount,
-    attendanceTodayStats,
-    fetchDashboardData
+    refreshing,
+    error,
+    lastUpdated,
+    fetchSummary,
+    startPolling,
+    stopPolling
   }
 })

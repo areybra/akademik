@@ -131,3 +131,55 @@ export interface Prestasi {
   event: string
   tahun: string
 }
+
+export interface DashboardSummary {
+  generatedAt: string
+  audience: 'school' | 'teacher' | 'personal'
+  fullAccess: boolean
+  counts: {
+    students: number
+    teachers: number | null
+    classes: number
+  }
+  attendance: {
+    referenceDate: string
+    isToday: boolean
+    today: {
+      total: number
+      hadir: number
+      izin: number
+      alfa: number
+      percentage: number
+    }
+    trend: Array<{
+      date: string
+      hadir: number
+      izin: number
+      alfa: number
+      total: number
+    }>
+  }
+  students: {
+    byLevel: Array<{ label: string; count: number }>
+    byMajor: Array<{ label: string; count: number }>
+    byGender: Array<{ label: string; count: number }>
+  }
+  grades: {
+    average: number
+    total: number
+    bySubject: Array<{ subject: string; average: number; count: number }>
+    distribution: Array<{ label: string; count: number }>
+  }
+  billing: {
+    total: number
+    paid: number
+    unpaid: number
+    amountTotal: number
+    amountPaid: number
+    amountOutstanding: number
+    byStatus: Array<{ status: string; label: string; count: number; amount: number }>
+    monthly: Array<{ period: string; total: number; paid: number }>
+  }
+  topClasses: Array<{ class: string; total: number; hadir: number; rate: number }>
+  topStudents: Array<{ name: string; class: string; average: number }>
+}

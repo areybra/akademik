@@ -12,6 +12,7 @@ import BillingPage from '../features/billing/BillingPage.vue'
 import ClassesPage from '../features/classes/ClassesPage.vue'
 import EkskulPage from '../features/ekskul/EkskulPage.vue'
 import PrestasiPage from '../features/prestasi/PrestasiPage.vue'
+import SettingsPage from '../features/settings/SettingsPage.vue'
 
 const ALL_ROLES: UserRole[] = ['admin', 'kepala_sekolah', 'waka', 'guru_mapel', 'wali_kelas', 'kepala_tu', 'staff_tu', 'guru', 'siswa', 'orang_tua']
 
@@ -74,6 +75,11 @@ const routes: RouteRecordRaw[] = [
     path: '/prestasi',
     component: PrestasiPage,
     meta: { requiresAuth: true, roles: ALL_ROLES }
+  },
+  {
+    path: '/settings',
+    component: SettingsPage,
+    meta: { requiresAuth: true, roles: ['admin'] }
   }
 ]
 

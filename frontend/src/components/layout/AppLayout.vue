@@ -4,7 +4,14 @@
     <div v-if="isMobileMenuOpen" class="fixed inset-0 bg-slate-900/50 z-40 lg:hidden" @click="isMobileMenuOpen = false"></div>
     
     <!-- Sidebar (Light Professional) -->
-    <aside class="w-64 flex flex-col h-full bg-white border-r border-slate-200 z-50 transition-transform duration-300 fixed lg:static inset-y-0 left-0" :class="isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+    <aside
+      class="w-64 flex flex-col h-full bg-white border-r border-slate-200 z-50 transition-all duration-300 fixed lg:static inset-y-0 left-0 overflow-hidden"
+      :class="[
+        isSidebarCollapsed ? 'lg:w-0 lg:border-r-0' : 'lg:w-64',
+        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      ]"
+      aria-label="Navigasi utama"
+    >
       <!-- Logo Section -->
       <div class="h-16 flex items-center px-6 border-b border-slate-100">
         <div class="flex items-center gap-2.5">
@@ -65,6 +72,18 @@
       <!-- Top Bar -->
       <header class="h-16 flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200 shrink-0">
         <div class="flex items-center gap-4 min-w-0">
+          <button
+            @click="toggleSidebar"
+            class="hidden lg:inline-flex p-2 shrink-0 text-slate-500 hover:bg-slate-100 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
+            :aria-label="isSidebarCollapsed ? 'Tampilkan sidebar' : 'Sembunyikan sidebar'"
+            :aria-expanded="!isSidebarCollapsed"
+            :title="isSidebarCollapsed ? 'Tampilkan sidebar (Ctrl+B)' : 'Sembunyikan sidebar (Ctrl+B)'"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <rect x="3" y="4" width="18" height="16" rx="2" stroke-width="2" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4v16" />
+            </svg>
+          </button>
           <button @click="isMobileMenuOpen = true" aria-label="Buka menu navigasi" class="lg:hidden p-2 shrink-0 text-slate-500 hover:bg-slate-100 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30">
              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -98,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import type { UserRole } from '../../types'
@@ -108,6 +127,27 @@ const route = useRoute()
 const router = useRouter()
 
 const isMobileMenuOpen = ref(false)
+
+const SIDEBAR_STORAGE_KEY = 'sidebar-collapsed'
+const isSidebarCollapsed = ref(localStorage.getItem(SIDEBAR_STORAGE_KEY) === '1')
+
+watch(isSidebarCollapsed, (collapsed) => {
+  localStorage.setItem(SIDEBAR_STORAGE_KEY, collapsed ? '1' : '0')
+})
+
+const toggleSidebar = () => {
+  isSidebarCollapsed.value = !isSidebarCollapsed.value
+}
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b') {
+    event.preventDefault()
+    toggleSidebar()
+  }
+}
+
+onMounted(() => window.addEventListener('keydown', handleKeydown))
+onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
 
 watch(() => route.path, () => {
   isMobileMenuOpen.value = false
@@ -124,6 +164,12 @@ const navigationConfig = [
         path: '/dashboard', 
         roles: ALL_ROLES,
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>'
+      },
+      {
+        label: 'Pengaturan',
+        path: '/settings',
+        roles: ['admin'],
+        icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>'
       },
     ]
   },
