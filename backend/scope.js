@@ -39,13 +39,16 @@ const unionScopes = (scopes) => {
   };
 };
 
+// ID baris students milik akun siswa (kolom student_id, fallback id lama).
+const studentIdOf = (user) => user.student_id || user.id;
+
 // Klausa pada tabel students (kolom id/class).
 function studentScope(user) {
   const roles = getRoles(user);
   if (hasFullAccess(user)) return { sql: '1 = 1', params: [] };
 
   const scopes = [];
-  if (roles.includes('siswa')) scopes.push({ sql: 'id = ?', params: [user.id] });
+  if (roles.includes('siswa')) scopes.push({ sql: 'id = ?', params: [studentIdOf(user)] });
   if (roles.includes('orang_tua')) {
     scopes.push({
       sql: 'id IN (SELECT student_id FROM parent_students WHERE parent_id = ?)',
@@ -70,7 +73,7 @@ function gradeScope(user) {
   if (hasFullAccess(user)) return { sql: '1 = 1', params: [] };
 
   const scopes = [];
-  if (roles.includes('siswa')) scopes.push({ sql: 'student_id = ?', params: [user.id] });
+  if (roles.includes('siswa')) scopes.push({ sql: 'student_id = ?', params: [studentIdOf(user)] });
   if (roles.includes('orang_tua')) {
     scopes.push({
       sql: 'student_id IN (SELECT student_id FROM parent_students WHERE parent_id = ?)',
@@ -95,7 +98,7 @@ function attendanceScope(user) {
   if (hasFullAccess(user)) return { sql: '1 = 1', params: [] };
 
   const scopes = [];
-  if (roles.includes('siswa')) scopes.push({ sql: 'student_id = ?', params: [user.id] });
+  if (roles.includes('siswa')) scopes.push({ sql: 'student_id = ?', params: [studentIdOf(user)] });
   if (roles.includes('orang_tua')) {
     scopes.push({
       sql: 'student_id IN (SELECT student_id FROM parent_students WHERE parent_id = ?)',
@@ -122,7 +125,7 @@ function billingScope(user) {
   if (hasFullAccess(user)) return { sql: '1 = 1', params: [] };
 
   const scopes = [];
-  if (roles.includes('siswa')) scopes.push({ sql: 'student_id = ?', params: [user.id] });
+  if (roles.includes('siswa')) scopes.push({ sql: 'student_id = ?', params: [studentIdOf(user)] });
   if (roles.includes('orang_tua')) {
     scopes.push({
       sql: 'student_id IN (SELECT student_id FROM parent_students WHERE parent_id = ?)',
@@ -171,6 +174,7 @@ module.exports = {
   hasAnyRole,
   isTeacher,
   hasFullAccess,
+  studentIdOf,
   studentScope,
   gradeScope,
   attendanceScope,

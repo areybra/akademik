@@ -5,6 +5,18 @@ const authenticateToken = require('../middleware/auth');
 const authorizeRoles = require('../middleware/roleCheck');
 
 const READ_ROLES = ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu'];
+const { getRoles } = require('../scope');
+
+const isTeacherUser = (row) => {
+  const roles = getRoles({ role: row.role, roles: row.roles });
+  return roles.includes('guru') || roles.includes('guru_mapel');
+};
+
+// GET /api/relations/teachers — daftar akun guru (untuk penugasan & jadwal)
+router.get('/teachers', authenticateToken, authorizeRoles(...READ_ROLES), (_req, res) => {
+  const rows = db.prepare('SELECT id, name, email, role, roles FROM users ORDER BY name').all();
+  res.json(rows.filter(isTeacherUser));
+});
 
 // GET /api/relations/parents — daftar relasi orang tua -> siswa
 router.get('/parents', authenticateToken, authorizeRoles(...READ_ROLES), (req, res) => {
@@ -45,6 +57,17 @@ router.delete('/parents/:parentId/:studentId', authenticateToken, authorizeRoles
   res.json({ message: 'Relasi dihapus' });
 });
 
+// GET /api/relations/teacher-assignments/mine — penugasan milik akun yang login
+router.get('/teacher-assignments/mine', authenticateToken, (req, res) => {
+  const rows = db.prepare(`
+    SELECT ta.id, ta.teacher_id, ta.subject, ta.class
+    FROM teacher_assignments ta
+    WHERE ta.teacher_id = ?
+    ORDER BY ta.class, ta.subject
+  `).all(req.user.id);
+  res.json(rows);
+});
+
 // GET /api/relations/teacher-assignments — daftar mapel/kelas yang diampu guru
 router.get('/teacher-assignments', authenticateToken, authorizeRoles(...READ_ROLES), (req, res) => {
   const rows = db.prepare(`
@@ -59,14 +82,15 @@ router.get('/teacher-assignments', authenticateToken, authorizeRoles(...READ_ROL
 
 // POST /api/relations/teacher-assignments { teacherEmail, subject, class }
 router.post('/teacher-assignments', authenticateToken, authorizeRoles('admin', 'kepala_sekolah'), (req, res) => {
-  const { teacherEmail, subject, class: className } = req.body;
+  const teacherEmail = String(req.body.teacherEmail || '').trim();
+  const subject = String(req.body.subject || '').trim();
+  const className = String(req.body.class || '').trim();
   if (!teacherEmail || !subject || !className) {
     return res.status(400).json({ message: 'Email guru, mapel, dan kelas wajib diisi' });
   }
 
-  const teacher = db
-    .prepare("SELECT id FROM users WHERE email = ? AND role IN ('guru', 'guru_mapel')")
-    .get(teacherEmail);
+  const teacherRows = db.prepare('SELECT id, name, email, role, roles FROM users WHERE email = ?').all(teacherEmail);
+  const teacher = teacherRows.find(isTeacherUser);
   if (!teacher) return res.status(404).json({ message: 'Akun guru tidak ditemukan' });
 
   const id = `assign-${teacher.id}-${subject}-${className}`.replace(/\s+/g, '-').toLowerCase();

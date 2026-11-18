@@ -23,7 +23,7 @@ function scopeFor(user) {
 
 // GET /api/attendances
 router.get('/', authenticateToken, (req, res) => {
-  const { date, studentId, status } = req.query;
+  const { date, studentId, status, from, to, class: classFilter } = req.query;
   let query = 'SELECT * FROM attendances';
   const scope = scopeFor(req.user);
   const params = [...scope.params];
@@ -33,6 +33,14 @@ router.get('/', authenticateToken, (req, res) => {
     conditions.push('date = ?');
     params.push(date);
   }
+  if (from) {
+    conditions.push('date >= ?');
+    params.push(from);
+  }
+  if (to) {
+    conditions.push('date <= ?');
+    params.push(to);
+  }
   if (studentId) {
     conditions.push('student_id = ?');
     params.push(studentId);
@@ -40,6 +48,10 @@ router.get('/', authenticateToken, (req, res) => {
   if (status) {
     conditions.push('status = ?');
     params.push(status);
+  }
+  if (classFilter) {
+    conditions.push('student_id IN (SELECT id FROM students WHERE class = ?)');
+    params.push(classFilter);
   }
   query += ' WHERE ' + conditions.join(' AND ');
   query += ' ORDER BY date DESC';
@@ -68,17 +80,38 @@ router.get('/stats/today', authenticateToken, (req, res) => {
 
 // POST /api/attendances — simpan satu/banyak absensi
 router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 'waka', 'guru_mapel', 'wali_kelas', 'guru'), (req, res) => {
-  const { attendances } = req.body;
+  const payload = Array.isArray(req.body.attendances)
+    ? req.body.attendances
+    : req.body.attendances === undefined && req.body.studentId
+      ? [req.body]
+      : null;
 
-  if (!Array.isArray(attendances) || attendances.length === 0) {
+  if (!Array.isArray(payload) || payload.length === 0) {
     return res.status(400).json({ message: 'Data absensi tidak valid' });
   }
 
-  const denied = attendances.find((a) => !canManageStudent(req.user, a.studentId, null));
+  const normalized = payload.map((a) => ({
+    id: a.id || null,
+    studentId: a.studentId || a.student_id,
+    studentName: a.studentName || a.student_name || '',
+    date: a.date,
+    status: a.status || 'hadir',
+    note: a.note || null
+  }));
+
+  const invalid = normalized.find((a) => !a.studentId || !a.date);
+  if (invalid) {
+    return res.status(400).json({ message: 'Setiap absensi wajib berisi siswa dan tanggal' });
+  }
+
+  const denied = normalized.find((a) => !canManageStudent(req.user, a.studentId, null));
   if (denied) {
     return res.status(403).json({ message: 'Akses ditolak: ada siswa di luar kelas yang Anda ampu' });
   }
 
+  const existingStmt = db.prepare(
+    'SELECT id FROM attendances WHERE student_id = ? AND date = ? ORDER BY rowid ASC LIMIT 1'
+  );
   const upsert = db.prepare(`
     INSERT INTO attendances (id, student_id, student_name, date, status, note)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -87,14 +120,15 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 'w
 
   const saveAll = db.transaction((list) => {
     for (const a of list) {
-      const id = a.id || `att-${a.studentId}-${a.date}`;
+      const existing = a.id ? null : existingStmt.get(a.studentId, a.date);
+      const id = a.id || (existing ? existing.id : `att-${a.studentId}-${a.date}`);
       upsert.run(id, a.studentId, a.studentName || '', a.date, a.status || 'hadir', a.note || null);
     }
   });
 
   try {
-    saveAll(attendances);
-    res.status(201).json({ message: 'Absensi berhasil disimpan' });
+    saveAll(normalized);
+    res.status(201).json({ message: 'Absensi berhasil disimpan', total: normalized.length });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

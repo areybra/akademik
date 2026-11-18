@@ -20,7 +20,7 @@ const daysAgo = (n) => {
 const users = [
   { email: 'admin@example.com', password: 'Password123', name: 'Administrator', role: 'admin' },
   { email: 'guru@smk.id', password: 'guru123', name: 'Budi Santoso, S.Kom.', role: 'guru' },
-  { email: 'siswa@smk.id', password: 'siswa123', name: 'Ahmad Fauzi', role: 'siswa' },
+  { email: 'siswa@smk.id', password: 'siswa123', name: 'Ahmad Fauzi', role: 'siswa', student_id: 'std-001' },
   { email: 'ortu@smk.id', password: 'ortu123', name: 'Siti Aminah', role: 'orang_tua' },
   { id: 'user-kepsek', email: 'kepsek@smk.id', password: 'Password123', name: 'Kepala Sekolah', role: 'kepala_sekolah' },
   { id: 'user-waka', email: 'waka@smk.id', password: 'Password123', name: 'Wakil Kepala Sekolah', role: 'waka' },
@@ -54,18 +54,18 @@ const teachers = [
 ];
 
 const schedules = [
-  ['sched-001', 'X RPL 1', '07:00 - 08:30', 'Matematika', 'Rina Marlina, S.Pd.', 'R-101'],
-  ['sched-002', 'X RPL 1', '08:30 - 10:00', 'Informatika', 'Budi Santoso, S.Kom.', 'Lab Kom 1'],
-  ['sched-003', 'X RPL 1', '10:15 - 11:45', 'Bahasa Indonesia', 'Agus Setiawan, M.Pd.', 'R-101'],
-  ['sched-004', 'X RPL 1', '13:00 - 14:30', 'Pemrograman Web', 'Budi Santoso, S.Kom.', 'Lab Kom 1'],
-  ['sched-005', 'XI RPL 1', '07:00 - 08:30', 'Pemrograman Web', 'Budi Santoso, S.Kom.', 'Lab Kom 2'],
-  ['sched-006', 'XI RPL 1', '08:30 - 10:00', 'Bahasa Inggris', 'Nurul Hidayah, S.Pd.', 'R-202'],
-  ['sched-007', 'XI RPL 1', '10:15 - 11:45', 'Matematika', 'Rina Marlina, S.Pd.', 'R-202'],
-  ['sched-008', 'XI RPL 1', '13:00 - 14:30', 'Bahasa Indonesia', 'Agus Setiawan, M.Pd.', 'R-202'],
-  ['sched-009', 'XII TKJ 1', '07:00 - 08:30', 'Jaringan Komputer', 'Hendra Gunawan, S.T.', 'Lab Jaringan'],
-  ['sched-010', 'XII TKJ 1', '08:30 - 10:00', 'Matematika', 'Rina Marlina, S.Pd.', 'R-303'],
-  ['sched-011', 'XII TKJ 1', '10:15 - 11:45', 'Bahasa Inggris', 'Nurul Hidayah, S.Pd.', 'R-303'],
-  ['sched-012', 'XII TKJ 1', '13:00 - 14:30', 'Bahasa Indonesia', 'Agus Setiawan, M.Pd.', 'R-303']
+  ['sched-001', 'X RPL 1', '07:00 - 08:30', 'Matematika', 'Rina Marlina, S.Pd.', 'R-101', 'Senin'],
+  ['sched-002', 'X RPL 1', '08:30 - 10:00', 'Informatika', 'Budi Santoso, S.Kom.', 'Lab Kom 1', 'Senin'],
+  ['sched-003', 'X RPL 1', '10:15 - 11:45', 'Bahasa Indonesia', 'Agus Setiawan, M.Pd.', 'R-101', 'Senin'],
+  ['sched-004', 'X RPL 1', '13:00 - 14:30', 'Pemrograman Web', 'Budi Santoso, S.Kom.', 'Lab Kom 1', 'Senin'],
+  ['sched-005', 'XI RPL 1', '07:00 - 08:30', 'Pemrograman Web', 'Budi Santoso, S.Kom.', 'Lab Kom 2', 'Senin'],
+  ['sched-006', 'XI RPL 1', '08:30 - 10:00', 'Bahasa Inggris', 'Nurul Hidayah, S.Pd.', 'R-202', 'Senin'],
+  ['sched-007', 'XI RPL 1', '10:15 - 11:45', 'Matematika', 'Rina Marlina, S.Pd.', 'R-202', 'Senin'],
+  ['sched-008', 'XI RPL 1', '13:00 - 14:30', 'Bahasa Indonesia', 'Agus Setiawan, M.Pd.', 'R-202', 'Senin'],
+  ['sched-009', 'XII TKJ 1', '07:00 - 08:30', 'Jaringan Komputer', 'Hendra Gunawan, S.T.', 'Lab Jaringan', 'Senin'],
+  ['sched-010', 'XII TKJ 1', '08:30 - 10:00', 'Matematika', 'Rina Marlina, S.Pd.', 'R-303', 'Senin'],
+  ['sched-011', 'XII TKJ 1', '10:15 - 11:45', 'Bahasa Inggris', 'Nurul Hidayah, S.Pd.', 'R-303', 'Senin'],
+  ['sched-012', 'XII TKJ 1', '13:00 - 14:30', 'Bahasa Indonesia', 'Agus Setiawan, M.Pd.', 'R-303', 'Senin']
 ];
 
 const subjects = ['Matematika', 'Bahasa Indonesia', 'Pemrograman Web'];
@@ -74,7 +74,7 @@ const attendanceStatuses = ['hadir', 'hadir', 'hadir', 'hadir', 'izin', 'hadir',
 function seedUsers() {
   const find = db.prepare('SELECT id FROM users WHERE email = ?');
   const insert = db.prepare(
-    'INSERT OR IGNORE INTO users (id, name, email, password, role, class, roles) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT OR IGNORE INTO users (id, name, email, password, role, class, roles, student_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
   );
   let added = 0;
   for (const u of users) {
@@ -86,7 +86,8 @@ function seedUsers() {
       bcrypt.hashSync(u.password, 10),
       u.role,
       u.class || null,
-      JSON.stringify(u.roles || [u.role])
+      JSON.stringify(u.roles || [u.role]),
+      u.student_id || null
     ).changes;
   }
   return added;
@@ -114,7 +115,7 @@ function seedTeachers() {
 
 function seedSchedules() {
   const insert = db.prepare(
-    'INSERT OR IGNORE INTO schedules (id, class, time, subject, teacher, room) VALUES (?, ?, ?, ?, ?, ?)'
+    'INSERT OR IGNORE INTO schedules (id, class, time, subject, teacher, room, day) VALUES (?, ?, ?, ?, ?, ?, ?)'
   );
   let added = 0;
   for (const s of schedules) added += insert.run(...s).changes;
@@ -256,7 +257,7 @@ function seedRelations() {
     rows.push([wali.id, 'Informatika', 'X RPL 1'], [wali.id, 'Pemrograman Web', 'X RPL 1']);
   }
   if (guru) {
-    rows.push([guru.id, 'Informatika', 'X RPL 1'], [guru.id, 'Pemrograman Web', 'XI RPL 1']);
+    rows.push([guru.id, 'Informatika', 'X RPL 1'], [guru.id, 'Pemrograman Web', 'X RPL 1'], [guru.id, 'Pemrograman Web', 'XI RPL 1']);
   }
   for (const [teacherId, subject, className] of rows) {
     const id = `assign-${teacherId}-${subject}-${className}`.replace(/\s+/g, '-').toLowerCase();

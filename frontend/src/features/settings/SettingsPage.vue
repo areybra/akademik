@@ -15,11 +15,14 @@
       <ThemeSwitcher variant="inline" />
     </section>
 
+    <TeacherAssignmentsSettings />
+
     <HelpContactsSettings />
   </div>
 </template>
 
 <script setup lang="ts">
 import HelpContactsSettings from './HelpContactsSettings.vue'
+import TeacherAssignmentsSettings from './TeacherAssignmentsSettings.vue'
 import ThemeSwitcher from '../../components/ui/ThemeSwitcher.vue'
 </script>

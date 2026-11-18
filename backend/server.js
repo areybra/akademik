@@ -19,7 +19,7 @@ app.use(cors({
     return callback(new Error('Not allowed by CORS'));
   }
 }));
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '8mb' }));
 app.use(express.static(__dirname)); // Serve static files (HTML, CSV templates)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploaded photos
 
@@ -44,6 +44,8 @@ const ekskulRoutes = require('./routes/ekskul');
 const prestasiRoutes = require('./routes/prestasi');
 const relationRoutes = require('./routes/relations');
 const dashboardRoutes = require('./routes/dashboard');
+const portalRoutes = require('./routes/portal');
+const teachingRoutes = require('./routes/teaching');
 
 // Mounting Routes
 app.use('/api/auth', authRoutes);
@@ -58,6 +60,8 @@ app.use('/api/ekskul', ekskulRoutes);
 app.use('/api/prestasi', prestasiRoutes);
 app.use('/api/relations', relationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/portal', portalRoutes);
+app.use('/api/teaching', teachingRoutes);
 
 // Endpoint dasar (Home)
 app.get('/', (req, res) => {

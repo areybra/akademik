@@ -1,5 +1,6 @@
 <template>
-  <div class="space-y-5 sm:space-y-6 pb-10">
+  <PersonalPortal v-if="isPersonal" />
+  <div v-else class="space-y-5 sm:space-y-6 pb-10">
     <!-- Header -->
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
@@ -257,6 +258,7 @@
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { useDashboardStore } from '../../stores/dashboard'
 import { useAuthStore } from '../../stores/auth'
+import PersonalPortal from '../portal/PersonalPortal.vue'
 import ChartCard from '../../components/charts/ChartCard.vue'
 import LineChart from '../../components/charts/LineChart.vue'
 import BarChart from '../../components/charts/BarChart.vue'
@@ -275,10 +277,12 @@ const dashboardStore = useDashboardStore()
 const authStore = useAuthStore()
 
 const summary = computed(() => dashboardStore.summary)
+const isPersonal = computed(() => authStore.hasAnyRole(['orang_tua', 'siswa']))
 
 const refresh = () => dashboardStore.fetchSummary()
 
 onMounted(async () => {
+  if (isPersonal.value) return
   await dashboardStore.fetchSummary()
   dashboardStore.startPolling()
 })

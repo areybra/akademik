@@ -1,5 +1,67 @@
 <template>
-  <div class="space-y-6 sm:space-y-8 pb-16">
+  <!-- ================= ORANG TUA / SISWA ================= -->
+  <div v-if="isPersonal" class="space-y-6 pb-16">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Tagihan</h1>
+      <p class="text-sm text-slate-500 mt-1">Sisa tagihan dan riwayat pembayaran.</p>
+    </div>
+
+    <div v-if="children.length > 1" class="flex flex-wrap gap-2">
+      <button
+        v-for="child in children"
+        :key="child.id"
+        type="button"
+        class="rounded-xl border px-3 py-2 text-xs font-bold transition-colors"
+        :class="selectedChildId === child.id
+          ? 'border-cta bg-cta text-cta-ink shadow-sm'
+          : 'border-line bg-panel text-slate-600 hover:border-indigo-300'"
+        @click="selectChild(child.id)"
+      >
+        {{ child.name }}
+      </button>
+    </div>
+
+    <section class="rounded-card border p-5 sm:p-6" :class="personalOutstanding > 0 ? 'border-amber-200 bg-amber-50/70' : 'border-emerald-200 bg-emerald-50/70'">
+      <p class="text-[10px] font-bold uppercase tracking-[0.2em]" :class="personalOutstanding > 0 ? 'text-amber-700' : 'text-emerald-700'">
+        {{ personalOutstanding > 0 ? 'Sisa tagihan' : 'Pembayaran' }}
+      </p>
+      <p class="mt-2 text-3xl font-bold tabular-nums" :class="personalOutstanding > 0 ? 'text-amber-800' : 'text-emerald-800'">
+        {{ personalOutstanding > 0 ? `Rp ${formatCurrency(personalOutstanding)}` : 'Lunas' }}
+      </p>
+      <p class="mt-1 text-sm" :class="personalOutstanding > 0 ? 'text-amber-700' : 'text-emerald-700'">
+        {{ personalOutstanding > 0 ? (nextBill ? personalStatusLabel(nextBill.status) : 'Belum dibayar') : 'Tidak ada tunggakan' }}
+      </p>
+      <button
+        v-if="personalOutstanding > 0 && nextBill && canPay"
+        type="button"
+        class="mt-4 rounded-xl bg-cta px-4 py-2 text-xs font-bold text-cta-ink hover:bg-cta-hover"
+        @click="openUploadProofModal(nextBill)"
+      >
+        Unggah bukti bayar
+      </button>
+    </section>
+
+    <section class="clean-card p-4 sm:p-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-bold text-slate-900">Riwayat tagihan</h2>
+        <span class="text-[11px] text-slate-500">{{ personalBills.length }} tagihan</span>
+      </div>
+      <ul v-if="personalBills.length > 0" class="mt-2 divide-y divide-line">
+        <li v-for="bill in personalBills" :key="bill.id" class="flex items-center justify-between gap-3 py-3">
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-slate-800">{{ bill.period }}</p>
+            <p class="text-[11px] text-slate-500 truncate">{{ bill.studentName }} · Rp {{ formatCurrency(bill.amount) }}</p>
+          </div>
+          <span class="shrink-0 rounded-md px-2 py-1 text-[10px] font-bold" :class="statusBadge(bill.status)">
+            {{ personalStatusLabel(bill.status) }}
+          </span>
+        </li>
+      </ul>
+      <p v-else class="mt-3 rounded-xl bg-slate-50 px-3 py-4 text-xs text-slate-500">Belum ada tagihan.</p>
+    </section>
+  </div>
+
+  <div v-else class="space-y-6 sm:space-y-8 pb-16">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Tagihan SPP / Triwulan</h1>
@@ -161,20 +223,20 @@
         </select>
       </div>
     </Modal>
-
-    <Modal
-      :is-open="showUploadModal"
-      title="Unggah Bukti Bayar"
-      confirm-text="Kirim Bukti"
-      @close="closeUploadModal"
-      @confirm="submitUploadProof"
-    >
-      <div class="space-y-4">
-        <p class="text-sm text-slate-500">Unggah foto atau file bukti pembayaran untuk tagihan {{ currentBill?.period }}</p>
-        <input type="file" @change="handleProofFile" class="w-full" />
-      </div>
-    </Modal>
   </div>
+
+  <Modal
+    :is-open="showUploadModal"
+    title="Unggah Bukti Bayar"
+    confirm-text="Kirim Bukti"
+    @close="closeUploadModal"
+    @confirm="submitUploadProof"
+  >
+    <div class="space-y-4">
+      <p class="text-sm text-slate-500">Unggah foto atau file bukti pembayaran untuk tagihan {{ currentBill?.period }}</p>
+      <input type="file" @change="handleProofFile" class="w-full" />
+    </div>
+  </Modal>
 </template>
 
 <script setup lang="ts">
@@ -182,6 +244,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useBillingStore } from '../../stores/billing'
 import { useStudentStore } from '../../stores/student'
+import { usePortalStore } from '../../stores/portal'
 import type { Bill, Student } from '../../types'
 import Input from '../../components/ui/Input.vue'
 import Modal from '../../components/ui/Modal.vue'
@@ -189,9 +252,49 @@ import Modal from '../../components/ui/Modal.vue'
 const authStore = useAuthStore()
 const billingStore = useBillingStore()
 const studentStore = useStudentStore()
+const portalStore = usePortalStore()
 
+const isPersonal = computed(() => authStore.hasAnyRole(['orang_tua', 'siswa']))
 const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_tu', 'staff_tu']))
 const canPay = computed(() => authStore.hasAnyRole(['orang_tua']))
+
+/* ---------------- Ringkasan personal ---------------- */
+const selectedChildId = ref('')
+const children = computed(() => portalStore.summary?.children ?? [])
+
+const personalBills = computed(() => {
+  const list = selectedChildId.value
+    ? billingStore.bills.filter((bill) => bill.studentId === selectedChildId.value)
+    : billingStore.bills
+  return [...list].sort((a, b) => String(b.period).localeCompare(String(a.period)))
+})
+
+const personalOutstanding = computed(() =>
+  personalBills.value
+    .filter((bill) => bill.status !== 'paid')
+    .reduce((sum, bill) => sum + (Number(bill.amount) || 0), 0)
+)
+
+const nextBill = computed(() => personalBills.value.find((bill) => bill.status !== 'paid') || null)
+
+const selectChild = (id: string) => {
+  selectedChildId.value = id
+  portalStore.rememberChild(id)
+}
+
+const personalStatusLabel = (status: string) => {
+  if (status === 'paid') return 'Lunas'
+  if (status === 'pending_verification') return 'Menunggu verifikasi'
+  if (status === 'rejected') return 'Ditolak'
+  return 'Belum dibayar'
+}
+
+const statusBadge = (status: string) => {
+  if (status === 'paid') return 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+  if (status === 'pending_verification') return 'bg-amber-50 text-amber-700 border border-amber-100'
+  if (status === 'rejected') return 'bg-rose-50 text-rose-700 border border-rose-100'
+  return 'bg-slate-100 text-slate-600'
+}
 
 const filterStatus = ref('')
 const showCreateModal = ref(false)
@@ -359,6 +462,13 @@ const submitUploadProof = async () => {
 }
 
 onMounted(async () => {
+  if (isPersonal.value) {
+    if (!portalStore.summary?.selected) await portalStore.fetchSummary()
+    selectedChildId.value = portalStore.summary?.selected?.profile.id || ''
+    await billingStore.fetchBills()
+    return
+  }
+
   if (!studentStore.students.length) {
     await studentStore.fetchStudents()
   }

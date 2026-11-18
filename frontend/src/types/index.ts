@@ -17,6 +17,8 @@ export interface User {
   role: UserRole
   roles?: UserRole[]
   avatar?: string
+  student_id?: string | null
+  class?: string | null
 }
 
 export interface Student {
@@ -86,7 +88,9 @@ export interface Schedule {
   time: string
   subject: string
   teacher: string
+  teacherId?: string | null
   room: string
+  day: string
 }
 
 export type BillingStatus = 'requested' | 'pending_verification' | 'paid' | 'rejected'

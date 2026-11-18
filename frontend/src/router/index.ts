@@ -13,6 +13,8 @@ import ClassesPage from '../features/classes/ClassesPage.vue'
 import EkskulPage from '../features/ekskul/EkskulPage.vue'
 import PrestasiPage from '../features/prestasi/PrestasiPage.vue'
 import SettingsPage from '../features/settings/SettingsPage.vue'
+import TeachingPage from '../features/teaching/TeachingPage.vue'
+import ProfilePage from '../features/profile/ProfilePage.vue'
 
 const ALL_ROLES: UserRole[] = ['admin', 'kepala_sekolah', 'waka', 'guru_mapel', 'wali_kelas', 'kepala_tu', 'staff_tu', 'guru', 'siswa', 'orang_tua']
 
@@ -39,7 +41,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/students',
     component: StudentsPage,
-    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas', 'guru_mapel', 'siswa', 'orang_tua'] }
+    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas', 'guru_mapel'] }
   },
   {
     path: '/teachers',
@@ -50,6 +52,16 @@ const routes: RouteRecordRaw[] = [
     path: '/schedule',
     component: SchedulePage,
     meta: { requiresAuth: true, roles: ALL_ROLES }
+  },
+  {
+    path: '/teaching',
+    component: TeachingPage,
+    meta: { requiresAuth: true, roles: ['guru', 'guru_mapel', 'wali_kelas'] }
+  },
+  {
+    path: '/profile',
+    component: ProfilePage,
+    meta: { requiresAuth: true, roles: ['siswa', 'orang_tua'] }
   },
   {
     path: '/attendance',

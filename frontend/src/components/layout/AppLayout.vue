@@ -168,6 +168,12 @@ const navigationConfig = [
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>'
       },
       {
+        label: 'Mengajar',
+        path: '/teaching',
+        roles: ['guru', 'guru_mapel', 'wali_kelas'],
+        icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0121 17.5M12 14v7m-6.16-10.922A12.083 12.083 0 003 17.5" /></svg>'
+      },
+      {
         label: 'Pengaturan',
         path: '/settings',
         roles: ['admin'],
@@ -181,7 +187,7 @@ const navigationConfig = [
       { 
         label: 'Siswa', 
         path: '/students', 
-        roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas', 'guru_mapel', 'siswa', 'orang_tua'],
+        roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas', 'guru_mapel'],
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>'
       },
       { 
@@ -246,6 +252,17 @@ const navigationConfig = [
         path: '/billing',
         roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas', 'siswa', 'orang_tua'],
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V8c0-2.21 3.582-4 8-4s8 1.79 8 4v6c0 2.21-3.582 4-8 4z" /></svg>'  },
+    ]
+  },
+  {
+    category: 'Akun',
+    items: [
+      {
+        label: 'Profil',
+        path: '/profile',
+        roles: ['siswa', 'orang_tua'],
+        icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>'
+      },
     ]
   }
 ]

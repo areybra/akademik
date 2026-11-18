@@ -1,7 +1,7 @@
 import { useAuthStore } from '../stores/auth'
 
 export const useApi = () => {
-  const baseURL = 'http://localhost:3000/api'
+  const baseURL = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api'
 
   const fetchWithAuth = async (endpoint: string, options: RequestInit = {}) => {
     const authStore = useAuthStore()

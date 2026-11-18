@@ -15,7 +15,8 @@ db.exec(`
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     role TEXT NOT NULL,
-    avatar TEXT
+    avatar TEXT,
+    student_id TEXT
   );
 
   CREATE TABLE IF NOT EXISTS students (
@@ -69,7 +70,9 @@ db.exec(`
     time TEXT NOT NULL,
     subject TEXT NOT NULL,
     teacher TEXT NOT NULL,
-    room TEXT NOT NULL
+    teacher_id TEXT,
+    room TEXT NOT NULL,
+    day TEXT NOT NULL DEFAULT 'Belum ditentukan'
   );
 
   CREATE TABLE IF NOT EXISTS bills (
@@ -115,6 +118,27 @@ db.exec(`
     UNIQUE (teacher_id, subject, class)
   );
 
+  CREATE TABLE IF NOT EXISTS lesson_sessions (
+    id TEXT PRIMARY KEY,
+    schedule_id TEXT NOT NULL,
+    date TEXT NOT NULL,
+    class TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    teacher_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE (schedule_id, date)
+  );
+
+  CREATE TABLE IF NOT EXISTS lesson_attendances (
+    session_id TEXT NOT NULL,
+    student_id TEXT NOT NULL,
+    student_name TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'hadir',
+    note TEXT,
+    PRIMARY KEY (session_id, student_id)
+  );
+
   CREATE TABLE IF NOT EXISTS prestasi (
     id TEXT PRIMARY KEY,
     student_id TEXT,
@@ -138,6 +162,57 @@ if (!userColumns.includes('class')) {
 if (!userColumns.includes('roles')) {
   db.exec('ALTER TABLE users ADD COLUMN roles TEXT');
 }
+if (!userColumns.includes('student_id')) {
+  db.exec('ALTER TABLE users ADD COLUMN student_id TEXT');
+}
+
+// Kolom jadwal: hari dan tautan ke akun guru.
+const scheduleColumns = db.prepare('PRAGMA table_info(schedules)').all().map((c) => c.name);
+if (!scheduleColumns.includes('day')) {
+  db.exec("ALTER TABLE schedules ADD COLUMN day TEXT NOT NULL DEFAULT 'Belum ditentukan'");
+}
+if (!scheduleColumns.includes('teacher_id')) {
+  db.exec('ALTER TABLE schedules ADD COLUMN teacher_id TEXT');
+}
+
+// Backfill: akun siswa ditautkan ke baris students berdasarkan nama yang sama.
+db.exec(`
+  UPDATE users
+  SET student_id = (
+    SELECT s.id FROM students s
+    WHERE s.name = users.name
+    ORDER BY CASE WHEN s.status = 'siswa aktif' THEN 0 ELSE 1 END
+    LIMIT 1
+  )
+  WHERE student_id IS NULL
+    AND role = 'siswa'
+    AND EXISTS (SELECT 1 FROM students s WHERE s.name = users.name)
+`);
+
+// Backfill: jadwal lama yang menyimpan nama guru ditautkan ke akun guru.
+db.exec(`
+  UPDATE schedules
+  SET teacher_id = (
+    SELECT u.id FROM users u
+    WHERE u.name = schedules.teacher
+      AND (u.role IN ('guru', 'guru_mapel') OR u.roles LIKE '%guru%')
+    LIMIT 1
+  )
+  WHERE teacher_id IS NULL
+    AND EXISTS (
+      SELECT 1 FROM users u
+      WHERE u.name = schedules.teacher
+        AND (u.role IN ('guru', 'guru_mapel') OR u.roles LIKE '%guru%')
+    )
+`);
+
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_attendances_date ON attendances (date);
+  CREATE INDEX IF NOT EXISTS idx_attendances_student ON attendances (student_id);
+  CREATE INDEX IF NOT EXISTS idx_grades_student ON grades (student_id);
+  CREATE INDEX IF NOT EXISTS idx_lesson_sessions_date ON lesson_sessions (date);
+  CREATE INDEX IF NOT EXISTS idx_lesson_sessions_teacher ON lesson_sessions (teacher_id);
+`);
 
 // Migrasi kolom baru untuk tabel students (nisn, foto, alamat)
 const studentColumns = db.prepare('PRAGMA table_info(students)').all().map((c) => c.name);
