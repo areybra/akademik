@@ -9,84 +9,132 @@
           {{ studentStore.filteredStudents.length }} Siswa terverifikasi dalam database
         </p>
       </div>
-      <div v-if="canEdit" class="flex gap-3">
-        <Button variant="secondary" size="lg" @click="openImportModal">
+      <div class="flex flex-wrap items-center gap-3">
+        <Button variant="outline" size="lg" @click="showFilters = !showFilters">
           <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L14 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 018 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
           </svg>
-          Impor Data
+          {{ showFilters ? 'Sembunyikan Filter' : 'Filter' }}
+          <span
+            v-if="activeFilterCount > 0"
+            class="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-600 text-white text-[10px] font-black"
+          >
+            {{ activeFilterCount }}
+          </span>
         </Button>
-        <Button variant="primary" size="lg" @click="openAddModal">
-          <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Registrasi Siswa
-        </Button>
-        <Button variant="outline" size="lg" class="no-print" @click="exportStudents">Ekspor CSV</Button>
+        <div v-if="canEdit" class="flex flex-wrap gap-3">
+          <Button variant="secondary" size="lg" @click="openImportModal">
+            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Impor Data
+          </Button>
+          <Button variant="primary" size="lg" @click="openAddModal">
+            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Registrasi Siswa
+          </Button>
+          <Button variant="outline" size="lg" class="no-print" @click="exportStudents">Ekspor CSV</Button>
+        </div>
       </div>
     </div>
 
     <!-- Filters Bar -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 items-end premium-card p-4 sm:p-6">
-      <div class="lg:col-span-5">
-        <Input
-          :model-value="studentStore.searchQuery"
-          type="text"
-          label="Pencarian Global"
-          placeholder="Cari identitas, NIUP, atau nama siswa..."
-          @update:model-value="(val) => studentStore.setSearch(String(val))"
-        />
-      </div>
-      <div>
-        <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
-          Tingkat Kelas
-        </label>
-        <select
-          v-model="levelFilter"
-          class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+    <div v-show="showFilters" class="premium-card p-4 sm:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <p class="text-[11px] font-black text-surface-500 uppercase tracking-widest">Filter Data Siswa</p>
+        <button
+          type="button"
+          class="text-[11px] font-bold uppercase tracking-widest transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          :class="activeFilterCount > 0 ? 'text-brand-600 hover:text-brand-700' : 'text-surface-400'"
+          :disabled="activeFilterCount === 0"
+          @click="resetFilters"
         >
-          <option value="">Semua Tingkat</option>
-          <option v-for="l in allLevels" :key="l" :value="l">Kelas {{ l }}</option>
-        </select>
+          Reset Filter
+        </button>
       </div>
-      <div>
-        <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
-          Program Keahlian
-        </label>
-        <select
-          v-model="majorFilter"
-          class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
-        >
-          <option value="">Semua Jurusan</option>
-          <option v-for="m in allMajors" :key="m" :value="m">
-            {{ m }}
-          </option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
-          Jenis Kelamin
-        </label>
-        <select
-          v-model="genderFilter"
-          class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
-        >
-          <option value="">Semua Gender</option>
-          <option value="L">Laki-laki</option>
-          <option value="P">Perempuan</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Status</label>
-        <select
-          v-model="statusFilter"
-          class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
-        >
-          <option value="">Semua Status</option>
-          <option value="siswa aktif">Siswa Aktif</option>
-          <option value="siswa berhenti">Siswa Berhenti</option>
-          <option value="siswa lulus">Siswa Lulus</option>
-        </select>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-end">
+        <div class="md:col-span-2 lg:col-span-3">
+          <Input
+            :model-value="studentStore.searchQuery"
+            type="text"
+            label="Pencarian Global"
+            placeholder="Cari nama atau NIUP siswa..."
+            @update:model-value="(val) => studentStore.setSearch(String(val))"
+          />
+        </div>
+        <div>
+          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+            Tingkat Kelas
+          </label>
+          <select
+            v-model="levelFilter"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+          >
+            <option value="">Semua Tingkat</option>
+            <option v-for="l in allLevels" :key="l" :value="l">Kelas {{ l }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+            Program Keahlian
+          </label>
+          <select
+            v-model="majorFilter"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+          >
+            <option value="">Semua Jurusan</option>
+            <option v-for="m in allMajors" :key="m" :value="m">
+              {{ m }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+            Jenis Kelamin
+          </label>
+          <select
+            v-model="genderFilter"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+          >
+            <option value="">Semua Gender</option>
+            <option value="L">Laki-laki</option>
+            <option value="P">Perempuan</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Status</label>
+          <select
+            v-model="statusFilter"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+          >
+            <option value="">Semua Status</option>
+            <option value="siswa aktif">Siswa Aktif</option>
+            <option value="siswa berhenti">Siswa Berhenti</option>
+            <option value="siswa lulus">Siswa Lulus</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Provinsi</label>
+          <select
+            v-model="provinceFilter"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+          >
+            <option value="">Semua Provinsi</option>
+            <option v-for="p in allProvinces" :key="p" :value="p">{{ p }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Kabupaten/Kota</label>
+          <select
+            v-model="kabupatenFilter"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+          >
+            <option value="">Semua Kabupaten/Kota</option>
+            <option v-for="k in kabupatenOptions" :key="k" :value="k">{{ k }}</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -116,7 +164,7 @@
                <th class="px-4 sm:px-6 lg:px-8 py-5 text-[11px] font-black text-surface-500 uppercase tracking-[0.2em]">Identitas (NIUP)</th>
                <th class="px-4 sm:px-6 lg:px-8 py-5 text-[11px] font-black text-surface-500 uppercase tracking-[0.2em] text-center">Jenis Kelamin</th>
                <th class="px-4 sm:px-6 lg:px-8 py-5 text-[11px] font-black text-surface-500 uppercase tracking-[0.2em] text-center">Klaster</th>
-               <th v-if="canEdit" class="px-4 sm:px-6 lg:px-8 py-5 text-[11px] font-black text-surface-500 uppercase tracking-[0.2em] text-right">Aksi</th>
+               <th class="px-4 sm:px-6 lg:px-8 py-5 text-[11px] font-black text-surface-500 uppercase tracking-[0.2em] text-right">Aksi</th>
              </tr>
            </thead>
            <tbody class="divide-y divide-surface-100">
@@ -126,12 +174,33 @@
                class="hover:bg-surface-50/80 transition-all duration-300 group"
              >
                <td class="px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-                 <div class="min-w-0">
-                   <div class="font-black text-surface-900 text-base tracking-tight max-w-xs truncate group-hover:text-brand-600 transition-colors">
-                     {{ student.name }}
+                 <div class="flex items-center gap-3 min-w-0">
+                   <div class="shrink-0">
+                     <img
+                       v-if="student.foto_siswa && !failedPhotos[student.id]"
+                       :src="photoUrl(student.foto_siswa)"
+                       :alt="'Foto ' + student.name"
+                       class="w-11 h-11 rounded-2xl object-cover border border-surface-200 bg-surface-100"
+                       @error="markPhotoFailed(student.id)"
+                     />
+                     <div
+                       v-else
+                       class="w-11 h-11 rounded-2xl bg-brand-50 text-brand-600 border border-brand-100 flex items-center justify-center text-sm font-black uppercase"
+                     >
+                       {{ initials(student.name) }}
+                     </div>
                    </div>
-                   <div class="text-[10px] font-bold uppercase tracking-widest mt-1" :class="{ 'text-emerald-500': student.status === 'siswa aktif', 'text-rose-500': student.status === 'siswa berhenti', 'text-amber-500': student.status === 'siswa lulus' }">
-                     {{ student.status }}
+                   <div class="min-w-0">
+                     <button
+                       type="button"
+                       class="font-black text-surface-900 text-base tracking-tight max-w-xs truncate group-hover:text-brand-600 transition-colors text-left"
+                       @click="showDetail(student)"
+                     >
+                       {{ student.name }}
+                     </button>
+                     <div class="text-[10px] font-bold uppercase tracking-widest mt-1" :class="{ 'text-emerald-500': student.status === 'siswa aktif', 'text-rose-500': student.status === 'siswa berhenti', 'text-amber-500': student.status === 'siswa lulus' }">
+                       {{ student.status }}
+                     </div>
                    </div>
                  </div>
                </td>
@@ -151,28 +220,44 @@
                  </span>
                </td>
 
-               <td v-if="canEdit" class="px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right">
-                 <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+               <td class="px-4 sm:px-6 lg:px-8 py-3 sm:py-4 text-right">
+                 <div class="flex justify-end items-center gap-2">
                    <button
-                     @click="editStudent(student)"
+                     @click="showDetail(student)"
                      class="p-2.5 bg-surface-100 text-surface-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl border border-surface-200/60 transition-all"
-                     title="Edit Profil"
-                     aria-label="Edit profil siswa"
+                     title="Lihat Detail"
+                     aria-label="Lihat detail siswa"
                    >
                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                      </svg>
                    </button>
-                   <button
-                     @click="deleteStudent(student.id)"
-                     class="p-2.5 bg-surface-100 text-surface-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl border border-surface-200/60 transition-all"
-                     title="Hapus Record"
-                     aria-label="Hapus data siswa"
+                   <div
+                     v-if="canEdit"
+                     class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
                    >
-                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                     </svg>
-                   </button>
+                     <button
+                       @click="editStudent(student)"
+                       class="p-2.5 bg-surface-100 text-surface-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl border border-surface-200/60 transition-all"
+                       title="Edit Profil"
+                       aria-label="Edit profil siswa"
+                     >
+                       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                       </svg>
+                     </button>
+                     <button
+                       @click="deleteStudent(student.id)"
+                       class="p-2.5 bg-surface-100 text-surface-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl border border-surface-200/60 transition-all"
+                       title="Hapus Record"
+                       aria-label="Hapus data siswa"
+                     >
+                       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                       </svg>
+                     </button>
+                   </div>
                  </div>
                </td>
              </tr>
@@ -254,7 +339,7 @@
              />
            </div>
            <div>
-             <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">NIUN (Nasional)</label>
+             <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">NISN (Nasional)</label>
              <input
                v-model="formData.nisn"
                type="text"
@@ -337,15 +422,132 @@
          </div>
          
          <div>
-           <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Foto Siswa (path)</label>
-           <Input
-             v-model="formData.foto_siswa"
-             type="text"
-             label="Path Foto"
-             placeholder="Masukkan path file foto (misal: foto_andi.jpg)"
-             :error="formErrors.foto_siswa"
+           <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Foto Siswa</label>
+           <div class="flex flex-wrap items-center gap-3">
+             <button
+               type="button"
+               class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-50 text-brand-700 rounded-xl border border-brand-100 hover:bg-brand-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold"
+               :disabled="uploadingFotoSiswa"
+               @click="fotoSiswaInput?.click()"
+             >
+               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+               </svg>
+               {{ uploadingFotoSiswa ? 'Mengunggah...' : 'Pilih Foto' }}
+             </button>
+             <input
+               ref="fotoSiswaInput"
+               type="file"
+               accept="image/*"
+               class="hidden"
+               @change="handleFotoSiswaChange"
+             />
+             <button
+               v-if="formData.foto_siswa"
+               type="button"
+               class="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline"
+               @click="removeFotoSiswa"
+             >
+               Hapus Foto
+             </button>
+           </div>
+           <div v-if="formData.foto_siswa" class="mt-3 flex items-center gap-3">
+             <img
+               :src="photoUrl(formData.foto_siswa)"
+               alt="Preview foto siswa"
+               class="w-14 h-14 rounded-xl object-cover border border-surface-200 bg-surface-100"
+             />
+             <span class="text-xs text-surface-500 break-all">{{ formData.foto_siswa }}</span>
+           </div>
+           <p class="text-xs text-surface-500 mt-2">Format gambar JPG/PNG, maksimum 2MB.</p>
+         </div>
+       </div>
+     </Modal>
+
+     <!-- Detail Modal (read-only) -->
+     <Modal
+       :is-open="showDetailModal"
+       title="Detail Profil Siswa"
+       subtitle="Informasi lengkap identitas siswa."
+       size="lg"
+       hide-confirm
+       cancel-text="Tutup"
+       @close="closeDetail"
+     >
+       <div v-if="detailStudent" class="space-y-6">
+         <div class="flex flex-col sm:flex-row sm:items-center gap-5 p-5 bg-surface-50 rounded-2xl border border-surface-100">
+           <img
+             v-if="detailStudent.foto_siswa && !failedPhotos[detailStudent.id]"
+             :src="photoUrl(detailStudent.foto_siswa)"
+             :alt="'Foto ' + detailStudent.name"
+             class="w-24 h-24 rounded-2xl object-cover border border-surface-200 bg-surface-100 shrink-0"
+             @error="markPhotoFailed(detailStudent.id)"
            />
-           <p class="text-xs text-surface-500 mt-1">Format rasio 4:6, maksimum 2MB. Kompresi dilakukan di client-side sebelum upload.</p>
+           <div
+             v-else
+             class="w-24 h-24 rounded-2xl bg-brand-50 text-brand-600 border border-brand-100 flex items-center justify-center text-2xl font-black uppercase shrink-0"
+           >
+             {{ initials(detailStudent.name) }}
+           </div>
+           <div class="min-w-0">
+             <p class="text-xl font-black text-surface-900 tracking-tight">{{ detailStudent.name }}</p>
+             <p class="text-[11px] font-bold uppercase tracking-widest mt-1" :class="{ 'text-emerald-500': detailStudent.status === 'siswa aktif', 'text-rose-500': detailStudent.status === 'siswa berhenti', 'text-amber-500': detailStudent.status === 'siswa lulus' }">
+               {{ detailStudent.status }}
+             </p>
+             <p class="text-xs text-surface-500 mt-2 font-mono">{{ detailStudent.niup }}</p>
+           </div>
+         </div>
+
+         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+           <div>
+             <p class="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-1">NIUP</p>
+             <p class="text-sm font-bold text-surface-900 font-mono">{{ display(detailStudent.niup) }}</p>
+           </div>
+           <div>
+             <p class="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-1">NISN</p>
+             <p class="text-sm font-bold text-surface-900 font-mono">{{ display(detailStudent.nisn) }}</p>
+           </div>
+           <div>
+             <p class="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-1">Jenis Kelamin</p>
+             <p class="text-sm font-bold text-surface-900">{{ detailStudent.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
+           </div>
+           <div>
+             <p class="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-1">Klaster Kelas</p>
+             <p class="text-sm font-bold text-surface-900">{{ display(detailStudent.class) }}</p>
+           </div>
+           <div>
+             <p class="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-1">Tempat Lahir</p>
+             <p class="text-sm font-bold text-surface-900">{{ display(detailStudent.tmp_lahir) }}</p>
+           </div>
+           <div>
+             <p class="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-1">Tanggal Lahir</p>
+             <p class="text-sm font-bold text-surface-900">{{ display(detailStudent.tgl_lahir) }}</p>
+           </div>
+           <div>
+             <p class="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-1">Provinsi</p>
+             <p class="text-sm font-bold text-surface-900">{{ display(detailStudent.provinsi) }}</p>
+           </div>
+           <div>
+             <p class="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-1">Kabupaten/Kota</p>
+             <p class="text-sm font-bold text-surface-900">{{ display(detailStudent.kabupaten) }}</p>
+           </div>
+           <div>
+             <p class="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-1">Kecamatan</p>
+             <p class="text-sm font-bold text-surface-900">{{ display(detailStudent.kecamatan) }}</p>
+           </div>
+           <div>
+             <p class="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-1">Negara</p>
+             <p class="text-sm font-bold text-surface-900">{{ display(detailStudent.negara) }}</p>
+           </div>
+         </div>
+
+         <div v-if="canEdit" class="pt-4 border-t border-surface-100">
+           <Button variant="primary" block @click="editFromDetail">
+             <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+             </svg>
+             Edit Data Siswa
+           </Button>
          </div>
        </div>
      </Modal>
@@ -442,9 +644,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useStudentStore } from '../../stores/student'
 import { useFormValidation } from '../../composables/useFormValidation'
+import { PROVINCES } from '../../constants/regions'
 import type { Student } from '../../types'
 import Input from '../../components/ui/Input.vue'
 import Button from '../../components/ui/Button.vue'
@@ -475,6 +678,26 @@ const genderFilter = ref('')
 const statusFilter = ref('')
 const levelFilter = ref('')
 const majorFilter = ref('')
+const provinceFilter = ref('')
+const kabupatenFilter = ref('')
+const showFilters = ref(false)
+
+const UPLOAD_BASE = 'http://localhost:3000/uploads'
+
+const photoUrl = (filename: string) => `${UPLOAD_BASE}/${encodeURIComponent(filename)}`
+
+const initials = (name: string) => {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase()
+}
+
+const failedPhotos = reactive<Record<string, boolean>>({})
+const markPhotoFailed = (id: string) => {
+  failedPhotos[id] = true
+}
+
+const display = (value?: string | null) => (value && String(value).trim() !== '' ? value : '—')
 
 const allLevels = computed(() => {
   const uniqueLevels = new Set(
@@ -494,13 +717,129 @@ const allMajors = computed(() => {
   return Array.from(uniqueMajors).filter(Boolean).sort()
 })
 
+const allProvinces = computed(() => {
+  const provinces = new Set<string>(PROVINCES)
+  studentStore.students.forEach(s => {
+    if (s.provinsi) provinces.add(s.provinsi)
+  })
+  return Array.from(provinces).sort((a, b) => a.localeCompare(b))
+})
+
+const kabupatenOptions = computed(() => {
+  const kabupaten = new Set<string>()
+  studentStore.students.forEach(s => {
+    if (!s.kabupaten) return
+    if (provinceFilter.value && (s.provinsi || '') !== provinceFilter.value) return
+    kabupaten.add(s.kabupaten)
+  })
+  return Array.from(kabupaten).sort((a, b) => a.localeCompare(b))
+})
+
+watch(provinceFilter, () => {
+  if (kabupatenFilter.value && !kabupatenOptions.value.includes(kabupatenFilter.value)) {
+    kabupatenFilter.value = ''
+  }
+})
+
+const activeFilterCount = computed(() => {
+  let count = 0
+  if (studentStore.searchQuery.trim()) count++
+  if (levelFilter.value) count++
+  if (majorFilter.value) count++
+  if (genderFilter.value) count++
+  if (statusFilter.value) count++
+  if (provinceFilter.value) count++
+  if (kabupatenFilter.value) count++
+  return count
+})
+
+const resetFilters = () => {
+  levelFilter.value = ''
+  majorFilter.value = ''
+  genderFilter.value = ''
+  statusFilter.value = ''
+  provinceFilter.value = ''
+  kabupatenFilter.value = ''
+  studentStore.setSearch('')
+}
+
+const showDetailModal = ref(false)
+const detailStudent = ref<Student | null>(null)
+
+const showDetail = (student: Student) => {
+  detailStudent.value = student
+  showDetailModal.value = true
+}
+
+const closeDetail = () => {
+  showDetailModal.value = false
+}
+
+const editFromDetail = () => {
+  const student = detailStudent.value
+  closeDetail()
+  if (student) editStudent(student)
+}
+
+const fotoSiswaInput = ref<HTMLInputElement | null>(null)
+const uploadingFotoSiswa = ref(false)
+
+const handleFotoSiswaChange = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    alert('Hanya file gambar yang diizinkan.')
+    input.value = ''
+    return
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Ukuran foto melebihi 2MB.')
+    input.value = ''
+    return
+  }
+
+  uploadingFotoSiswa.value = true
+  try {
+    const fd = new FormData()
+    fd.append('foto', file)
+
+    const response = await fetch('http://localhost:3000/api/upload', {
+      method: 'POST',
+      body: fd
+    })
+    const result = await response.json()
+
+    if (response.ok && result.filename) {
+      formData.foto_siswa = result.filename
+    } else {
+      alert('Gagal upload foto: ' + (result.message || 'Unknown error'))
+    }
+  } catch (error) {
+    alert('Terjadi kesalahan saat upload foto.')
+    console.error('Upload error:', error)
+  } finally {
+    uploadingFotoSiswa.value = false
+    input.value = ''
+  }
+}
+
+const removeFotoSiswa = () => {
+  formData.foto_siswa = ''
+  if (fotoSiswaInput.value) fotoSiswaInput.value.value = ''
+}
+
 const filteredStudentsList = computed(() => {
   return studentStore.filteredStudents.filter(s => {
     const matchGender = !genderFilter.value || s.gender === genderFilter.value
     const matchStatus = !statusFilter.value || s.status === statusFilter.value
     const matchLevel = !levelFilter.value || s.class.startsWith(levelFilter.value + ' ')
     const matchMajor = !majorFilter.value || s.class.includes(majorFilter.value)
-    return matchGender && matchStatus && matchLevel && matchMajor
+    const matchProvince = !provinceFilter.value || (s.provinsi || '') === provinceFilter.value
+    const matchKabupaten = !kabupatenFilter.value || (s.kabupaten || '') === kabupatenFilter.value
+    return matchGender && matchStatus && matchLevel && matchMajor && matchProvince && matchKabupaten
   })
 })
 
@@ -543,6 +882,7 @@ const clearForm = () => {
   formData.gender = 'L'
   formData.status = 'siswa aktif'
   formData.foto_siswa = ''
+  if (fotoSiswaInput.value) fotoSiswaInput.value.value = ''
 }
 
 const editStudent = (student: Student) => {
@@ -560,6 +900,7 @@ const editStudent = (student: Student) => {
   formData.gender = student.gender
   formData.status = student.status
   formData.foto_siswa = student.foto_siswa || ''
+  if (fotoSiswaInput.value) fotoSiswaInput.value.value = ''
   clearErrors()
   showModal.value = true
 }

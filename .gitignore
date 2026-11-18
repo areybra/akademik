@@ -33,6 +33,7 @@ pnpm-debug.log*
 *.db-shm
 *.db-wal
 *.db-*
+backend/uploads/
 
 # IDE and editor files
 .vscode/

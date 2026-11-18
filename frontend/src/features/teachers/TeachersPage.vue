@@ -6,60 +6,116 @@
         <h1 class="text-xl font-bold text-slate-900 tracking-tight">Manajemen Guru</h1>
         <p class="text-sm text-slate-500 mt-0.5">Kelola data tenaga pendidik dan bidang studi mereka.</p>
       </div>
-      <div v-if="isAdmin" class="flex gap-2">
-        <Button variant="secondary" @click="openImportModal">
+      <div class="flex flex-wrap items-center gap-2">
+        <Button variant="outline" @click="showFilters = !showFilters">
           <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L14 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 018 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
           </svg>
-          Impor Data
+          {{ showFilters ? 'Sembunyikan Filter' : 'Filter' }}
+          <span
+            v-if="activeFilterCount > 0"
+            class="ml-2 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-indigo-600 text-white text-[10px] font-black"
+          >
+            {{ activeFilterCount }}
+          </span>
         </Button>
-        <Button variant="primary" @click="openAddModal">
-          <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-          </svg>
-          Tambah Guru
-        </Button>
+        <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-lg shrink-0">
+          <button
+            @click="viewMode = 'table'"
+            class="p-2 rounded-md transition-all"
+            :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'"
+            aria-label="Tampilan tabel"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+          <button
+            @click="viewMode = 'grid'"
+            class="p-2 rounded-md transition-all"
+            :class="viewMode === 'grid' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'"
+            aria-label="Tampilan kartu"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+          </button>
+        </div>
+        <div v-if="isAdmin" class="flex gap-2">
+          <Button variant="secondary" @click="openImportModal">
+            <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Impor Data
+          </Button>
+          <Button variant="primary" @click="openAddModal">
+            <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+            </svg>
+            Tambah Guru
+          </Button>
+        </div>
       </div>
     </div>
 
     <!-- Filters Bar -->
-    <div class="clean-card p-4 sm:p-6 flex flex-col lg:flex-row lg:items-end gap-4 sm:gap-6">
-      <div class="flex-1">
-        <Input
-          v-model="searchQuery"
-          label="Cari Guru"
-          placeholder="Nama, NIUP, atau Mata Pelajaran..."
-        />
-      </div>
-      <div class="w-full lg:w-64">
-        <label class="clean-label">Mata Pelajaran</label>
-        <select 
-          v-model="filterSubject"
-          class="clean-input appearance-none cursor-pointer"
+    <div v-show="showFilters" class="clean-card p-4 sm:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Filter Data Guru</p>
+        <button
+          type="button"
+          class="text-[11px] font-bold uppercase tracking-widest transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          :class="activeFilterCount > 0 ? 'text-indigo-600 hover:text-indigo-700' : 'text-slate-400'"
+          :disabled="activeFilterCount === 0"
+          @click="resetFilters"
         >
-          <option value="">Semua Mata Pelajaran</option>
-          <option v-for="s in uniqueSubjects" :key="s" :value="s">{{ s }}</option>
-        </select>
-      </div>
-      <div class="flex items-center gap-1 p-1 bg-slate-100 rounded-lg shrink-0">
-        <button 
-          @click="viewMode = 'table'"
-          class="p-2 rounded-md transition-all"
-          :class="viewMode === 'table' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'"
-        >
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
+          Reset Filter
         </button>
-        <button 
-          @click="viewMode = 'grid'"
-          class="p-2 rounded-md transition-all"
-          :class="viewMode === 'grid' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'"
-        >
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-          </svg>
-        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-end">
+        <div class="md:col-span-2 lg:col-span-3">
+          <Input
+            v-model="searchQuery"
+            label="Cari Guru"
+            placeholder="Nama, NIUP, NIP, atau Mata Pelajaran..."
+          />
+        </div>
+        <div>
+          <label class="clean-label">Mata Pelajaran</label>
+          <select v-model="filterSubject" class="clean-input appearance-none cursor-pointer">
+            <option value="">Semua Mata Pelajaran</option>
+            <option v-for="s in uniqueSubjects" :key="s" :value="s">{{ s }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="clean-label">Kelas</label>
+          <select v-model="filterClass" class="clean-input appearance-none cursor-pointer">
+            <option value="">Semua Kelas</option>
+            <option v-for="c in uniqueClasses" :key="c" :value="c">{{ c }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="clean-label">Jenis Kelamin</label>
+          <select v-model="filterGender" class="clean-input appearance-none cursor-pointer">
+            <option value="">Semua Gender</option>
+            <option value="L">Laki-laki</option>
+            <option value="P">Perempuan</option>
+          </select>
+        </div>
+        <div>
+          <label class="clean-label">Provinsi</label>
+          <select v-model="filterProvinsi" class="clean-input appearance-none cursor-pointer">
+            <option value="">Semua Provinsi</option>
+            <option v-for="p in allProvinces" :key="p" :value="p">{{ p }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="clean-label">Kabupaten/Kota</label>
+          <select v-model="filterKabupaten" class="clean-input appearance-none cursor-pointer">
+            <option value="">Semua Kabupaten/Kota</option>
+            <option v-for="k in kabupatenOptions" :key="k" :value="k">{{ k }}</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -73,17 +129,36 @@
         <table class="w-full text-left text-sm">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200">
-              <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Nama Guru</th>
+              <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Profil Guru</th>
               <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Identitas / NIUP</th>
               <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px] text-center">L/P</th>
               <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Spesialisasi</th>
-              <th v-if="isAdmin" class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px] text-right">Opsi</th>
+              <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px] text-right">Opsi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="teacher in filteredTeachers" :key="teacher.id" class="hover:bg-slate-50/50 transition-colors">
               <td class="px-6 py-4">
-                <span class="font-semibold text-slate-900">{{ teacher.name }}</span>
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="shrink-0">
+                    <img
+                      v-if="teacher.foto_guru && !failedPhotos[teacher.id]"
+                      :src="photoUrl(teacher.foto_guru)"
+                      :alt="'Foto ' + teacher.name"
+                      class="w-10 h-10 rounded-full object-cover border border-slate-200 bg-slate-100"
+                      @error="markPhotoFailed(teacher.id)"
+                    />
+                    <div
+                      v-else
+                      class="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-xs font-black uppercase"
+                    >
+                      {{ initials(teacher.name) }}
+                    </div>
+                  </div>
+                  <button type="button" class="font-semibold text-slate-900 truncate text-left hover:text-indigo-600 transition-colors" @click="showDetail(teacher)">
+                    {{ teacher.name }}
+                  </button>
+                </div>
               </td>
               <td class="px-6 py-4 text-slate-600 font-medium">{{ teacher.niup }}</td>
               <td class="px-6 py-4 text-center">
@@ -94,18 +169,26 @@
                   <span v-for="s in teacher.subjects" :key="s" class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-bold uppercase">{{ s }}</span>
                 </div>
               </td>
-              <td v-if="isAdmin" class="px-6 py-4 text-right">
-                <div class="flex justify-end gap-1">
-                  <button @click="openEditModal(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-all">
+              <td class="px-6 py-4 text-right">
+                <div class="flex justify-end items-center gap-1">
+                  <button @click="showDetail(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-all" title="Lihat Detail" aria-label="Lihat detail guru">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   </button>
-                  <button @click="deleteTeacher(teacher.id)" class="p-2 text-slate-400 hover:text-rose-600 rounded hover:bg-rose-50 transition-all">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+                  <template v-if="isAdmin">
+                    <button @click="openEditModal(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-all" title="Edit Data" aria-label="Edit data guru">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                    <button @click="deleteTeacher(teacher.id)" class="p-2 text-slate-400 hover:text-rose-600 rounded hover:bg-rose-50 transition-all" title="Hapus Data" aria-label="Hapus data guru">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </template>
                 </div>
               </td>
             </tr>
@@ -117,10 +200,41 @@
     <!-- Grid Mode -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
       <div v-for="teacher in filteredTeachers" :key="teacher.id" class="clean-card p-4 sm:p-6 group">
-        <div class="flex justify-end mb-4">
-          <div v-if="isAdmin" class="flex gap-1">
-            <button @click="openEditModal(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
-            <button @click="deleteTeacher(teacher.id)" class="p-2 text-slate-400 hover:text-rose-600 transition-colors"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="shrink-0">
+            <img
+              v-if="teacher.foto_guru && !failedPhotos[teacher.id]"
+              :src="photoUrl(teacher.foto_guru)"
+              :alt="'Foto ' + teacher.name"
+              class="w-14 h-14 rounded-2xl object-cover border border-slate-200 bg-slate-100"
+              @error="markPhotoFailed(teacher.id)"
+            />
+            <div
+              v-else
+              class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-sm font-black uppercase"
+            >
+              {{ initials(teacher.name) }}
+            </div>
+          </div>
+          <div class="flex gap-1">
+            <button @click="showDetail(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 transition-colors" title="Lihat Detail" aria-label="Lihat detail guru">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
+            <template v-if="isAdmin">
+              <button @click="openEditModal(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 transition-colors" title="Edit Data" aria-label="Edit data guru">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
+              <button @click="deleteTeacher(teacher.id)" class="p-2 text-slate-400 hover:text-rose-600 transition-colors" title="Hapus Data" aria-label="Hapus data guru">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </template>
           </div>
         </div>
         <h3 class="font-bold text-slate-900 truncate">{{ teacher.name }}</h3>
@@ -133,7 +247,9 @@
             <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
             <span class="text-[10px] font-bold text-slate-500 uppercase">Aktif</span>
           </div>
-          <button class="text-[10px] font-bold text-indigo-600 uppercase hover:underline py-1.5 -my-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded">Detail Profil</button>
+          <button class="text-[10px] font-bold text-indigo-600 uppercase hover:underline py-1.5 -my-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded" @click="showDetail(teacher)">
+            Detail Profil
+          </button>
         </div>
       </div>
     </div>
@@ -180,36 +296,45 @@
           </div>
           <div>
             <label class="clean-label">Foto Guru</label>
-            <div class="flex items-center gap-2">
-              <!-- Tombol pilih file -->
+            <div class="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 id="foto-guru-btn"
-                class="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
+                class="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold"
+                :disabled="uploadingFotoGuru"
+                @click="fotoGuruInput?.click()"
               >
                 <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M4 6h16m10 0v6a2 2 0 01-2 2H8a2 2 0 01-2-2v-6m12 0v6a2 2 0 01-2 2H10a2 2 0 01-2-2v-6" />
                 </svg>
-                Pilih Foto
+                {{ uploadingFotoGuru ? 'Mengunggah...' : 'Pilih Foto' }}
               </button>
-              <!-- Input file tersembunyi -->
               <input
+                ref="fotoGuruInput"
                 type="file"
                 id="foto-guru-input"
                 accept="image/*"
                 class="hidden"
                 @change="handleFotoGuruChange"
               />
+              <button
+                v-if="formData.foto_guru"
+                type="button"
+                class="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline"
+                @click="removeFotoGuru"
+              >
+                Hapus Foto
+              </button>
             </div>
-            <!-- Preview foto jika ada -->
-            <div v-if="formData.foto_guru" class="ml-4 flex items-center gap-2">
+            <div v-if="formData.foto_guru" class="mt-3 flex items-center gap-2">
               <img
-                :src="'/uploads/' + formData.foto_guru"
+                :src="photoUrl(formData.foto_guru)"
                 alt="Preview Foto"
-                class="w-10 h-10 rounded-lg object-cover"
+                class="w-12 h-12 rounded-xl object-cover border border-slate-200 bg-slate-100"
               />
-              <span class="text-xs text-indigo-600">{{ formData.foto_guru }}</span>
+              <span class="text-xs text-indigo-600 break-all">{{ formData.foto_guru }}</span>
             </div>
+            <p class="text-[11px] text-slate-500 mt-2">Format gambar JPG/PNG, maksimum 2MB.</p>
           </div>
         </div>
         
@@ -217,7 +342,7 @@
           <div>
             <label class="clean-label">Provinsi</label>
             <select v-model="formData.provinsi" class="clean-input appearance-none cursor-pointer">
-              <option value="Indonesia">Indonesia</option>
+              <option v-for="p in PROVINCES" :key="p" :value="p">{{ p }}</option>
             </select>
           </div>
           <div>
@@ -237,6 +362,94 @@
               <option value="Indonesia">Indonesia</option>
             </select>
           </div>
+        </div>
+      </div>
+    </Modal>
+
+    <!-- Detail Modal (read-only) -->
+    <Modal
+      :is-open="showDetailModal"
+      title="Detail Profil Guru"
+      subtitle="Informasi lengkap identitas tenaga pendidik."
+      size="lg"
+      hide-confirm
+      cancel-text="Tutup"
+      @close="closeDetail"
+    >
+      <div v-if="detailTeacher" class="space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-5 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+          <img
+            v-if="detailTeacher.foto_guru && !failedPhotos[detailTeacher.id]"
+            :src="photoUrl(detailTeacher.foto_guru)"
+            :alt="'Foto ' + detailTeacher.name"
+            class="w-24 h-24 rounded-2xl object-cover border border-slate-200 bg-slate-100 shrink-0"
+            @error="markPhotoFailed(detailTeacher.id)"
+          />
+          <div
+            v-else
+            class="w-24 h-24 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-2xl font-black uppercase shrink-0"
+          >
+            {{ initials(detailTeacher.name) }}
+          </div>
+          <div class="min-w-0">
+            <p class="text-xl font-black text-slate-900 tracking-tight">{{ detailTeacher.name }}</p>
+            <p class="text-xs text-slate-500 mt-1">NIUP: <span class="font-mono font-bold">{{ display(detailTeacher.niup) }}</span></p>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span v-for="s in detailTeacher.subjects" :key="s" class="px-2 py-0.5 bg-white text-slate-600 border border-slate-200 rounded text-[10px] font-bold uppercase">{{ s }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">NIP</p>
+            <p class="text-sm font-bold text-slate-900 font-mono">{{ display(detailTeacher.nip) }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pangkat</p>
+            <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.pangkat) }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pendidikan Terakhir</p>
+            <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.pendidikan) }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Jenis Kelamin</p>
+            <p class="text-sm font-bold text-slate-900">{{ detailTeacher.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mata Pelajaran</p>
+            <p class="text-sm font-bold text-slate-900">{{ display((detailTeacher.subjects || []).join(', ')) }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Daftar Kelas</p>
+            <p class="text-sm font-bold text-slate-900">{{ display((detailTeacher.classes || []).join(', ')) }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Provinsi</p>
+            <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.provinsi) }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Kabupaten/Kota</p>
+            <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.kabupaten) }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Kecamatan</p>
+            <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.kecamatan) }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Negara</p>
+            <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.negara) }}</p>
+          </div>
+        </div>
+
+        <div v-if="isAdmin" class="pt-4 border-t border-slate-100">
+          <Button variant="primary" block @click="editFromDetail">
+            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit Data Guru
+          </Button>
         </div>
       </div>
     </Modal>
@@ -333,9 +546,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useTeacherStore } from '../../stores/teacher'
+import { PROVINCES } from '../../constants/regions'
 import type { Teacher } from '../../types'
 import Button from '../../components/ui/Button.vue'
 import Modal from '../../components/ui/Modal.vue'
@@ -353,7 +567,29 @@ onMounted(async () => {
 
 const searchQuery = ref('')
 const filterSubject = ref('')
+const filterClass = ref('')
+const filterGender = ref('')
+const filterProvinsi = ref('')
+const filterKabupaten = ref('')
+const showFilters = ref(false)
 const viewMode = ref<'table' | 'grid'>('table')
+
+const UPLOAD_BASE = 'http://localhost:3000/uploads'
+
+const photoUrl = (filename: string) => `${UPLOAD_BASE}/${encodeURIComponent(filename)}`
+
+const initials = (name: string) => {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase()
+}
+
+const failedPhotos = reactive<Record<string, boolean>>({})
+const markPhotoFailed = (id: string) => {
+  failedPhotos[id] = true
+}
+
+const display = (value?: string | null) => (value && String(value).trim() !== '' ? value : '—')
 
 const uniqueSubjects = computed(() => {
   const subs = new Set<string>()
@@ -365,14 +601,91 @@ const uniqueSubjects = computed(() => {
   return Array.from(subs).sort()
 })
 
+const uniqueClasses = computed(() => {
+  const classes = new Set<string>()
+  teacherStore.teachers.forEach(t => {
+    if (t.classes && Array.isArray(t.classes)) {
+      t.classes.forEach(c => classes.add(c))
+    }
+  })
+  return Array.from(classes).sort()
+})
+
+const allProvinces = computed(() => {
+  const provinces = new Set<string>(PROVINCES)
+  teacherStore.teachers.forEach(t => {
+    if (t.provinsi) provinces.add(t.provinsi)
+  })
+  return Array.from(provinces).sort((a, b) => a.localeCompare(b))
+})
+
+const kabupatenOptions = computed(() => {
+  const kabupaten = new Set<string>()
+  teacherStore.teachers.forEach(t => {
+    if (!t.kabupaten) return
+    if (filterProvinsi.value && (t.provinsi || '') !== filterProvinsi.value) return
+    kabupaten.add(t.kabupaten)
+  })
+  return Array.from(kabupaten).sort((a, b) => a.localeCompare(b))
+})
+
+watch(filterProvinsi, () => {
+  if (filterKabupaten.value && !kabupatenOptions.value.includes(filterKabupaten.value)) {
+    filterKabupaten.value = ''
+  }
+})
+
+const activeFilterCount = computed(() => {
+  let count = 0
+  if (searchQuery.value.trim()) count++
+  if (filterSubject.value) count++
+  if (filterClass.value) count++
+  if (filterGender.value) count++
+  if (filterProvinsi.value) count++
+  if (filterKabupaten.value) count++
+  return count
+})
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  filterSubject.value = ''
+  filterClass.value = ''
+  filterGender.value = ''
+  filterProvinsi.value = ''
+  filterKabupaten.value = ''
+}
+
+const showDetailModal = ref(false)
+const detailTeacher = ref<Teacher | null>(null)
+
+const showDetail = (teacher: Teacher) => {
+  detailTeacher.value = teacher
+  showDetailModal.value = true
+}
+
+const closeDetail = () => {
+  showDetailModal.value = false
+}
+
+const editFromDetail = () => {
+  const teacher = detailTeacher.value
+  closeDetail()
+  if (teacher) openEditModal(teacher)
+}
+
 const filteredTeachers = computed(() => {
   return teacherStore.teachers.filter(t => {
-    const matchesSearch = !searchQuery.value || 
-      t.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+    const matchesSearch = !searchQuery.value ||
+      t.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       t.niup.includes(searchQuery.value) ||
+      (t.nip || '').includes(searchQuery.value) ||
       (t.subjects && Array.isArray(t.subjects) && t.subjects.some(s => s.toLowerCase().includes(searchQuery.value.toLowerCase())))
     const matchesSubject = !filterSubject.value || (t.subjects && Array.isArray(t.subjects) && t.subjects.includes(filterSubject.value))
-    return matchesSearch && matchesSubject
+    const matchesClass = !filterClass.value || (t.classes && Array.isArray(t.classes) && t.classes.includes(filterClass.value))
+    const matchesGender = !filterGender.value || t.gender === filterGender.value
+    const matchesProvinsi = !filterProvinsi.value || (t.provinsi || '') === filterProvinsi.value
+    const matchesKabupaten = !filterKabupaten.value || (t.kabupaten || '') === filterKabupaten.value
+    return matchesSearch && matchesSubject && matchesClass && matchesGender && matchesProvinsi && matchesKabupaten
   })
 })
 
@@ -394,6 +707,9 @@ const formData = reactive({
   negara: 'Indonesia'
 })
 
+const fotoGuruInput = ref<HTMLInputElement | null>(null)
+const uploadingFotoGuru = ref(false)
+
 // Import State
 const showImportModal = ref(false)
 const importPreview = ref<Teacher[]>([])
@@ -401,16 +717,39 @@ const csvFileInput = ref<HTMLInputElement | null>(null)
 
 const openAddModal = () => {
   editingTeacher.value = null
-  formData.name = ''; formData.niup = ''; formData.gender = 'L';
-  classesInput.value = ''; subjectsInput.value = '';
+  formData.name = ''
+  formData.niup = ''
+  formData.nip = ''
+  formData.pangkat = ''
+  formData.pendidikan = ''
+  formData.gender = 'L'
+  formData.foto_guru = ''
+  formData.provinsi = 'Indonesia'
+  formData.kabupaten = ''
+  formData.kecamatan = ''
+  formData.negara = 'Indonesia'
+  classesInput.value = ''
+  subjectsInput.value = ''
+  if (fotoGuruInput.value) fotoGuruInput.value.value = ''
   showModal.value = true
 }
 
 const openEditModal = (teacher: Teacher) => {
   editingTeacher.value = teacher
-  formData.name = teacher.name; formData.niup = teacher.niup; formData.gender = teacher.gender;
-  classesInput.value = (teacher.classes || []).join(', '); 
-  subjectsInput.value = (teacher.subjects || []).join(', ');
+  formData.name = teacher.name || ''
+  formData.niup = teacher.niup || ''
+  formData.nip = teacher.nip || ''
+  formData.pangkat = teacher.pangkat || ''
+  formData.pendidikan = teacher.pendidikan || ''
+  formData.gender = teacher.gender || 'L'
+  formData.foto_guru = teacher.foto_guru || ''
+  formData.provinsi = teacher.provinsi || 'Indonesia'
+  formData.kabupaten = teacher.kabupaten || ''
+  formData.kecamatan = teacher.kecamatan || ''
+  formData.negara = teacher.negara || 'Indonesia'
+  classesInput.value = (teacher.classes || []).join(', ')
+  subjectsInput.value = (teacher.subjects || []).join(', ')
+  if (fotoGuruInput.value) fotoGuruInput.value.value = ''
   showModal.value = true
 }
 
@@ -623,20 +962,28 @@ const processImport = async () => {
   }
 }
 
-const handleFotoGuruChange = async (event: any) => {
-  const file = event.target.files[0]
+const handleFotoGuruChange = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
   if (!file) return
 
-  // Validasi sederhana
-  if (file.size > 2 * 1024 * 1024) {
-    alert('Ukuran foto melebihi 2MB')
+  if (!file.type.startsWith('image/')) {
+    alert('Hanya file gambar yang diizinkan.')
+    input.value = ''
     return
   }
 
-  const fd = new FormData()
-  fd.append('foto', file)
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Ukuran foto melebihi 2MB.')
+    input.value = ''
+    return
+  }
 
+  uploadingFotoGuru.value = true
   try {
+    const fd = new FormData()
+    fd.append('foto', file)
+
     const response = await fetch('http://localhost:3000/api/upload', {
       method: 'POST',
       body: fd
@@ -646,13 +993,20 @@ const handleFotoGuruChange = async (event: any) => {
 
     if (response.ok && result.filename) {
       formData.foto_guru = result.filename
-      alert('Foto berhasil diupload!')
     } else {
       alert('Gagal upload foto: ' + (result.message || 'Unknown error'))
     }
   } catch (error) {
-    alert('Terjadi kesalahan saat upload')
+    alert('Terjadi kesalahan saat upload foto.')
     console.error('Upload error:', error)
+  } finally {
+    uploadingFotoGuru.value = false
+    input.value = ''
   }
+}
+
+const removeFotoGuru = () => {
+  formData.foto_guru = ''
+  if (fotoGuruInput.value) fotoGuruInput.value.value = ''
 }
 </script>
