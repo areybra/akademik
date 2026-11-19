@@ -38,7 +38,7 @@ router.get('/:id', authenticateToken, (req, res) => {
 });
 
 // POST /api/teachers
-router.post('/', authenticateToken, authorizeRoles('admin'), (req, res) => {
+router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), (req, res) => {
   const { name, niup, nip, gender, pangkat, pendidikan, subjects, classes, foto_guru, provinsi, kabupaten, kecamatan, negara } = req.body;
 
   if (!name || !niup || !gender) {
@@ -63,7 +63,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), (req, res) => {
 });
 
 // PUT /api/teachers/:id
-router.put('/:id', authenticateToken, authorizeRoles('admin'), (req, res) => {
+router.put('/:id', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), (req, res) => {
   const { name, niup, nip, gender, pangkat, pendidikan, subjects, classes, foto_guru, provinsi, kabupaten, kecamatan, negara } = req.body;
   const { id } = req.params;
 
@@ -104,14 +104,14 @@ router.put('/:id', authenticateToken, authorizeRoles('admin'), (req, res) => {
 });
 
 // DELETE /api/teachers/:id
-router.delete('/:id', authenticateToken, authorizeRoles('admin'), (req, res) => {
+router.delete('/:id', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), (req, res) => {
   const result = db.prepare('DELETE FROM teachers WHERE id = ?').run(req.params.id);
   if (result.changes === 0) return res.status(404).json({ message: 'Guru tidak ditemukan' });
   res.json({ message: 'Guru berhasil dihapus' });
 });
 
 // POST /api/teachers/bulk — import masal
-router.post('/bulk', authenticateToken, authorizeRoles('admin'), (req, res) => {
+router.post('/bulk', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), (req, res) => {
   const { teachers } = req.body;
   if (!Array.isArray(teachers) || teachers.length === 0) {
     return res.status(400).json({ message: 'Data guru tidak valid' });
@@ -170,7 +170,7 @@ router.post('/bulk', authenticateToken, authorizeRoles('admin'), (req, res) => {
 });
 
 // POST /api/teachers/upload-foto — upload foto guru
-router.post('/upload-foto', authenticateToken, authorizeRoles('admin'), upload.single('foto'), (req, res) => {
+router.post('/upload-foto', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), upload.single('foto'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'File tidak diunggah' });
   }

@@ -175,6 +175,15 @@ if (!scheduleColumns.includes('teacher_id')) {
   db.exec('ALTER TABLE schedules ADD COLUMN teacher_id TEXT');
 }
 
+// Sesi mengajar: draft bisa diedit, submitted terkunci setelah guru kirim.
+const sessionColumns = db.prepare('PRAGMA table_info(lesson_sessions)').all().map((c) => c.name);
+if (!sessionColumns.includes('status')) {
+  db.exec("ALTER TABLE lesson_sessions ADD COLUMN status TEXT NOT NULL DEFAULT 'draft'");
+}
+if (!sessionColumns.includes('submitted_at')) {
+  db.exec('ALTER TABLE lesson_sessions ADD COLUMN submitted_at TEXT');
+}
+
 // Backfill: akun siswa ditautkan ke baris students berdasarkan nama yang sama.
 db.exec(`
   UPDATE users

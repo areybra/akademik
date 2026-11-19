@@ -21,6 +21,11 @@ export interface TeachingSlot {
   filled: number
   total: number
   complete: boolean
+  status: 'draft' | 'submitted'
+  submittedAt: string | null
+  startAt: string | null
+  endAt: string | null
+  missingInput: boolean
 }
 
 export interface SessionStudent {
@@ -44,6 +49,8 @@ export interface LessonSession {
   subject: string
   teacherId: string
   updatedAt: string
+  status: 'draft' | 'submitted'
+  submittedAt: string | null
   records: SessionRecord[]
   students: SessionStudent[]
 }
@@ -108,6 +115,30 @@ export const useTeachingStore = defineStore('teaching', () => {
     return true
   }
 
+  const submitSession = async (sessionId: string) => {
+    loading.value = true
+    error.value = null
+    const { error: fetchError } = await fetchWithAuth(`/teaching/sessions/${sessionId}/submit`, { method: 'POST' })
+    loading.value = false
+    if (fetchError) {
+      error.value = fetchError
+      return false
+    }
+    return true
+  }
+
+  const unlockSession = async (sessionId: string) => {
+    loading.value = true
+    error.value = null
+    const { error: fetchError } = await fetchWithAuth(`/teaching/sessions/${sessionId}/unlock`, { method: 'POST' })
+    loading.value = false
+    if (fetchError) {
+      error.value = fetchError
+      return false
+    }
+    return true
+  }
+
   const fetchGradebook = async (className: string, subject: string) => {
     loading.value = true
     error.value = null
@@ -130,6 +161,8 @@ export const useTeachingStore = defineStore('teaching', () => {
     fetchToday,
     openSession,
     saveSession,
+    submitSession,
+    unlockSession,
     fetchGradebook
   }
 })

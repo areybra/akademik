@@ -39,6 +39,26 @@
       </div>
     </div>
 
+    <!-- Peringatan sesi -->
+    <div v-if="missedSlots.length || endingSoon.length" class="space-y-2">
+      <div
+        v-if="missedSlots.length"
+        class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-700"
+      >
+        {{ missedSlots.length }} sesi lewat jam selesai tanpa input absensi:
+        {{ missedSlots.map((slot) => `${slot.subject} (${slot.class})`).join(', ') }}.
+      </div>
+      <div
+        v-for="item in endingSoon"
+        :key="`warn-${item.slot.id}`"
+        class="rounded-xl border px-4 py-3 text-xs font-medium"
+        :class="item.minutes <= 5 ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-amber-200 bg-amber-50 text-amber-800'"
+      >
+        Sesi {{ item.slot.subject }} ({{ item.slot.class }}) selesai dalam {{ item.minutes }} menit —
+        {{ item.slot.total > 0 && item.slot.filled >= item.slot.total ? 'absensi sudah diisi, belum dikirim' : 'absensi belum diisi' }}.
+      </div>
+    </div>
+
     <!-- Jadwal -->
     <div v-if="teachingStore.loading && teachingStore.slots.length === 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div v-for="index in 2" :key="`teach-skeleton-${index}`" class="clean-card p-5 animate-pulse">
@@ -73,21 +93,42 @@
           </div>
           <span
             class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold"
-            :class="slot.complete
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-              : slot.sessionId
-                ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                : 'bg-slate-100 text-slate-500'"
+            :class="slot.status === 'submitted'
+              ? 'bg-indigo-50 text-indigo-700 border border-indigo-100'
+              : slot.complete
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                : slot.sessionId
+                  ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                  : 'bg-slate-100 text-slate-500'"
           >
-            {{ slot.complete ? 'Absensi lengkap' : slot.sessionId ? `Tersimpan ${slot.filled}/${slot.total}` : 'Belum diisi' }}
+            {{ slot.status === 'submitted'
+              ? 'Terkunci'
+              : slot.complete
+                ? 'Absensi lengkap'
+                : slot.sessionId ? `Tersimpan ${slot.filled}/${slot.total}` : 'Belum diisi' }}
           </span>
         </div>
 
         <div class="mt-4 flex flex-wrap items-center gap-2">
-          <Button variant="primary" size="sm" :disabled="slot.total === 0" @click="openAttendance(slot)">
-            {{ slot.sessionId ? 'Ubah Absensi' : 'Isi Absensi' }}
+          <Button
+            :variant="slot.status === 'submitted' ? 'outline' : 'primary'"
+            size="sm"
+            :disabled="slot.total === 0 || (!isLocked(slot) && isNotStarted(slot))"
+            @click="openAttendance(slot)"
+          >
+            {{ isLocked(slot) ? 'Lihat Absensi' : isNotStarted(slot) ? 'Belum dimulai' : slot.sessionId ? 'Ubah Absensi' : 'Isi Absensi' }}
           </Button>
-          <Button variant="outline" size="sm" :disabled="slot.total === 0" @click="openGradebook(slot)">Input Nilai</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            :disabled="slot.total === 0 || isNotStarted(slot)"
+            @click="openGradebook(slot)"
+          >
+            {{ isLocked(slot) ? 'Lihat Nilai' : 'Input Nilai' }}
+          </Button>
+          <Button v-if="isAdmin && isLocked(slot)" variant="secondary" size="sm" @click="unlock(slot)">
+            Buka Kunci
+          </Button>
           <span class="text-[10px] text-slate-400 ml-auto">
             {{ slot.total === 0 ? 'Belum ada siswa di kelas ini' : `${slot.filled}/${slot.total} siswa` }}
           </span>
@@ -123,9 +164,11 @@
     <!-- Modal absensi -->
     <Modal
       :is-open="attendanceOpen"
-      :title="`Absensi ${activeSlot?.subject || ''}`"
+      :title="activeLocked ? `Absensi ${activeSlot?.subject || ''} (terkunci)` : `Absensi ${activeSlot?.subject || ''}`"
       :subtitle="activeSlot ? `${activeSlot.class} · ${selectedDate} · ${activeSlot.time}` : ''"
       confirm-text="Simpan Absensi"
+      :cancel-text="activeLocked ? 'Tutup' : 'Batal'"
+      :hide-confirm="activeLocked"
       size="lg"
       @close="attendanceOpen = false"
       @confirm="saveAttendance"
@@ -135,7 +178,12 @@
           <p class="text-xs text-slate-500">
             {{ session?.students.length ?? 0 }} siswa · {{ attendanceSaved }} hadir
           </p>
-          <button type="button" class="text-[11px] font-bold text-indigo-600 hover:underline" @click="markAllPresent">
+          <button
+            v-if="!activeLocked"
+            type="button"
+            class="text-[11px] font-bold text-indigo-600 hover:underline"
+            @click="markAllPresent"
+          >
             Tandai semua hadir
           </button>
         </div>
@@ -154,7 +202,8 @@
                   v-for="option in statusOptions"
                   :key="option.value"
                   type="button"
-                  class="rounded-lg px-2.5 py-1.5 text-[10px] font-bold border transition-colors"
+                  :disabled="activeLocked"
+                  class="rounded-lg px-2.5 py-1.5 text-[10px] font-bold border transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                   :class="attendanceForm[student.id] === option.value ? option.active : 'border-line bg-panel text-slate-500 hover:bg-slate-50'"
                   @click="setStatus(student.id, option.value)"
                 >
@@ -166,6 +215,7 @@
               v-if="attendanceForm[student.id] !== 'hadir'"
               v-model="attendanceNotes[student.id]"
               type="text"
+              :disabled="activeLocked"
               placeholder="Keterangan (opsional)"
               class="mt-2 w-full rounded-lg border border-line bg-slate-50 px-3 py-1.5 text-[11px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
@@ -177,33 +227,36 @@
         </p>
 
         <p v-if="attendanceError" class="rounded-lg bg-rose-50 px-3 py-2 text-[11px] font-medium text-rose-700">{{ attendanceError }}</p>
+
+        <div v-if="session && !activeLocked" class="rounded-xl border border-line bg-slate-50 px-3 py-3">
+          <p class="text-[11px] text-slate-500">
+            Setelah dikirim, absensi dan nilai sesi ini terkunci. Hanya admin yang dapat membuka kembali.
+          </p>
+          <Button variant="primary" size="sm" class="mt-2" :disabled="teachingStore.loading" @click="submitAttendance">
+            Konfirmasi &amp; Kirim
+          </Button>
+        </div>
+        <p v-else-if="activeLocked" class="rounded-xl bg-indigo-50 px-3 py-3 text-[11px] font-medium text-indigo-700">
+          Sesi sudah dikirim{{ activeSubmittedAt ? ` pada ${formatDate(activeSubmittedAt)}` : '' }}.
+        </p>
       </div>
     </Modal>
 
     <!-- Modal nilai -->
     <Modal
       :is-open="gradeOpen"
-      :title="`Input Nilai ${gradeSubject}`"
-      :subtitle="`${gradeClass} · ${gradeDate}`"
+      :title="activeLocked ? `Nilai ${gradeSubject} (terkunci)` : `Input Nilai ${gradeSubject}`"
+      :subtitle="`${gradeClass} · ${selectedDate}`"
       confirm-text="Simpan Nilai"
+      :hide-confirm="activeLocked"
       size="lg"
       @close="gradeOpen = false"
       @confirm="saveGrades"
     >
       <div class="space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Tanggal penilaian</label>
-            <input
-              v-model="gradeDate"
-              type="date"
-              class="w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-            />
-          </div>
-          <div class="rounded-xl bg-slate-50 px-3 py-2">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Terisi</p>
-            <p class="text-sm font-bold text-slate-800">{{ filledScoreCount }} / {{ teachingStore.gradebook.length }} siswa</p>
-          </div>
+        <div class="rounded-xl bg-slate-50 px-3 py-2">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Terisi</p>
+          <p class="text-sm font-bold text-slate-800">{{ filledScoreCount }} / {{ teachingStore.gradebook.length }} siswa</p>
         </div>
 
         <div v-if="teachingStore.loading && teachingStore.gradebook.length === 0" class="rounded-xl bg-slate-50 px-3 py-4 text-xs text-slate-500">Memuat daftar siswa…</div>
@@ -224,12 +277,16 @@
               type="number"
               min="0"
               max="100"
+              :disabled="activeLocked"
               placeholder="0–100"
               class="w-24 rounded-xl border border-line bg-panel px-3 py-2 text-right text-sm font-bold text-slate-800 tabular-nums focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
             />
           </li>
         </ul>
 
+        <p v-if="activeLocked" class="rounded-xl bg-indigo-50 px-3 py-3 text-[11px] font-medium text-indigo-700">
+          Sesi sudah ditutup. Nilai hanya dapat dilihat.
+        </p>
         <p v-if="gradeError" class="rounded-lg bg-rose-50 px-3 py-2 text-[11px] font-medium text-rose-700">{{ gradeError }}</p>
         <p v-if="gradeSuccess" class="rounded-lg bg-emerald-50 px-3 py-2 text-[11px] font-medium text-emerald-700">{{ gradeSuccess }}</p>
       </div>
@@ -238,14 +295,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import Button from '../../components/ui/Button.vue'
 import Modal from '../../components/ui/Modal.vue'
 import { useTeachingStore, type TeachingSlot } from '../../stores/teaching'
 import { useGradeStore } from '../../stores/grade'
+import { useAuthStore } from '../../stores/auth'
 
 const teachingStore = useTeachingStore()
 const gradeStore = useGradeStore()
+const authStore = useAuthStore()
 
 const today = new Date().toISOString().split('T')[0]
 const selectedDate = ref(today)
@@ -264,6 +323,27 @@ const dayLabel = computed(() => {
 const completedCount = computed(() => teachingStore.slots.filter((slot) => slot.complete).length)
 const pendingCount = computed(() => teachingStore.slots.filter((slot) => !slot.complete).length)
 
+/* ---------------- Waktu & kunci sesi ---------------- */
+const isAdmin = computed(() => authStore.hasAnyRole(['admin']))
+const now = ref(Date.now())
+const timer = setInterval(() => { now.value = Date.now() }, 30000)
+onUnmounted(() => clearInterval(timer))
+
+const startMs = (slot: TeachingSlot) => (slot.startAt ? new Date(slot.startAt).getTime() : 0)
+const endMs = (slot: TeachingSlot) => (slot.endAt ? new Date(slot.endAt).getTime() : 0)
+const liveSlot = (slot: TeachingSlot) => teachingStore.slots.find((item) => item.id === slot.id) || slot
+const isLocked = (slot: TeachingSlot) => liveSlot(slot).status === 'submitted'
+const isNotStarted = (slot: TeachingSlot) => !!slot.startAt && now.value < startMs(slot)
+
+const missedSlots = computed(() => teachingStore.slots.filter((slot) => slot.missingInput))
+const endingSoon = computed(() =>
+  teachingStore.slots
+    .filter((slot) => slot.endAt && !isLocked(slot) && now.value >= startMs(slot) && now.value < endMs(slot))
+    .map((slot) => ({ slot, minutes: Math.max(1, Math.ceil((endMs(slot) - now.value) / 60000)) }))
+    .filter((item) => item.minutes <= 30)
+    .sort((a, b) => a.minutes - b.minutes)
+)
+
 const load = () => teachingStore.fetchToday(selectedDate.value)
 
 onMounted(load)
@@ -279,6 +359,8 @@ const attendanceError = ref('')
 const attendanceSaved = computed(() =>
   Object.values(attendanceForm).filter((status) => status === 'hadir').length
 )
+const activeLocked = computed(() => (activeSlot.value ? isLocked(activeSlot.value) : false) || session.value?.status === 'submitted')
+const activeSubmittedAt = computed(() => (activeSlot.value ? liveSlot(activeSlot.value).submittedAt : null))
 
 const openAttendance = async (slot: TeachingSlot) => {
   activeSlot.value = slot
@@ -311,8 +393,8 @@ const markAllPresent = () => {
   for (const student of session.value?.students ?? []) attendanceForm[student.id] = 'hadir'
 }
 
-const saveAttendance = async () => {
-  if (!session.value) return
+const persistAttendance = async () => {
+  if (!session.value) return false
   attendanceError.value = ''
   const payload = session.value.students.map((student) => ({
     studentId: student.id,
@@ -322,9 +404,33 @@ const saveAttendance = async () => {
   const success = await teachingStore.saveSession(session.value.id, payload)
   if (!success) {
     attendanceError.value = teachingStore.error || 'Gagal menyimpan absensi'
+    return false
+  }
+  return true
+}
+
+const saveAttendance = async () => {
+  if (!(await persistAttendance())) return
+  attendanceOpen.value = false
+  await load()
+}
+
+const submitAttendance = async () => {
+  if (!session.value) return
+  if (!(await persistAttendance())) return
+  const success = await teachingStore.submitSession(session.value.id)
+  if (!success) {
+    attendanceError.value = teachingStore.error || 'Gagal mengirim sesi'
     return
   }
+  session.value = { ...session.value, status: 'submitted', submittedAt: new Date().toISOString() }
   attendanceOpen.value = false
+  await load()
+}
+
+const unlock = async (slot: TeachingSlot) => {
+  if (!slot.sessionId) return
+  if (!(await teachingStore.unlockSession(slot.sessionId))) return
   await load()
 }
 
@@ -332,7 +438,6 @@ const saveAttendance = async () => {
 const gradeOpen = ref(false)
 const gradeClass = ref('')
 const gradeSubject = ref('')
-const gradeDate = ref(today)
 const scoreForm = reactive<Record<string, number | ''>>({})
 const gradeError = ref('')
 const gradeSuccess = ref('')
@@ -343,9 +448,9 @@ const filledScoreCount = computed(
 
 const openGradebook = async (slot: TeachingSlot) => {
   activeSlot.value = slot
+  session.value = null
   gradeClass.value = slot.class
   gradeSubject.value = slot.subject
-  gradeDate.value = selectedDate.value
   gradeError.value = ''
   gradeSuccess.value = ''
   gradeOpen.value = true
@@ -364,7 +469,7 @@ const saveGrades = async () => {
       studentName: student.name,
       subject: gradeSubject.value,
       score: Number(scoreForm[student.id]),
-      date: gradeDate.value
+      date: selectedDate.value
     }))
 
   if (entries.length === 0) {
@@ -373,10 +478,6 @@ const saveGrades = async () => {
   }
   if (entries.some((entry) => !Number.isFinite(entry.score) || entry.score < 0 || entry.score > 100)) {
     gradeError.value = 'Nilai harus berada di antara 0 dan 100.'
-    return
-  }
-  if (!gradeDate.value) {
-    gradeError.value = 'Tanggal penilaian wajib diisi.'
     return
   }
 
@@ -394,6 +495,7 @@ const saveGrades = async () => {
 
 const formatDate = (value: string | null) => {
   if (!value) return ''
-  return new Date(`${value}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+  const date = value.includes('T') ? new Date(value) : new Date(`${value}T00:00:00`)
+  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
 }
 </script>

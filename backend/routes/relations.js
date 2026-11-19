@@ -18,6 +18,12 @@ router.get('/teachers', authenticateToken, authorizeRoles(...READ_ROLES), (_req,
   res.json(rows.filter(isTeacherUser));
 });
 
+// GET /api/relations/parent-accounts — daftar akun orang tua (untuk dropdown tautan)
+router.get('/parent-accounts', authenticateToken, authorizeRoles(...READ_ROLES), (_req, res) => {
+  const rows = db.prepare("SELECT id, name, email FROM users WHERE role = 'orang_tua' ORDER BY name").all();
+  res.json(rows);
+});
+
 // GET /api/relations/parents — daftar relasi orang tua -> siswa
 router.get('/parents', authenticateToken, authorizeRoles(...READ_ROLES), (req, res) => {
   const rows = db.prepare(`

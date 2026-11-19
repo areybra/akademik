@@ -9,14 +9,14 @@
           {{ ekskulStore.ekskuls.length }} Ekstrakurikuler terdaftar
         </p>
       </div>
-      <div v-if="canEdit" class="flex gap-3">
-        <Button variant="primary" size="lg" class="no-print" @click="openAddModal">
+      <div class="flex gap-3">
+        <Button v-if="canEdit" variant="primary" size="lg" class="no-print" @click="openAddModal">
           <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           Tambah Ekskul
         </Button>
-        <Button variant="outline" size="lg" class="no-print" @click="exportEkskul">Ekspor CSV</Button>
+        <Button v-if="canExport" variant="outline" size="lg" class="no-print" @click="exportEkskul">Ekspor CSV</Button>
       </div>
     </div>
 
@@ -198,6 +198,7 @@ const authStore = useAuthStore()
 const { exportToCsv } = useExport()
 
 const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_sekolah', 'waka']))
+const canExport = computed(() => canEdit.value || authStore.hasAnyRole(['kepala_tu', 'staff_tu']))
 
 onMounted(async () => {
   if (ekskulStore.ekskuls.length === 0) {

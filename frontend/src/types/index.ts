@@ -138,7 +138,7 @@ export interface Prestasi {
 
 export interface DashboardSummary {
   generatedAt: string
-  audience: 'school' | 'teacher' | 'personal'
+  audience: 'admin' | 'supervisor' | 'tu' | 'teacher' | 'personal'
   fullAccess: boolean
   counts: {
     students: number
@@ -186,4 +186,21 @@ export interface DashboardSummary {
   }
   topClasses: Array<{ class: string; total: number; hadir: number; rate: number }>
   topStudents: Array<{ name: string; class: string; average: number }>
+  teaching?: {
+    date: string
+    total: number
+    submitted: number
+    pending: number
+    missing: number
+    slots: Array<{
+      id: string
+      time: string
+      class: string
+      subject: string
+      room: string
+      filled: number
+      total: number
+      status: 'locked' | 'complete' | 'partial' | 'empty'
+    }>
+  } | null
 }

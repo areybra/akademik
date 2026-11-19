@@ -8,7 +8,8 @@ const {
   gradeScope,
   billingScope,
   getRoles,
-  hasFullAccess
+  hasFullAccess,
+  canTeachSchedule
 } = require('../scope');
 
 const LEVEL_ORDER = ['X', 'XI', 'XII'];
@@ -37,6 +38,15 @@ const round = (value, digits = 1) => {
   return Math.round((Number(value) || 0) * factor) / factor;
 };
 
+// Jam selesai dilewati → sesi dianggap tertutup walau belum sempat dikirim.
+const hasEnded = (iso, time) => {
+  const match = String(time || '').match(/-\s*(\d{1,2}):(\d{2})/);
+  if (!match) return false;
+  const [year, month, day] = String(iso).split('-').map(Number);
+  const end = new Date(year || 1970, (month || 1) - 1, day || 1, Number(match[1]), Number(match[2]));
+  return Date.now() > end.getTime();
+};
+
 const emptyAttendance = () => ({ total: 0, hadir: 0, izin: 0, alfa: 0, percentage: 0 });
 
 const summarizeAttendance = (rows) => {
@@ -59,7 +69,11 @@ router.get('/summary', authenticateToken, (req, res) => {
     const roles = getRoles(user);
     const fullAccess = hasFullAccess(user);
     const personal = roles.includes('siswa') || roles.includes('orang_tua');
-    const audience = fullAccess ? 'school' : personal ? 'personal' : 'teacher';
+    let audience = 'teacher';
+    if (roles.includes('admin')) audience = 'admin';
+    else if (roles.includes('kepala_sekolah') || roles.includes('waka')) audience = 'supervisor';
+    else if (roles.includes('kepala_tu') || roles.includes('staff_tu')) audience = 'tu';
+    else if (personal) audience = 'personal';
 
     // ---- Siswa ----
     const studentScopeDef = studentScope(user);
@@ -293,6 +307,53 @@ router.get('/summary', authenticateToken, (req, res) => {
       rate: row.total > 0 ? round((row.hadir / row.total) * 100) : 0
     }));
 
+    // ---- Sesi mengajar hari ini (guru) ----
+    let teaching = null;
+    if (audience === 'teacher') {
+      const DAY_NAMES = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const dayName = DAY_NAMES[new Date(`${today}T00:00:00Z`).getUTCDay()];
+      const mySchedules = db
+        .prepare('SELECT * FROM schedules WHERE day = ? ORDER BY time ASC')
+        .all(dayName)
+        .filter((schedule) => canTeachSchedule(user, schedule));
+
+      const slots = mySchedules.map((schedule) => {
+        const session = db
+          .prepare('SELECT * FROM lesson_sessions WHERE schedule_id = ? AND date = ?')
+          .get(schedule.id, today);
+        const total = db
+          .prepare("SELECT COUNT(*) AS count FROM students WHERE class = ? AND status = 'siswa aktif'")
+          .get(schedule.class).count;
+        const filled = session
+          ? db.prepare('SELECT COUNT(*) AS count FROM lesson_attendances WHERE session_id = ?').get(session.id).count
+          : 0;
+
+        let status = 'empty';
+        if (filled > 0) status = total > 0 && filled >= total ? 'complete' : 'partial';
+        if ((session && session.status === 'submitted') || hasEnded(today, schedule.time)) status = 'locked';
+
+        return {
+          id: schedule.id,
+          time: schedule.time,
+          class: schedule.class,
+          subject: schedule.subject,
+          room: schedule.room,
+          filled,
+          total,
+          status
+        };
+      });
+
+      teaching = {
+        date: today,
+        total: slots.length,
+        submitted: slots.filter((slot) => slot.status === 'locked').length,
+        pending: slots.filter((slot) => slot.status !== 'locked').length,
+        missing: slots.filter((slot) => slot.filled === 0).length,
+        slots
+      };
+    }
+
     res.json({
       generatedAt: new Date().toISOString(),
       audience,
@@ -335,7 +396,8 @@ router.get('/summary', authenticateToken, (req, res) => {
         monthly
       },
       topClasses,
-      topStudents
+      topStudents,
+      teaching
     });
   } catch (error) {
     console.error('Dashboard summary error:', error);

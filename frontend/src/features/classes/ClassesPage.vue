@@ -6,12 +6,15 @@
         <h1 class="text-xl font-bold text-slate-900 tracking-tight">Manajemen Kelas</h1>
         <p class="text-sm text-slate-500 mt-0.5">Kelola klaster kelas dan program keahlian siswa.</p>
       </div>
-      <Button v-if="canEdit" variant="primary" @click="openAddModal">
-        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-        </svg>
-        Tambah Kelas
-      </Button>
+      <div class="flex gap-2">
+        <Button v-if="canEdit" variant="primary" @click="openAddModal">
+          <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+          </svg>
+          Tambah Kelas
+        </Button>
+        <Button v-if="canExport" variant="outline" class="no-print" @click="exportClasses">Ekspor CSV</Button>
+      </div>
     </div>
 
     <!-- Filters Bar -->
@@ -158,12 +161,21 @@ import Modal from '../../components/ui/Modal.vue'
 import Input from '../../components/ui/Input.vue'
 import { useAuthStore } from '../../stores/auth'
 import { compareClassNames } from '../../utils/classes'
+import { useExport } from '../../composables/useExport'
 
 const studentStore = useStudentStore()
 const teacherStore = useTeacherStore()
 const authStore = useAuthStore()
 
 const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_tu', 'staff_tu']))
+const canExport = computed(() => canEdit.value || authStore.hasAnyRole(['kepala_sekolah', 'waka']))
+
+const { exportToCsv } = useExport()
+const exportClasses = () => {
+  const headers = ['Nama Kelas', 'Jurusan', 'Wali Kelas', 'Kapasitas']
+  const rows = filteredClasses.value.map((c) => [c.name, c.major, c.teacher, c.capacity])
+  exportToCsv(headers, rows, 'ekspor-kelas')
+}
 const classes = ref<Class[]>([])
 const searchQuery = ref('')
 const filterMajor = ref('')

@@ -168,12 +168,6 @@ const navigationConfig = [
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>'
       },
       {
-        label: 'Mengajar',
-        path: '/teaching',
-        roles: ['guru', 'guru_mapel', 'wali_kelas'],
-        icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0121 17.5M12 14v7m-6.16-10.922A12.083 12.083 0 003 17.5" /></svg>'
-      },
-      {
         label: 'Pengaturan',
         path: '/settings',
         roles: ['admin'],
@@ -187,13 +181,13 @@ const navigationConfig = [
       { 
         label: 'Siswa', 
         path: '/students', 
-        roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas', 'guru_mapel'],
+        roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas'],
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>'
       },
       { 
         label: 'Kelas', 
         path: '/classes', 
-        roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas', 'guru_mapel'],
+        roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas'],
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>'
       },
       { 
@@ -213,16 +207,34 @@ const navigationConfig = [
         roles: ALL_ROLES,
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>'
       },
+      {
+        label: 'Mengajar',
+        path: '/teaching',
+        roles: ['guru', 'guru_mapel', 'wali_kelas'],
+        icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0121 17.5M12 14v7m-6.16-10.922A12.083 12.083 0 003 17.5" /></svg>'
+      },
       { 
         label: 'Absensi', 
         path: '/attendance', 
-        roles: ALL_ROLES,
+        roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu'],
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>'
       },
       { 
         label: 'Nilai', 
         path: '/grades', 
-        roles: ALL_ROLES,
+        roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu'],
+        icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>'
+      },
+      {
+        label: 'Laporan Absensi',
+        path: '/attendance',
+        roles: ['siswa', 'orang_tua'],
+        icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>'
+      },
+      {
+        label: 'Laporan Nilai',
+        path: '/grades',
+        roles: ['siswa', 'orang_tua'],
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>'
       },
     ]
@@ -233,13 +245,13 @@ const navigationConfig = [
       {
         label: 'Ekskul',
         path: '/ekskul',
-        roles: ALL_ROLES,
+        roles: ['admin', 'kepala_sekolah', 'waka', 'guru', 'wali_kelas', 'siswa', 'orang_tua'],
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>'
       },
       {
         label: 'Prestasi',
         path: '/prestasi',
-        roles: ALL_ROLES,
+        roles: ['admin', 'kepala_sekolah', 'waka', 'guru', 'wali_kelas', 'siswa', 'orang_tua'],
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5v10a2 2 0 002 2h10a2 2 0 002-2V5m-2 0l3-3m-3 3l3 3" /></svg>'
       },
     ]
@@ -283,8 +295,9 @@ const userRolesLabel = computed(() => {
 })
 
 const currentRouteLabel = computed(() => {
+  const userRoles = authStore.user?.roles || (authStore.user?.role ? [authStore.user.role] : [])
   for (const group of navigationConfig) {
-    const item = group.items.find(i => i.path === route.path)
+    const item = group.items.find(i => i.path === route.path && (i.roles as UserRole[]).some(r => userRoles.includes(r)))
     if (item) return item.label
   }
   return 'Halaman'

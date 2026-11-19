@@ -68,6 +68,15 @@ const schedules = [
   ['sched-012', 'XII TKJ 1', '13:00 - 14:30', 'Bahasa Indonesia', 'Agus Setiawan, M.Pd.', 'R-303', 'Senin']
 ];
 
+// Salin jadwal Senin ke hari lain agar setiap hari ada jadwal demo.
+const scheduleVariants = ['Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].flatMap((day) =>
+  schedules.map((s, i) => {
+    const [id, cls, time, subject, teacher, room] = s;
+    return [`${id}-${day.toLowerCase()}`, cls, time, subject, teacher, room, day];
+  })
+);
+
+const DAY_NAMES = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 const subjects = ['Matematika', 'Bahasa Indonesia', 'Pemrograman Web'];
 const attendanceStatuses = ['hadir', 'hadir', 'hadir', 'hadir', 'izin', 'hadir', 'alfa', 'hadir', 'hadir', 'hadir'];
 
@@ -118,7 +127,52 @@ function seedSchedules() {
     'INSERT OR IGNORE INTO schedules (id, class, time, subject, teacher, room, day) VALUES (?, ?, ?, ?, ?, ?, ?)'
   );
   let added = 0;
-  for (const s of schedules) added += insert.run(...s).changes;
+  for (const s of [...schedules, ...scheduleVariants]) added += insert.run(...s).changes;
+  // Baris lama bisa punya day kosong; isi agar muncul di filter hari.
+  db.prepare("UPDATE schedules SET day = 'Senin' WHERE day IS NULL OR day = '' OR day = 'Belum ditentukan'").run();
+  return added;
+}
+
+// Sesi mengajar + presensi 7 hari terakhir agar halaman Mengajar tidak kosong.
+function seedLessonSessions() {
+  const insertSession = db.prepare(`
+    INSERT OR IGNORE INTO lesson_sessions
+      (id, schedule_id, date, class, subject, teacher_id, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const insertRecord = db.prepare(
+    'INSERT OR IGNORE INTO lesson_attendances (session_id, student_id, student_name, status, note) VALUES (?, ?, ?, ?, ?)'
+  );
+  const findTeacher = db.prepare('SELECT id FROM users WHERE name = ?');
+  const studentRows = db.prepare("SELECT id, name FROM students WHERE class = ? AND status = 'siswa aktif' ORDER BY name");
+  const schedulesOfDay = db.prepare('SELECT * FROM schedules WHERE day = ?');
+  let added = 0;
+  for (let d = 0; d < 7; d++) {
+    const date = daysAgo(d);
+    const isoDate = ymd(date);
+    const day = DAY_NAMES[date.getDay()];
+    for (const row of schedulesOfDay.all(day)) {
+      const teacher = findTeacher.get(row.teacher);
+      const sessionId = `sess-${row.id}-${isoDate}`;
+      added += insertSession.run(
+        sessionId, row.id, isoDate, row.class, row.subject,
+        teacher ? teacher.id : 'user-guru1', iso(date), iso(date)
+      ).changes;
+      studentRows.all(row.class).forEach((s, idx) => {
+        const status = attendanceStatuses[(idx + date.getDate()) % attendanceStatuses.length];
+        added += insertRecord.run(
+          sessionId, s.id, s.name, status, status === 'izin' ? 'Izin keperluan keluarga' : null
+        ).changes;
+      });
+    }
+  }
+  // Sesi hari-hari sebelumnya dianggap sudah dikirim agar status terkunci terlihat.
+  db.prepare(`
+    UPDATE lesson_sessions
+    SET status = 'submitted', submitted_at = updated_at
+    WHERE status = 'draft' AND date < ?
+      AND EXISTS (SELECT 1 FROM lesson_attendances la WHERE la.session_id = lesson_sessions.id)
+  `).run(ymd(today));
   return added;
 }
 
@@ -273,6 +327,7 @@ const run = db.transaction(() => ({
   schedules: seedSchedules(),
   grades: seedGrades(),
   attendances: seedAttendances(),
+  lessonSessions: seedLessonSessions(),
   bills: seedBills(),
   settings: seedSettings(),
   ekskul: seedEkskul(),

@@ -69,9 +69,9 @@
         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Manajemen Nilai</h1>
         <p class="text-sm text-slate-500 mt-1">Rekapitulasi pencapaian akademik siswa.</p>
       </div>
-      <div v-if="canEdit" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:justify-end">
-        <Button variant="primary" @click="openAddModal">Input Nilai</Button>
-        <Button variant="outline" class="no-print" @click="exportGrades">Ekspor CSV</Button>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:justify-end">
+        <Button v-if="canEdit" variant="primary" @click="openAddModal">Input Nilai</Button>
+        <Button v-if="canExport" variant="outline" class="no-print" @click="exportGrades">Ekspor CSV</Button>
       </div>
     </div>
 
@@ -237,6 +237,7 @@ const { exportToCsv } = useExport()
 
 const isPersonal = computed(() => authStore.hasAnyRole(['orang_tua', 'siswa']))
 const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_sekolah', 'waka', 'guru_mapel', 'wali_kelas', 'guru']))
+const canExport = computed(() => canEdit.value || authStore.hasAnyRole(['kepala_tu', 'staff_tu']))
 
 /* ---------------- Mode personal ---------------- */
 const selectedChildId = ref('')

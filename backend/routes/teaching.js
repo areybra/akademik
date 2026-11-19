@@ -3,13 +3,48 @@ const router = express.Router();
 const db = require('../database');
 const authenticateToken = require('../middleware/auth');
 const authorizeRoles = require('../middleware/roleCheck');
-const { hasFullAccess } = require('../scope');
+const { hasFullAccess, canTeachSchedule } = require('../scope');
 
 const TEACHING_ROLES = ['admin', 'kepala_sekolah', 'waka', 'guru', 'guru_mapel', 'wali_kelas'];
 const DAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const dayName = (iso) => DAYS[new Date(`${iso}T00:00:00Z`).getUTCDay()];
+
+// Jam jadwal disimpan sebagai rentang teks, mis. "07:00 - 08:30".
+const parseTimeRange = (text) => {
+  const match = String(text || '').match(/(\d{1,2}):(\d{2})\s*[-\u2013]\s*(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+  const startMin = Number(match[1]) * 60 + Number(match[2]);
+  const endMin = Number(match[3]) * 60 + Number(match[4]);
+  return endMin > startMin ? { startMin, endMin } : null;
+};
+
+const windowOf = (date, time) => {
+  const range = parseTimeRange(time);
+  if (!range) return null;
+  const [year, month, day] = String(date).split('-').map(Number);
+  const base = [year || 1970, (month || 1) - 1, day || 1];
+  return {
+    startAt: new Date(...base, 0, range.startMin).toISOString(),
+    endAt: new Date(...base, 0, range.endMin).toISOString()
+  };
+};
+
+const attendanceCount = (sessionId) =>
+  db.prepare('SELECT COUNT(*) AS count FROM lesson_attendances WHERE session_id = ?').get(sessionId).count;
+
+// Sesi yang sudah lewat jam selesai otomatis ditutup agar tidak menggantung.
+const syncSession = (session, schedule) => {
+  if (!session || session.status === 'submitted') return session;
+  const window = schedule ? windowOf(session.date, schedule.time) : null;
+  if (!window || Date.now() <= new Date(window.endAt).getTime()) return session;
+  db.prepare(`
+    UPDATE lesson_sessions SET status = 'submitted', submitted_at = ?, updated_at = ?
+    WHERE id = ? AND status = 'draft'
+  `).run(window.endAt, new Date().toISOString(), session.id);
+  return db.prepare('SELECT * FROM lesson_sessions WHERE id = ?').get(session.id);
+};
 
 const assignmentsOf = (user) => db.prepare(`
   SELECT id, subject, class FROM teacher_assignments
@@ -20,13 +55,6 @@ const isAssigned = (user, className, subject) =>
   !!db.prepare(`
     SELECT 1 FROM teacher_assignments WHERE teacher_id = ? AND class = ? AND subject = ?
   `).get(user.id, className, subject);
-
-const canTeachSchedule = (user, schedule) => {
-  if (hasFullAccess(user)) return true;
-  if (schedule.teacher_id && schedule.teacher_id === user.id) return true;
-  if (schedule.teacher && schedule.teacher === user.name) return true;
-  return isAssigned(user, schedule.class, schedule.subject);
-};
 
 const studentsOf = (className) => db.prepare(`
   SELECT id, name, class FROM students
@@ -46,6 +74,8 @@ const mapSession = (session, className) => {
     subject: session.subject,
     teacherId: session.teacher_id,
     updatedAt: session.updated_at,
+    status: session.status || 'draft',
+    submittedAt: session.submitted_at || null,
     records: rows.map((row) => ({
       studentId: row.student_id,
       studentName: row.student_name,
@@ -69,13 +99,13 @@ router.get('/today', authenticateToken, authorizeRoles(...TEACHING_ROLES), (req,
     : daySchedules.filter((schedule) => canTeachSchedule(req.user, schedule));
 
   const slots = mySchedules.map((schedule) => {
-    const session = db.prepare(
+    let session = db.prepare(
       'SELECT * FROM lesson_sessions WHERE schedule_id = ? AND date = ?'
     ).get(schedule.id, date);
+    session = syncSession(session, schedule);
     const total = studentsOf(schedule.class).length;
-    const filled = session
-      ? db.prepare('SELECT COUNT(*) AS count FROM lesson_attendances WHERE session_id = ?').get(session.id).count
-      : 0;
+    const filled = session ? attendanceCount(session.id) : 0;
+    const window = windowOf(date, schedule.time);
 
     return {
       id: schedule.id,
@@ -89,7 +119,12 @@ router.get('/today', authenticateToken, authorizeRoles(...TEACHING_ROLES), (req,
       sessionId: session ? session.id : null,
       filled,
       total,
-      complete: total > 0 && filled >= total
+      complete: total > 0 && filled >= total,
+      status: session ? session.status || 'draft' : 'draft',
+      submittedAt: session ? session.submitted_at || null : null,
+      startAt: window ? window.startAt : null,
+      endAt: window ? window.endAt : null,
+      missingInput: !!window && Date.now() > new Date(window.endAt).getTime() && filled === 0
     };
   });
 
@@ -117,6 +152,11 @@ router.post('/sessions', authenticateToken, authorizeRoles(...TEACHING_ROLES), (
     return res.status(403).json({ message: 'Jadwal ini bukan jadwal mengajar Anda' });
   }
 
+  const window = windowOf(date, schedule.time);
+  if (!hasFullAccess(req.user) && window && Date.now() < new Date(window.startAt).getTime()) {
+    return res.status(403).json({ message: 'Sesi belum dimulai' });
+  }
+
   const existing = db.prepare(
     'SELECT * FROM lesson_sessions WHERE schedule_id = ? AND date = ?'
   ).get(scheduleId, date);
@@ -131,6 +171,7 @@ router.post('/sessions', authenticateToken, authorizeRoles(...TEACHING_ROLES), (
     `).run(id, scheduleId, date, schedule.class, schedule.subject, req.user.id, now, now);
     session = db.prepare('SELECT * FROM lesson_sessions WHERE id = ?').get(id);
   }
+  session = syncSession(session, schedule);
 
   res.json({
     ...mapSession(session, schedule.class),
@@ -145,8 +186,10 @@ router.get('/sessions/:id', authenticateToken, authorizeRoles(...TEACHING_ROLES)
   if (!hasFullAccess(req.user) && session.teacher_id !== req.user.id) {
     return res.status(403).json({ message: 'Akses ditolak' });
   }
+  const schedule = db.prepare('SELECT * FROM schedules WHERE id = ?').get(session.schedule_id);
+  const current = syncSession(session, schedule);
   res.json({
-    ...mapSession(session),
+    ...mapSession(current),
     students: studentsOf(session.class)
   });
 });
@@ -157,6 +200,15 @@ router.put('/sessions/:id', authenticateToken, authorizeRoles(...TEACHING_ROLES)
   if (!session) return res.status(404).json({ message: 'Sesi mengajar tidak ditemukan' });
   if (!hasFullAccess(req.user) && session.teacher_id !== req.user.id) {
     return res.status(403).json({ message: 'Akses ditolak' });
+  }
+  const schedule = db.prepare('SELECT * FROM schedules WHERE id = ?').get(session.schedule_id);
+  const current = syncSession(session, schedule);
+  if (current.status === 'submitted') {
+    return res.status(409).json({ message: 'Sesi sudah ditutup dan dikunci' });
+  }
+  const window = schedule ? windowOf(session.date, schedule.time) : null;
+  if (!hasFullAccess(req.user) && window && Date.now() < new Date(window.startAt).getTime()) {
+    return res.status(403).json({ message: 'Sesi belum dimulai' });
   }
 
   const payload = Array.isArray(req.body.attendances) ? req.body.attendances : null;
@@ -195,6 +247,43 @@ router.put('/sessions/:id', authenticateToken, authorizeRoles(...TEACHING_ROLES)
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+// POST /api/teaching/sessions/:id/submit — kunci sesi setelah absensi + nilai selesai
+router.post('/sessions/:id/submit', authenticateToken, authorizeRoles(...TEACHING_ROLES), (req, res) => {
+  const session = db.prepare('SELECT * FROM lesson_sessions WHERE id = ?').get(req.params.id);
+  if (!session) return res.status(404).json({ message: 'Sesi mengajar tidak ditemukan' });
+  if (!hasFullAccess(req.user) && session.teacher_id !== req.user.id) {
+    return res.status(403).json({ message: 'Akses ditolak' });
+  }
+  const schedule = db.prepare('SELECT * FROM schedules WHERE id = ?').get(session.schedule_id);
+  const current = syncSession(session, schedule);
+  if (current.status === 'submitted') {
+    return res.json({ message: 'Sesi sudah ditutup', status: 'submitted', submittedAt: current.submitted_at });
+  }
+
+  const total = studentsOf(session.class).length;
+  const filled = attendanceCount(session.id);
+  if (total > 0 && filled < total) {
+    return res.status(400).json({ message: 'Absensi belum lengkap. Isi semua siswa sebelum mengirim.' });
+  }
+
+  const now = new Date().toISOString();
+  db.prepare(
+    "UPDATE lesson_sessions SET status = 'submitted', submitted_at = ?, updated_at = ? WHERE id = ?"
+  ).run(now, now, session.id);
+  res.json({ message: 'Sesi dikirim dan dikunci', status: 'submitted', submittedAt: now });
+});
+
+// POST /api/teaching/sessions/:id/unlock — admin membuka kembali sesi terkunci
+router.post('/sessions/:id/unlock', authenticateToken, authorizeRoles('admin'), (req, res) => {
+  const session = db.prepare('SELECT * FROM lesson_sessions WHERE id = ?').get(req.params.id);
+  if (!session) return res.status(404).json({ message: 'Sesi mengajar tidak ditemukan' });
+
+  db.prepare(
+    "UPDATE lesson_sessions SET status = 'draft', submitted_at = NULL, updated_at = ? WHERE id = ?"
+  ).run(new Date().toISOString(), session.id);
+  res.json({ message: 'Sesi dibuka kembali', status: 'draft' });
 });
 
 // GET /api/teaching/gradebook?class=&subject=

@@ -46,6 +46,7 @@ const relationRoutes = require('./routes/relations');
 const dashboardRoutes = require('./routes/dashboard');
 const portalRoutes = require('./routes/portal');
 const teachingRoutes = require('./routes/teaching');
+const userRoutes = require('./routes/users');  // <-- baru
 
 // Mounting Routes
 app.use('/api/auth', authRoutes);
@@ -59,6 +60,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/ekskul', ekskulRoutes);
 app.use('/api/prestasi', prestasiRoutes);
 app.use('/api/relations', relationRoutes);
+app.use('/api/users', userRoutes);     // <-- baru, setelah relations
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/portal', portalRoutes);
 app.use('/api/teaching', teachingRoutes);

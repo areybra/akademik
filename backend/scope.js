@@ -163,6 +163,16 @@ function canManageSubject(user, subject) {
   return !!db.prepare('SELECT 1 FROM teacher_assignments WHERE teacher_id = ? AND subject = ?').get(user.id, subject);
 }
 
+// Guru boleh mengajar jadwal bila tertaut langsung atau mengampu kelas+mapel.
+function canTeachSchedule(user, schedule) {
+  if (hasFullAccess(user)) return true;
+  if (schedule.teacher_id && schedule.teacher_id === user.id) return true;
+  if (schedule.teacher && schedule.teacher === user.name) return true;
+  return !!db
+    .prepare('SELECT 1 FROM teacher_assignments WHERE teacher_id = ? AND class = ? AND subject = ?')
+    .get(user.id, schedule.class, schedule.subject);
+}
+
 // Orang tua hanya boleh mengunggah bukti untuk tagihan anaknya.
 function isChildOf(user, studentId) {
   return !!db.prepare('SELECT 1 FROM parent_students WHERE parent_id = ? AND student_id = ?').get(user.id, studentId);
@@ -181,5 +191,6 @@ module.exports = {
   billingScope,
   canManageStudent,
   canManageSubject,
+  canTeachSchedule,
   isChildOf
 };

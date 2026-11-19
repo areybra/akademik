@@ -17,6 +17,14 @@
 
     <TeacherAssignmentsSettings />
 
+    <ParentRelationsSettings />
+
+    <UsersPage />
+
+    <UsersPage />
+
+    <UsersPage />
+
     <HelpContactsSettings />
   </div>
 </template>
@@ -24,5 +32,7 @@
 <script setup lang="ts">
 import HelpContactsSettings from './HelpContactsSettings.vue'
 import TeacherAssignmentsSettings from './TeacherAssignmentsSettings.vue'
+import ParentRelationsSettings from './ParentRelationsSettings.vue'
+import UsersPage from '../users/UsersPage.vue'
 import ThemeSwitcher from '../../components/ui/ThemeSwitcher.vue'
 </script>

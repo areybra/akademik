@@ -41,19 +41,22 @@
             </svg>
           </button>
         </div>
-        <div v-if="isAdmin" class="flex gap-2">
-          <Button variant="secondary" @click="openImportModal">
-            <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            Impor Data
-          </Button>
-          <Button variant="primary" @click="openAddModal">
-            <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-            </svg>
-            Tambah Guru
-          </Button>
+        <div class="flex gap-2">
+          <template v-if="canWrite">
+            <Button variant="secondary" @click="openImportModal">
+              <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Impor Data
+            </Button>
+            <Button variant="primary" @click="openAddModal">
+              <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+              </svg>
+              Tambah Guru
+            </Button>
+          </template>
+          <Button v-if="canExport" variant="outline" class="no-print" @click="exportTeachers">Ekspor CSV</Button>
         </div>
       </div>
     </div>
@@ -177,7 +180,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   </button>
-                  <template v-if="isAdmin">
+                  <template v-if="canWrite">
                     <button @click="openEditModal(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-all" title="Edit Data" aria-label="Edit data guru">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -223,7 +226,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </button>
-            <template v-if="isAdmin">
+            <template v-if="canWrite">
               <button @click="openEditModal(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 transition-colors" title="Edit Data" aria-label="Edit data guru">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -452,7 +455,7 @@
           </div>
         </div>
 
-        <div v-if="isAdmin" class="pt-4 border-t border-slate-100">
+        <div v-if="canWrite" class="pt-4 border-t border-slate-100">
           <Button variant="primary" block @click="editFromDetail">
             <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -565,10 +568,23 @@ import Modal from '../../components/ui/Modal.vue'
 import Input from '../../components/ui/Input.vue'
 import Pagination from '../../components/ui/Pagination.vue'
 import { sortClassNames } from '../../utils/classes'
+import { useExport } from '../../composables/useExport'
 
 const authStore = useAuthStore()
 const teacherStore = useTeacherStore()
-const isAdmin = computed(() => authStore.hasAnyRole(['admin']))
+const canWrite = computed(() => authStore.hasAnyRole(['admin', 'kepala_tu', 'staff_tu']))
+const canExport = computed(() => canWrite.value || authStore.hasAnyRole(['kepala_sekolah', 'waka']))
+
+const { exportToCsv } = useExport()
+const exportTeachers = () => {
+  const headers = ['Nama', 'NIUP', 'NIP', 'Gender', 'Pangkat', 'Pendidikan', 'Mata Pelajaran', 'Kelas', 'Provinsi', 'Kabupaten', 'Kecamatan', 'Negara']
+  const rows = teacherStore.teachers.map((t) => [
+    t.name, t.niup, t.nip || '', t.gender, t.pangkat || '', t.pendidikan || '',
+    (t.subjects || []).join('; '), (t.classes || []).join('; '),
+    t.provinsi || '', t.kabupaten || '', t.kecamatan || '', t.negara || ''
+  ])
+  exportToCsv(headers, rows, 'ekspor-guru')
+}
 
 onMounted(async () => {
   if (teacherStore.teachers.length === 0) {

@@ -36,12 +36,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/classes',
     component: ClassesPage,
-    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas', 'guru_mapel'] }
+    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas'] }
   },
   {
     path: '/students',
     component: StudentsPage,
-    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas', 'guru_mapel'] }
+    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'wali_kelas'] }
   },
   {
     path: '/teachers',
@@ -66,12 +66,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/attendance',
     component: AttendancePage,
-    meta: { requiresAuth: true, roles: ALL_ROLES }
+    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'siswa', 'orang_tua'] }
   },
   {
     path: '/grades',
     component: GradesPage,
-    meta: { requiresAuth: true, roles: ALL_ROLES }
+    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'kepala_tu', 'staff_tu', 'siswa', 'orang_tua'] }
   },
   {
     path: '/billing',
@@ -81,12 +81,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/ekskul',
     component: EkskulPage,
-    meta: { requiresAuth: true, roles: ALL_ROLES }
+    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] }
   },
   {
     path: '/prestasi',
     component: PrestasiPage,
-    meta: { requiresAuth: true, roles: ALL_ROLES }
+    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'guru', 'wali_kelas', 'siswa', 'orang_tua'] }
   },
   {
     path: '/settings',

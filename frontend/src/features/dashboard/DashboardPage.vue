@@ -8,7 +8,7 @@
           Selamat Datang, {{ authStore.user?.name }}
         </h1>
         <p class="text-sm text-slate-500 mt-1">
-          Ringkasan akademik dalam grafik realtime.
+          {{ audienceSubtitle }}
           <span v-if="referenceLabel" class="text-slate-400">Data absensi {{ referenceLabel }}.</span>
         </p>
       </div>
@@ -81,6 +81,44 @@
       </div>
     </div>
 
+    <!-- Sesi mengajar hari ini -->
+    <section v-if="audience === 'teacher'" class="clean-card p-4 sm:p-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900">Sesi Mengajar Hari Ini</h2>
+          <p class="mt-0.5 text-[11px] text-slate-500">
+            {{ summary?.teaching?.total ?? 0 }} sesi ·
+            {{ summary?.teaching?.pending ?? 0 }} belum dikirim ·
+            {{ summary?.teaching?.missing ?? 0 }} tanpa input
+          </p>
+        </div>
+        <RouterLink to="/teaching" class="text-[11px] font-bold text-indigo-600 hover:underline">
+          Buka Mengajar
+        </RouterLink>
+      </div>
+
+      <ul v-if="(summary?.teaching?.slots.length ?? 0) > 0" class="mt-3 divide-y divide-line">
+        <li v-for="slot in summary?.teaching?.slots ?? []" :key="slot.id" class="flex flex-wrap items-center gap-3 py-2.5">
+          <span class="w-24 text-[11px] font-bold text-slate-600 tabular-nums">{{ slot.time }}</span>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-xs font-bold text-slate-800">{{ slot.subject }}</p>
+            <p class="text-[10px] text-slate-400">{{ slot.class }} · {{ slot.room }}</p>
+          </div>
+          <span class="rounded-full px-2.5 py-1 text-[10px] font-bold" :class="teachingStatus(slot.status).class">
+            {{ teachingStatus(slot.status).label }}
+          </span>
+        </li>
+      </ul>
+      <p v-else class="mt-3 rounded-xl bg-slate-50 px-3 py-4 text-xs text-slate-500">
+        Tidak ada jadwal mengajar hari ini.
+      </p>
+
+      <div v-if="homeroom" class="mt-4 rounded-xl border border-line bg-slate-50 px-3 py-3 text-[11px] text-slate-600">
+        Wali kelas <strong>{{ homeroom }}</strong> · kehadiran {{ summary?.attendance.today.percentage ?? 0 }}%
+        ({{ summary?.attendance.today.hadir ?? 0 }} hadir dari {{ summary?.attendance.today.total ?? 0 }} catatan)
+      </div>
+    </section>
+
     <!-- Attendance -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
       <ChartCard
@@ -113,7 +151,7 @@
     </div>
 
     <!-- Student composition -->
-    <div v-if="summary && summary.audience !== 'personal'" class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+    <div v-if="showStudentComposition" class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
       <ChartCard
         title="Siswa per Tingkat"
         subtitle="Distribusi kelas X, XI, dan XII"
@@ -176,7 +214,7 @@
     </div>
 
     <!-- Billing -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+    <div v-if="showBilling" class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
       <ChartCard
         title="Status Pembayaran SPP"
         :subtitle="`${summary?.billing.paid ?? 0} dari ${summary?.billing.total ?? 0} tagihan lunas`"
@@ -211,7 +249,7 @@
     </div>
 
     <!-- Summary tables -->
-    <div v-if="summary && summary.audience !== 'personal'" class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+    <div v-if="summary && showSupervision" class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
       <ChartCard
         title="Kehadiran Terendah per Kelas"
         subtitle="30 hari terakhir"
@@ -256,6 +294,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useDashboardStore } from '../../stores/dashboard'
 import { useAuthStore } from '../../stores/auth'
 import PersonalPortal from '../portal/PersonalPortal.vue'
@@ -278,6 +317,27 @@ const authStore = useAuthStore()
 
 const summary = computed(() => dashboardStore.summary)
 const isPersonal = computed(() => authStore.hasAnyRole(['orang_tua', 'siswa']))
+const audience = computed(() => summary.value?.audience ?? 'teacher')
+const homeroom = computed(() => authStore.user?.class || '')
+
+const audienceSubtitle = computed(() => ({
+  admin: 'Kontrol penuh data sekolah.',
+  supervisor: 'Pemantauan akademik sekolah.',
+  tu: 'Administrasi dan keuangan sekolah.',
+  teacher: 'Ringkasan mengajar Anda.',
+  personal: 'Ringkasan pribadi.'
+}[audience.value] ?? 'Ringkasan akademik.'))
+
+const showStudentComposition = computed(() => ['admin', 'tu'].includes(audience.value))
+const showBilling = computed(() => ['admin', 'tu'].includes(audience.value))
+const showSupervision = computed(() => ['admin', 'supervisor'].includes(audience.value))
+
+const teachingStatus = (status: string) => ({
+  locked: { label: 'Terkunci', class: 'bg-indigo-50 text-indigo-700 border border-indigo-100' },
+  complete: { label: 'Lengkap', class: 'bg-emerald-50 text-emerald-700 border border-emerald-100' },
+  partial: { label: 'Sebagian', class: 'bg-amber-50 text-amber-700 border border-amber-100' },
+  empty: { label: 'Belum diisi', class: 'bg-slate-100 text-slate-500' }
+}[status] ?? { label: status, class: 'bg-slate-100 text-slate-500' })
 
 const refresh = () => dashboardStore.fetchSummary()
 
@@ -414,51 +474,106 @@ const stats = computed(() => {
       ? Math.round(data.counts.students / data.counts.teachers)
       : 0
 
-  return [
-    {
-      label: 'Total Siswa',
-      value: formatNumber(data.counts.students),
-      hint: `${data.counts.classes} kelas terdata`,
-      icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
-      iconBg: 'bg-indigo-50',
-      iconClass: 'text-indigo-600',
-      sparkline: [] as number[],
-      sparkColor: CHART_COLORS.indigo
-    },
-    {
-      label: data.counts.teachers !== null ? 'Tenaga Pengajar' : 'Kelas Terdata',
-      value: formatNumber(data.counts.teachers ?? data.counts.classes),
-      hint:
-        data.counts.teachers !== null
-          ? `Rasio 1 guru : ${teacherRatio} siswa`
-          : 'Sesuai cakupan akses',
+  const studentCard = {
+    label: 'Total Siswa',
+    value: formatNumber(data.counts.students),
+    hint: `${data.counts.classes} kelas terdata`,
+    icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+    iconBg: 'bg-indigo-50',
+    iconClass: 'text-indigo-600',
+    sparkline: [] as number[],
+    sparkColor: CHART_COLORS.indigo
+  }
+
+  const teacherCard = {
+    label: data.counts.teachers !== null ? 'Tenaga Pengajar' : 'Kelas Terdata',
+    value: formatNumber(data.counts.teachers ?? data.counts.classes),
+    hint:
+      data.counts.teachers !== null
+        ? `Rasio 1 guru : ${teacherRatio} siswa`
+        : 'Sesuai cakupan akses',
+    icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    iconBg: 'bg-sky-50',
+    iconClass: 'text-sky-600',
+    sparkline: [] as number[],
+    sparkColor: CHART_COLORS.sky
+  }
+
+  const attendanceCard = {
+    label: 'Kehadiran',
+    value: `${data.attendance.today.percentage}%`,
+    hint: `${data.attendance.today.hadir} hadir • ${data.attendance.today.izin} izin • ${data.attendance.today.alfa} alfa`,
+    icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+    iconBg: 'bg-emerald-50',
+    iconClass: 'text-emerald-600',
+    sparkline: attendanceSpark,
+    sparkColor: CHART_COLORS.emerald
+  }
+
+  const gradeCard = {
+    label: 'Rata-rata Nilai',
+    value: formatScore(data.grades.average),
+    hint: `${data.grades.total} nilai tercatat`,
+    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+    iconBg: 'bg-violet-50',
+    iconClass: 'text-violet-600',
+    sparkline: [] as number[],
+    sparkColor: CHART_COLORS.indigo
+  }
+
+  const billingCard = {
+    label: 'Tunggakan SPP',
+    value: formatMoneyCompact(data.billing.amountOutstanding),
+    hint: `${data.billing.unpaid} dari ${data.billing.total} tagihan belum lunas`,
+    icon: 'M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V8c0-2.21 3.582-4 8-4s8 1.79 8 4v6c0 2.21-3.582 4-8 4z',
+    iconBg: 'bg-rose-50',
+    iconClass: 'text-rose-600',
+    sparkline: [] as number[],
+    sparkColor: CHART_COLORS.rose
+  }
+
+  if (data.audience === 'supervisor') {
+    const classCard = {
+      label: 'Kelas Terdata',
+      value: formatNumber(data.counts.classes),
+      hint: `${data.counts.students} siswa dalam cakupan`,
       icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
       iconBg: 'bg-sky-50',
       iconClass: 'text-sky-600',
       sparkline: [] as number[],
       sparkColor: CHART_COLORS.sky
-    },
-    {
-      label: 'Kehadiran',
-      value: `${data.attendance.today.percentage}%`,
-      hint: `${data.attendance.today.hadir} hadir • ${data.attendance.today.izin} izin • ${data.attendance.today.alfa} alfa`,
-      icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
-      iconBg: 'bg-emerald-50',
-      iconClass: 'text-emerald-600',
-      sparkline: attendanceSpark,
-      sparkColor: CHART_COLORS.emerald
-    },
-    {
-      label: 'Tunggakan SPP',
-      value: formatMoneyCompact(data.billing.amountOutstanding),
-      hint: `${data.billing.unpaid} dari ${data.billing.total} tagihan belum lunas`,
-      icon: 'M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 10c-4.418 0-8-1.79-8-4V8c0-2.21 3.582-4 8-4s8 1.79 8 4v6c0 2.21-3.582 4-8 4z',
-      iconBg: 'bg-rose-50',
-      iconClass: 'text-rose-600',
-      sparkline: [] as number[],
-      sparkColor: CHART_COLORS.rose
     }
-  ]
+    return [attendanceCard, gradeCard, teacherCard, classCard]
+  }
+
+  if (data.audience === 'teacher') {
+    return [
+      {
+        label: 'Sesi Hari Ini',
+        value: formatNumber(data.teaching?.total ?? 0),
+        hint: `${data.teaching?.submitted ?? 0} sudah ditutup`,
+        icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+        iconBg: 'bg-indigo-50',
+        iconClass: 'text-indigo-600',
+        sparkline: [] as number[],
+        sparkColor: CHART_COLORS.indigo
+      },
+      {
+        label: 'Belum Dikirim',
+        value: formatNumber(data.teaching?.pending ?? 0),
+        hint: `${data.teaching?.missing ?? 0} tanpa input`,
+        icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+        iconBg: 'bg-amber-50',
+        iconClass: 'text-amber-600',
+        sparkline: [] as number[],
+        sparkColor: CHART_COLORS.amber
+      },
+      studentCard,
+      gradeCard
+    ]
+  }
+
+  return [studentCard, teacherCard, attendanceCard, billingCard]
 })
 
 const initials = (name: string) =>

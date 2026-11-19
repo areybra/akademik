@@ -93,14 +93,16 @@
         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Presensi Kehadiran</h1>
         <p class="text-sm text-slate-500 mt-1">Pemantauan kehadiran siswa harian.</p>
       </div>
-      <div v-if="canEdit" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:justify-end">
-        <p v-if="!selectedClass" class="text-[11px] font-medium text-slate-500 sm:max-w-[220px] sm:text-right">
-          Pilih kelas dulu untuk menyimpan rekap.
-        </p>
-        <Button variant="primary" :disabled="!selectedClass || filteredStudents.length === 0" @click="saveAttendance">
-          Simpan Rekap
-        </Button>
-        <Button variant="outline" class="no-print" @click="exportAttendance">Ekspor CSV</Button>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:justify-end">
+        <div v-if="canEdit" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <p v-if="!selectedClass" class="text-[11px] font-medium text-slate-500 sm:max-w-[220px] sm:text-right">
+            Pilih kelas dulu untuk menyimpan rekap.
+          </p>
+          <Button variant="primary" :disabled="!selectedClass || filteredStudents.length === 0" @click="saveAttendance">
+            Simpan Rekap
+          </Button>
+        </div>
+        <Button v-if="canExport" variant="outline" class="no-print" @click="exportAttendance">Ekspor CSV</Button>
       </div>
     </div>
 
@@ -239,6 +241,7 @@ const personalSubtitle = computed(() =>
   authStore.hasAnyRole(['orang_tua']) ? 'Kalender kehadiran anak per bulan.' : 'Kalender kehadiran Anda per bulan.'
 )
 const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_sekolah', 'waka', 'guru_mapel', 'wali_kelas', 'guru']))
+const canExport = computed(() => canEdit.value || authStore.hasAnyRole(['kepala_tu', 'staff_tu']))
 
 /* ---------------- Mode personal ---------------- */
 const month = ref(new Date().toISOString().slice(0, 7))

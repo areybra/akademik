@@ -68,16 +68,25 @@
         <p class="text-sm text-slate-500 mt-1">Kelola atau lihat status pembayaran siswa sesuai peran.</p>
       </div>
 
-      <button
-        v-if="canEdit"
-        @click="openCreateBillModal"
-        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-cta-ink bg-cta rounded-lg shadow-sm hover:bg-cta-hover transition-colors"
-      >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        Buat Tagihan Baru
-      </button>
+      <div class="flex gap-2">
+        <button
+          v-if="canEdit"
+          @click="openCreateBillModal"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-cta-ink bg-cta rounded-lg shadow-sm hover:bg-cta-hover transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Buat Tagihan Baru
+        </button>
+        <button
+          v-if="canExport"
+          @click="exportBills"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border border-line bg-panel text-slate-700 hover:bg-slate-50 transition-colors no-print"
+        >
+          Ekspor CSV
+        </button>
+      </div>
     </div>
 
     <div class="grid gap-4 sm:gap-6 lg:grid-cols-[1.5fr_1fr]">
@@ -248,6 +257,7 @@ import { usePortalStore } from '../../stores/portal'
 import type { Bill, Student } from '../../types'
 import Input from '../../components/ui/Input.vue'
 import Modal from '../../components/ui/Modal.vue'
+import { useExport } from '../../composables/useExport'
 
 const authStore = useAuthStore()
 const billingStore = useBillingStore()
@@ -256,7 +266,15 @@ const portalStore = usePortalStore()
 
 const isPersonal = computed(() => authStore.hasAnyRole(['orang_tua', 'siswa']))
 const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_tu', 'staff_tu']))
+const canExport = computed(() => canEdit.value || authStore.hasAnyRole(['kepala_sekolah', 'waka']))
 const canPay = computed(() => authStore.hasAnyRole(['orang_tua']))
+
+const { exportToCsv } = useExport()
+const exportBills = () => {
+  const headers = ['Siswa', 'Periode', 'Jumlah', 'Status', 'Keterangan']
+  const rows = billingStore.bills.map((b) => [b.studentName, b.period, b.amount, b.status, b.description || ''])
+  exportToCsv(headers, rows, 'ekspor-tagihan')
+}
 
 /* ---------------- Ringkasan personal ---------------- */
 const selectedChildId = ref('')

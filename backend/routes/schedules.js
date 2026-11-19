@@ -52,7 +52,7 @@ router.get('/:id', authenticateToken, (req, res) => {
 });
 
 // POST /api/schedules
-router.post('/', authenticateToken, authorizeRoles('admin', 'guru'), (req, res) => {
+router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), (req, res) => {
   const { class: schedClass, day, time, subject, room } = req.body;
   const teacherId = req.body.teacherId || req.body.teacher_id || null;
   const teacher = teacherName(teacherId) || req.body.teacher;
@@ -73,7 +73,7 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'guru'), (req, res) 
 });
 
 // PUT /api/schedules/:id
-router.put('/:id', authenticateToken, authorizeRoles('admin', 'guru'), (req, res) => {
+router.put('/:id', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), (req, res) => {
   const { class: schedClass, day, time, subject, room } = req.body;
   const teacherId = req.body.teacherId || req.body.teacher_id || null;
   const teacher = teacherName(teacherId) || req.body.teacher;
@@ -101,7 +101,7 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'guru'), (req, res
 });
 
 // DELETE /api/schedules/:id
-router.delete('/:id', authenticateToken, authorizeRoles('admin', 'guru'), (req, res) => {
+router.delete('/:id', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu'), (req, res) => {
   const result = db.prepare('DELETE FROM schedules WHERE id = ?').run(req.params.id);
   if (result.changes === 0) return res.status(404).json({ message: 'Jadwal tidak ditemukan' });
   res.json({ message: 'Jadwal berhasil dihapus' });

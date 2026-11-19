@@ -8,13 +8,14 @@
           {{ isPersonal ? 'Jadwal kelas anak Anda.' : 'Penjadwalan aktivitas belajar mengajar SMK.' }}
         </p>
       </div>
-      <div v-if="canEdit" class="flex gap-3">
-        <Button variant="primary" size="lg" @click="openAddModal">
+      <div class="flex gap-3">
+        <Button v-if="canEdit" variant="primary" size="lg" @click="openAddModal">
           <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           Tambah Jadwal
         </Button>
+        <Button v-if="canExport" variant="outline" size="lg" class="no-print" @click="exportSchedules">Ekspor CSV</Button>
       </div>
     </div>
 
@@ -233,6 +234,7 @@ import type { Schedule } from '../../types'
 import Button from '../../components/ui/Button.vue'
 import Modal from '../../components/ui/Modal.vue'
 import Input from '../../components/ui/Input.vue'
+import { useExport } from '../../composables/useExport'
 
 const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 const dayOptions = DAYS
@@ -244,8 +246,16 @@ const studentStore = useStudentStore()
 const relationStore = useRelationStore()
 const portalStore = usePortalStore()
 
-const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_sekolah', 'waka']))
+const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_tu', 'staff_tu']))
 const isPersonal = computed(() => authStore.hasAnyRole(['orang_tua', 'siswa']))
+const canExport = computed(() => !isPersonal.value)
+
+const { exportToCsv } = useExport()
+const exportSchedules = () => {
+  const headers = ['Hari', 'Kelas', 'Jam', 'Mata Pelajaran', 'Guru', 'Ruang']
+  const rows = scheduleStore.schedules.map((s) => [s.day, s.class, s.time, s.subject, s.teacher || '', s.room || ''])
+  exportToCsv(headers, rows, 'ekspor-jadwal')
+}
 
 const todayIndex = new Date().getDay()
 const initialDay = todayIndex === 0 ? 'Senin' : DAYS[todayIndex - 1] || 'Senin'
