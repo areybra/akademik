@@ -30,6 +30,10 @@ router.post('/login', (req, res) => {
     return res.status(401).json({ message: 'Email atau password salah' });
   }
 
+  if (user.active === 0) {
+    return res.status(403).json({ message: 'Akun ini dinonaktifkan. Hubungi admin sekolah.' });
+  }
+
   // Return user without password
   const { password: _, ...userWithoutPassword } = user;
 

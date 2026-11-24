@@ -23,10 +23,11 @@
           
           <div class="space-y-1.5">
             <div class="flex items-center justify-between px-0.5">
-              <label class="text-sm font-medium text-slate-700">Kata Sandi</label>
+              <label for="login-password" class="text-sm font-medium text-slate-700">Kata Sandi</label>
               <a href="#" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-wider">Lupa Sandi?</a>
             </div>
             <Input
+              id="login-password"
               v-model="password"
               type="password"
               placeholder="••••••••"

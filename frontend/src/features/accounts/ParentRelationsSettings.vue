@@ -10,10 +10,11 @@
 
   <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" @submit.prevent="submit">
     <div class="lg:col-span-2">
-      <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+      <label :for="uid + '-parent'" class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
         Akun orang tua
       </label>
       <select
+        :id="uid + '-parent'"
         v-model="form.parentEmail"
         class="w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
       >
@@ -24,10 +25,11 @@
       </select>
     </div>
     <div class="lg:col-span-2">
-      <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+      <label :for="uid + '-student'" class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
         Siswa
       </label>
       <select
+        :id="uid + '-student'"
         v-model="form.studentId"
         class="w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
       >
@@ -87,11 +89,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, useId } from 'vue'
 import Button from '../../components/ui/Button.vue'
 import { useRelationStore } from '../../stores/relation'
 import { useStudentStore } from '../../stores/student'
 
+const uid = useId()
 const relationStore = useRelationStore()
 const studentStore = useStudentStore()
 

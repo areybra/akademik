@@ -19,6 +19,7 @@ export interface User {
   avatar?: string
   student_id?: string | null
   class?: string | null
+  active?: boolean | number
 }
 
 export interface Student {

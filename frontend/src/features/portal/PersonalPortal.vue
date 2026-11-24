@@ -352,7 +352,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { usePortalStore } from '../../stores/portal'
@@ -519,6 +519,15 @@ const selectChild = (id: string) => {
 
 const refresh = () => portalStore.fetchSummary(selectedId.value || undefined)
 
+// Polling ringan: data relasi/absensi baru terlihat tanpa refresh manual.
+const POLL_MS = 30_000
+let refreshTimer: ReturnType<typeof setInterval> | null = null
+
+const silentRefresh = () => {
+  if (document.hidden) return
+  portalStore.fetchSummary(selectedId.value || undefined, true)
+}
+
 onMounted(async () => {
   const savedTab = localStorage.getItem(tabKey.value)
   if (savedTab === 'ringkasan' || savedTab === 'statistik') activeTab.value = savedTab
@@ -527,6 +536,14 @@ onMounted(async () => {
   selectedId.value = savedChild
   await portalStore.fetchSummary(savedChild || undefined)
   if (portalStore.summary?.selected) selectedId.value = portalStore.summary.selected.profile.id
+
+  refreshTimer = setInterval(silentRefresh, POLL_MS)
+  document.addEventListener('visibilitychange', silentRefresh)
+})
+
+onUnmounted(() => {
+  if (refreshTimer) clearInterval(refreshTimer)
+  document.removeEventListener('visibilitychange', silentRefresh)
 })
 
 watch(

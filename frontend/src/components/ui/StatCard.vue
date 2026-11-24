@@ -43,82 +43,82 @@ defineProps({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-6);
+  padding: 24px;
   border-left: 4px solid transparent;
 }
 
 .card-accent-primary {
-  border-left-color: var(--color-primary-500);
+  border-left-color: rgb(var(--accent-500));
 }
 .card-accent-success {
-  border-left-color: var(--color-success);
+  border-left-color: rgb(var(--emerald-600));
 }
 .card-accent-warning {
-  border-left-color: var(--color-warning);
+  border-left-color: rgb(var(--amber-600));
 }
 .card-accent-danger {
-  border-left-color: var(--color-danger);
+  border-left-color: rgb(var(--danger));
 }
 .card-accent-info {
-  border-left-color: var(--color-info);
+  border-left-color: rgb(var(--sky-600));
 }
 
 .stat-card-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-1);
+  gap: 4px;
 }
 
 .stat-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-neutral-500);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(var(--muted));
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .stat-value {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-neutral-800);
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: rgb(var(--ink));
   line-height: 1.1;
 }
 
 .stat-trend {
-  font-size: var(--font-size-xs);
-  color: var(--color-neutral-400);
+  font-size: 0.75rem;
+  color: rgb(var(--muted));
   display: flex;
   align-items: center;
-  gap: var(--spacing-1);
+  gap: 4px;
 }
 
 .stat-icon-wrapper {
   width: 48px;
   height: 48px;
-  border-radius: var(--radius-lg);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .icon-bg-primary {
-  background-color: var(--color-primary-50);
-  color: var(--color-primary-600);
+  background-color: rgb(var(--accent-50));
+  color: rgb(var(--accent-600));
 }
 .icon-bg-success {
-  background-color: var(--color-success-light);
-  color: var(--color-success-dark);
+  background-color: rgb(var(--emerald-50));
+  color: rgb(var(--emerald-700));
 }
 .icon-bg-warning {
-  background-color: var(--color-warning-light);
-  color: var(--color-warning-dark);
+  background-color: rgb(var(--amber-50));
+  color: rgb(var(--amber-700));
 }
 .icon-bg-danger {
-  background-color: var(--color-danger-light);
-  color: var(--color-danger-dark);
+  background-color: rgb(var(--rose-50));
+  color: rgb(var(--rose-700));
 }
 .icon-bg-info {
-  background-color: var(--color-info-light);
-  color: var(--color-info-dark);
+  background-color: rgb(var(--sky-50));
+  color: rgb(var(--sky-700));
 }
 </style>

@@ -68,8 +68,8 @@ export const useTeachingStore = defineStore('teaching', () => {
   const error = ref<string | null>(null)
   const { fetchWithAuth } = useApi()
 
-  const fetchToday = async (date?: string) => {
-    loading.value = true
+  const fetchToday = async (date?: string, silent = false) => {
+    if (!silent) loading.value = true
     error.value = null
     const suffix = date ? `?date=${date}` : ''
     const { data, error: fetchError } = await fetchWithAuth(`/teaching/today${suffix}`)
@@ -79,7 +79,7 @@ export const useTeachingStore = defineStore('teaching', () => {
       slots.value = data.slots
       assignments.value = data.assignments
     }
-    loading.value = false
+    if (!silent) loading.value = false
   }
 
   const openSession = async (scheduleId: string, date: string): Promise<LessonSession | null> => {

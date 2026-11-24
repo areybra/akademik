@@ -77,8 +77,9 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 premium-card p-4 sm:p-6">
       <div class="space-y-2">
-        <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest px-1">Pilih Kelas</label>
+        <label :for="uid + '-class'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest px-1">Pilih Kelas</label>
         <select
+          :id="uid + '-class'"
           v-model="selectedClass"
           class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/30 appearance-none cursor-pointer"
         >
@@ -89,8 +90,9 @@
         </select>
       </div>
       <div class="space-y-2">
-        <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest px-1">Mata Pelajaran</label>
+        <label :for="uid + '-subject-filter'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest px-1">Mata Pelajaran</label>
         <select
+          :id="uid + '-subject-filter'"
           v-model="selectedSubject"
           class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/30 appearance-none cursor-pointer"
         >
@@ -172,8 +174,9 @@
     >
       <div class="space-y-5">
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Pilih Siswa</label>
+          <label :for="uid + '-student'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Pilih Siswa</label>
           <select
+            :id="uid + '-student'"
             v-model="formData.studentId"
             @change="onStudentChange"
             class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/30 appearance-none cursor-pointer"
@@ -186,8 +189,9 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Mata Pelajaran</label>
+          <label :for="uid + '-subject'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Mata Pelajaran</label>
           <input
+            :id="uid + '-subject'"
             v-model="formData.subject"
             list="grade-subject-options"
             class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/30"
@@ -218,7 +222,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, useId } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useGradeStore } from '../../stores/grade'
 import { useStudentStore } from '../../stores/student'
@@ -231,6 +235,7 @@ import { useExport } from '../../composables/useExport'
 
 const authStore = useAuthStore()
 const gradeStore = useGradeStore()
+const uid = useId()
 const studentStore = useStudentStore()
 const portalStore = usePortalStore()
 const { exportToCsv } = useExport()

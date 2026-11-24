@@ -23,10 +23,11 @@
     <!-- Filters Bar -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-end premium-card p-4 sm:p-6">
       <div>
-        <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+        <label :for="uid + '-kelas'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
           Kelas
         </label>
         <select
+          :id="uid + '-kelas'"
           v-model="kelasFilter"
           class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
         >
@@ -35,10 +36,11 @@
         </select>
       </div>
       <div>
-        <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+        <label :for="uid + '-juara-filter'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
           Juara
         </label>
         <select
+          :id="uid + '-juara-filter'"
           v-model="juaraFilter"
           class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
         >
@@ -47,10 +49,11 @@
         </select>
       </div>
       <div>
-        <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+        <label :for="uid + '-tahun'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
           Tahun
         </label>
         <select
+          :id="uid + '-tahun'"
           v-model="tahunFilter"
           class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
         >
@@ -201,10 +204,11 @@
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+            <label :for="uid + '-juara'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
               Juara
             </label>
             <select
+              :id="uid + '-juara'"
               v-model="formData.juara"
               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
               required
@@ -238,7 +242,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted, useId } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { usePrestasiStore } from '../../stores/prestasi'
 import { useExport } from '../../composables/useExport'
@@ -250,6 +254,7 @@ import Input from '../../components/ui/Input.vue'
 
 const authStore = useAuthStore()
 const prestasiStore = usePrestasiStore()
+const uid = useId()
 const { exportToCsv } = useExport()
 
 const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_sekolah', 'waka']))

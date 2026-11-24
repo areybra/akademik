@@ -108,16 +108,18 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-end bg-panel p-4 sm:p-6 rounded-card border border-line shadow-sm">
       <div class="space-y-2">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Pilih Tanggal</label>
+        <label :for="uid + '-date'" class="block text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Pilih Tanggal</label>
         <input
+          :id="uid + '-date'"
           v-model="selectedDate"
           type="date"
           class="w-full px-4 py-3 bg-slate-50 border border-line rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
         />
       </div>
       <div class="space-y-2">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Pilih Kelas</label>
+        <label :for="uid + '-class'" class="block text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Pilih Kelas</label>
         <select
+          :id="uid + '-class'"
           v-model="selectedClass"
           class="w-full px-4 py-3 bg-slate-50 border border-line rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none"
         >
@@ -128,8 +130,9 @@
         </select>
       </div>
       <div class="space-y-2">
-        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Status Kehadiran</label>
+        <label :for="uid + '-status'" class="block text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Status Kehadiran</label>
         <select
+          :id="uid + '-status'"
           v-model="statusFilter"
           class="w-full px-4 py-3 bg-slate-50 border border-line rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none cursor-pointer"
         >
@@ -220,7 +223,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, useId, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useStudentStore } from '../../stores/student'
 import { useAttendanceStore } from '../../stores/attendance'
@@ -229,6 +232,7 @@ import Button from '../../components/ui/Button.vue'
 import { useExport } from '../../composables/useExport'
 import { useApi } from '../../composables/useApi'
 
+const uid = useId()
 const authStore = useAuthStore()
 const studentStore = useStudentStore()
 const attendanceStore = useAttendanceStore()

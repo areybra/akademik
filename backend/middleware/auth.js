@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const db = require('../database');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -17,6 +18,12 @@ const authenticateToken = (req, res, next) => {
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
       return res.status(403).json({ message: 'Akses ditolak: Token tidak valid' });
+    }
+
+    // Akun nonaktif/dihapus langsung terputus walau JWT masih berlaku.
+    const row = db.prepare('SELECT active FROM users WHERE id = ?').get(user.id);
+    if (!row || row.active === 0) {
+      return res.status(401).json({ message: 'Akun tidak aktif. Silakan login kembali.' });
     }
 
     req.user = user;

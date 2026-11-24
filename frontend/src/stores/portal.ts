@@ -70,8 +70,8 @@ export const usePortalStore = defineStore('portal', () => {
     if (id) localStorage.setItem(childStorageKey(), id)
   }
 
-  const fetchSummary = async (studentId?: string) => {
-    loading.value = true
+  const fetchSummary = async (studentId?: string, silent = false) => {
+    if (!silent) loading.value = true
     error.value = null
     const preferred = studentId || localStorage.getItem(childStorageKey()) || ''
     const suffix = preferred ? `?studentId=${encodeURIComponent(preferred)}` : ''
@@ -85,7 +85,7 @@ export const usePortalStore = defineStore('portal', () => {
         localStorage.setItem(childStorageKey(), data.selected.profile.id)
       }
     }
-    loading.value = false
+    if (!silent) loading.value = false
   }
 
   return { summary, loading, error, fetchSummary, rememberChild }

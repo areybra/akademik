@@ -10,8 +10,8 @@
 
     <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" @submit.prevent="submit">
       <div class="lg:col-span-2">
-        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Akun guru</label>
-        <select v-model="form.teacherEmail" class="w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+        <label :for="uid + '-teacher'" class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Akun guru</label>
+        <select :id="uid + '-teacher'" v-model="form.teacherEmail" class="w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
           <option value="">— Pilih akun guru —</option>
           <option v-for="teacher in relationStore.teachers" :key="teacher.id" :value="teacher.email">
             {{ teacher.name }}
@@ -19,8 +19,9 @@
         </select>
       </div>
       <div>
-        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Mata pelajaran</label>
+        <label :for="uid + '-subject'" class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Mata pelajaran</label>
         <input
+          :id="uid + '-subject'"
           v-model="form.subject"
           list="subject-options"
           placeholder="Contoh: Informatika"
@@ -31,8 +32,9 @@
         </datalist>
       </div>
       <div>
-        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Kelas</label>
+        <label :for="uid + '-class'" class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Kelas</label>
         <input
+          :id="uid + '-class'"
           v-model="form.class"
           list="class-options"
           placeholder="Contoh: X RPL 1"
@@ -91,12 +93,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, useId } from 'vue'
 import Button from '../../components/ui/Button.vue'
 import { useRelationStore } from '../../stores/relation'
 import { useScheduleStore } from '../../stores/schedule'
 import { useStudentStore } from '../../stores/student'
 
+const uid = useId()
 const relationStore = useRelationStore()
 const scheduleStore = useScheduleStore()
 const studentStore = useStudentStore()

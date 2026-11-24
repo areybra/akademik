@@ -1,9 +1,9 @@
 <template>
   <div class="w-full">
-    <label v-if="label" :for="id" class="clean-label">{{ label }}</label>
+    <label v-if="label" :for="inputId" class="clean-label">{{ label }}</label>
     <div class="relative">
       <input
-        :id="id"
+        :id="inputId"
         :type="inputType"
         :value="modelValue"
         :placeholder="placeholder"
@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, useId } from 'vue'
 interface Props {
   modelValue: string | number
   label?: string
@@ -43,14 +43,17 @@ interface Props {
   togglePassword?: boolean
 }
 
+const generatedId = useId()
+
 const props = withDefaults(defineProps<Props>(), {
   type: 'text',
   placeholder: '',
   required: false,
   disabled: false,
-  togglePassword: false,
-  id: () => `input-${Math.random().toString(36).substr(2, 9)}`
+  togglePassword: false
 })
+
+const inputId = computed(() => props.id || generatedId)
 
 const showPassword = ref(false)
 const inputType = computed(() => {

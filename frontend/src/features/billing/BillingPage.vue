@@ -203,8 +203,8 @@
       @confirm="submitCreateBill"
     >
       <div class="space-y-4">
-        <label class="block text-sm font-semibold text-slate-700">Siswa</label>
-        <select v-model="createForm.studentId" class="clean-input w-full">
+        <label :for="uid + '-student'" class="block text-sm font-semibold text-slate-700">Siswa</label>
+        <select :id="uid + '-student'" v-model="createForm.studentId" class="clean-input w-full">
           <option value="" disabled>Pilih siswa</option>
           <option v-for="student in studentOptions" :key="student.id" :value="student.id">{{ student.name }} — {{ student.class }}</option>
         </select>
@@ -223,8 +223,8 @@
       @confirm="submitEditBill"
     >
       <div class="space-y-4">
-        <label class="block text-sm font-semibold text-slate-700">Status</label>
-        <select v-model="editForm.status" class="clean-input w-full">
+        <label :for="uid + '-status'" class="block text-sm font-semibold text-slate-700">Status</label>
+        <select :id="uid + '-status'" v-model="editForm.status" class="clean-input w-full">
           <option value="requested">Diminta</option>
           <option value="pending_verification">Menunggu Verifikasi</option>
           <option value="paid">Lunas</option>
@@ -249,7 +249,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, useId } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useBillingStore } from '../../stores/billing'
 import { useStudentStore } from '../../stores/student'
@@ -259,6 +259,7 @@ import Input from '../../components/ui/Input.vue'
 import Modal from '../../components/ui/Modal.vue'
 import { useExport } from '../../composables/useExport'
 
+const uid = useId()
 const authStore = useAuthStore()
 const billingStore = useBillingStore()
 const studentStore = useStudentStore()

@@ -23,9 +23,10 @@
     <div class="premium-card p-4 sm:p-6 space-y-4">
       <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div class="flex-1 max-w-md">
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Filter Kelas</label>
+          <label :for="uid + '-filter-class'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Filter Kelas</label>
           <div class="relative">
             <select
+              :id="uid + '-filter-class'"
               v-model="selectedClassFilter"
               class="w-full pl-11 pr-5 py-3 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
             >
@@ -155,8 +156,9 @@
       <div class="space-y-5">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Hari</label>
+            <label :for="uid + '-day'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Hari</label>
             <select
+              :id="uid + '-day'"
               v-model="formData.day"
               class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
             >
@@ -164,8 +166,9 @@
             </select>
           </div>
           <div>
-            <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Kelas</label>
+            <label :for="uid + '-class'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Kelas</label>
             <select
+              :id="uid + '-class'"
               v-model="formData.class"
               class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
             >
@@ -188,8 +191,9 @@
         />
 
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Akun Guru Pengajar</label>
+          <label :for="uid + '-teacher'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Akun Guru Pengajar</label>
           <select
+            :id="uid + '-teacher'"
             v-model="formData.teacherId"
             class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
             @change="onTeacherChange"
@@ -223,7 +227,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, useId } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useScheduleStore } from '../../stores/schedule'
 import { useTeacherStore } from '../../stores/teacher'
@@ -238,6 +242,7 @@ import { useExport } from '../../composables/useExport'
 
 const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 const dayOptions = DAYS
+const uid = useId()
 
 const authStore = useAuthStore()
 const scheduleStore = useScheduleStore()

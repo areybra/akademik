@@ -38,6 +38,7 @@ backend/uploads/
 # Artefak agen / audit lokal
 .agent-teams/
 security-audit/
+.team-board/
 devserver.log
 
 # IDE and editor files

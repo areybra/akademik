@@ -15,6 +15,7 @@
       </transition>
     </router-view>
   </div>
+  <AlertToast />
 </template>
 
 <script setup lang="ts">
@@ -22,6 +23,7 @@ import { useRoute } from 'vue-router'
 import { onMounted } from 'vue'
 import { useAuthStore } from './stores/auth'
 import AppLayout from './components/layout/AppLayout.vue'
+import AlertToast from './components/ui/AlertToast.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()

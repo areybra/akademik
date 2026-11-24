@@ -65,10 +65,11 @@
           />
         </div>
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+          <label :for="uid + '-level-filter'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
             Tingkat Kelas
           </label>
           <select
+            :id="uid + '-level-filter'"
             v-model="levelFilter"
             class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
@@ -77,10 +78,11 @@
           </select>
         </div>
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+          <label :for="uid + '-major-filter'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
             Program Keahlian
           </label>
           <select
+            :id="uid + '-major-filter'"
             v-model="majorFilter"
             class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
@@ -91,10 +93,11 @@
           </select>
         </div>
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+          <label :for="uid + '-gender-filter'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
             Jenis Kelamin
           </label>
           <select
+            :id="uid + '-gender-filter'"
             v-model="genderFilter"
             class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
@@ -104,8 +107,9 @@
           </select>
         </div>
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Status</label>
+          <label :for="uid + '-status-filter'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Status</label>
           <select
+            :id="uid + '-status-filter'"
             v-model="statusFilter"
             class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
@@ -116,8 +120,9 @@
           </select>
         </div>
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Provinsi</label>
+          <label :for="uid + '-province-filter'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Provinsi</label>
           <select
+            :id="uid + '-province-filter'"
             v-model="provinceFilter"
             class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
@@ -126,8 +131,9 @@
           </select>
         </div>
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Kabupaten/Kota</label>
+          <label :for="uid + '-kabupaten-filter'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Kabupaten/Kota</label>
           <select
+            :id="uid + '-kabupaten-filter'"
             v-model="kabupatenFilter"
             class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
@@ -302,8 +308,9 @@
          />
 
          <div>
-           <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Klaster Kelas</label>
+           <label :for="uid + '-form-class'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Klaster Kelas</label>
            <select
+             :id="uid + '-form-class'"
              v-model="formData.class"
              class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
              required
@@ -315,8 +322,9 @@
 
          <div class="grid grid-cols-2 gap-4">
            <div>
-             <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Jenis Kelamin</label>
+             <label :for="uid + '-form-gender'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Jenis Kelamin</label>
              <select
+               :id="uid + '-form-gender'"
                v-model="formData.gender"
                class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
                required
@@ -326,8 +334,9 @@
              </select>
            </div>
            <div>
-             <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Tempat Lahir</label>
+             <label :for="uid + '-form-tmp-lahir'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Tempat Lahir</label>
              <input
+               :id="uid + '-form-tmp-lahir'"
                v-model="formData.tmp_lahir"
                type="text"
                placeholder="Tempat lahir"
@@ -339,8 +348,9 @@
          
          <div class="grid grid-cols-2 gap-4">
            <div>
-             <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Tanggal Lahir</label>
+             <label :for="uid + '-form-tgl-lahir'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Tanggal Lahir</label>
              <input
+               :id="uid + '-form-tgl-lahir'"
                v-model="formData.tgl_lahir"
                type="date"
                class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
@@ -348,8 +358,9 @@
              />
            </div>
            <div>
-             <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">NISN (Nasional)</label>
+             <label :for="uid + '-form-nisn'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">NISN (Nasional)</label>
              <input
+               :id="uid + '-form-nisn'"
                v-model="formData.nisn"
                type="text"
                placeholder="Nomor Induk Siswa Nasional"
@@ -360,8 +371,9 @@
          
          <div class="grid grid-cols-2 gap-4">
            <div>
-             <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Provinsi</label>
+             <label :for="uid + '-form-provinsi'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Provinsi</label>
              <select
+               :id="uid + '-form-provinsi'"
                v-model="formData.provinsi"
                class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
                required
@@ -399,8 +411,9 @@
              </select>
            </div>
            <div>
-             <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Kabupaten/Kota</label>
+             <label :for="uid + '-form-kabupaten'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Kabupaten/Kota</label>
              <input
+               :id="uid + '-form-kabupaten'"
                v-model="formData.kabupaten"
                type="text"
                placeholder="Kabupaten/Kota"
@@ -411,8 +424,9 @@
          
          <div class="grid grid-cols-2 gap-4">
            <div>
-             <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Kecamatan</label>
+             <label :for="uid + '-form-kecamatan'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Kecamatan</label>
              <input
+               :id="uid + '-form-kecamatan'"
                v-model="formData.kecamatan"
                type="text"
                placeholder="Kecamatan"
@@ -420,8 +434,9 @@
              />
            </div>
            <div>
-             <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Negara</label>
+             <label :for="uid + '-form-negara'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Negara</label>
              <select
+               :id="uid + '-form-negara'"
                v-model="formData.negara"
                class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
              >
@@ -431,10 +446,11 @@
          </div>
          
          <div>
-           <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Foto Siswa</label>
+           <label :for="uid + '-foto-btn'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">Foto Siswa</label>
            <div class="flex flex-wrap items-center gap-3">
              <button
                type="button"
+               :id="uid + '-foto-btn'"
                class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-50 text-brand-700 rounded-xl border border-brand-100 hover:bg-brand-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold"
                :disabled="uploadingFotoSiswa"
                @click="fotoSiswaInput?.click()"
@@ -653,7 +669,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, useId, watch } from 'vue'
 import { useStudentStore } from '../../stores/student'
 import { useFormValidation } from '../../composables/useFormValidation'
 import { PROVINCES } from '../../constants/regions'
@@ -668,6 +684,7 @@ import { useAuthStore } from '../../stores/auth'
 
 const studentStore = useStudentStore()
 const authStore = useAuthStore()
+const uid = useId()
 const { exportToCsv } = useExport()
 
 const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_tu', 'staff_tu']))

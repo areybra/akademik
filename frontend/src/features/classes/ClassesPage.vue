@@ -27,8 +27,8 @@
         />
       </div>
       <div>
-        <label class="clean-label">Program Keahlian</label>
-        <select v-model="filterMajor" class="clean-input appearance-none cursor-pointer">
+        <label :for="uid + '-filter-major'" class="clean-label">Program Keahlian</label>
+        <select v-model="filterMajor" :id="uid + '-filter-major'" class="clean-input appearance-none cursor-pointer">
           <option value="">Semua Program</option>
           <option value="Multimedia (MM)">Multimedia (MM)</option>
           <option value="Rekayasa Perangkat Lunak (RPL)">Rekayasa Perangkat Lunak (RPL)</option>
@@ -108,30 +108,30 @@
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="clean-label">Tingkat Kelas</label>
-            <select v-model="formData.level" class="clean-input appearance-none cursor-pointer">
+            <label :for="uid + '-level'" class="clean-label">Tingkat Kelas</label>
+            <select v-model="formData.level" :id="uid + '-level'" class="clean-input appearance-none cursor-pointer">
               <option value="X">Kelas X</option>
               <option value="XI">Kelas XI</option>
               <option value="XII">Kelas XII</option>
             </select>
           </div>
           <div>
-            <label class="clean-label">Suffix / Nomor (Opsional)</label>
-            <Input v-model="formData.suffix" placeholder="Contoh: 1 atau A" />
+            <label :for="uid + '-suffix'" class="clean-label">Suffix / Nomor (Opsional)</label>
+            <Input :id="uid + '-suffix'" v-model="formData.suffix" placeholder="Contoh: 1 atau A" />
           </div>
         </div>
 
         <div>
-          <label class="clean-label">Program Keahlian (Jurusan)</label>
-          <select v-model="formData.major" class="clean-input appearance-none cursor-pointer">
+          <label :for="uid + '-major'" class="clean-label">Program Keahlian (Jurusan)</label>
+          <select v-model="formData.major" :id="uid + '-major'" class="clean-input appearance-none cursor-pointer">
             <option v-for="m in majors" :key="m" :value="m">{{ m }}</option>
           </select>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="clean-label">Wali Kelas</label>
-            <select v-model="formData.teacher" class="clean-input appearance-none cursor-pointer">
+            <label :for="uid + '-teacher'" class="clean-label">Wali Kelas</label>
+            <select v-model="formData.teacher" :id="uid + '-teacher'" class="clean-input appearance-none cursor-pointer">
               <option value="">Pilih Wali Kelas...</option>
               <option v-for="t in teachers" :key="t.id" :value="t.name">
                 {{ t.name }}
@@ -152,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, useId } from 'vue'
 import type { Class } from '../../types'
 import { useStudentStore } from '../../stores/student'
 import { useTeacherStore } from '../../stores/teacher'
@@ -162,6 +162,8 @@ import Input from '../../components/ui/Input.vue'
 import { useAuthStore } from '../../stores/auth'
 import { compareClassNames } from '../../utils/classes'
 import { useExport } from '../../composables/useExport'
+
+const uid = useId()
 
 const studentStore = useStudentStore()
 const teacherStore = useTeacherStore()

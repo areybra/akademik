@@ -84,37 +84,37 @@
           />
         </div>
         <div>
-          <label class="clean-label">Mata Pelajaran</label>
-          <select v-model="filterSubject" class="clean-input appearance-none cursor-pointer">
+          <label :for="uid + '-subject-filter'" class="clean-label">Mata Pelajaran</label>
+          <select v-model="filterSubject" :id="uid + '-subject-filter'" class="clean-input appearance-none cursor-pointer">
             <option value="">Semua Mata Pelajaran</option>
             <option v-for="s in uniqueSubjects" :key="s" :value="s">{{ s }}</option>
           </select>
         </div>
         <div>
-          <label class="clean-label">Kelas</label>
-          <select v-model="filterClass" class="clean-input appearance-none cursor-pointer">
+          <label :for="uid + '-class-filter'" class="clean-label">Kelas</label>
+          <select v-model="filterClass" :id="uid + '-class-filter'" class="clean-input appearance-none cursor-pointer">
             <option value="">Semua Kelas</option>
             <option v-for="c in uniqueClasses" :key="c" :value="c">{{ c }}</option>
           </select>
         </div>
         <div>
-          <label class="clean-label">Jenis Kelamin</label>
-          <select v-model="filterGender" class="clean-input appearance-none cursor-pointer">
+          <label :for="uid + '-gender-filter'" class="clean-label">Jenis Kelamin</label>
+          <select v-model="filterGender" :id="uid + '-gender-filter'" class="clean-input appearance-none cursor-pointer">
             <option value="">Semua Gender</option>
             <option value="L">Laki-laki</option>
             <option value="P">Perempuan</option>
           </select>
         </div>
         <div>
-          <label class="clean-label">Provinsi</label>
-          <select v-model="filterProvinsi" class="clean-input appearance-none cursor-pointer">
+          <label :for="uid + '-province-filter'" class="clean-label">Provinsi</label>
+          <select v-model="filterProvinsi" :id="uid + '-province-filter'" class="clean-input appearance-none cursor-pointer">
             <option value="">Semua Provinsi</option>
             <option v-for="p in allProvinces" :key="p" :value="p">{{ p }}</option>
           </select>
         </div>
         <div>
-          <label class="clean-label">Kabupaten/Kota</label>
-          <select v-model="filterKabupaten" class="clean-input appearance-none cursor-pointer">
+          <label :for="uid + '-kabupaten-filter'" class="clean-label">Kabupaten/Kota</label>
+          <select v-model="filterKabupaten" :id="uid + '-kabupaten-filter'" class="clean-input appearance-none cursor-pointer">
             <option value="">Semua Kabupaten/Kota</option>
             <option v-for="k in kabupatenOptions" :key="k" :value="k">{{ k }}</option>
           </select>
@@ -280,8 +280,8 @@
         <div class="grid grid-cols-2 gap-4">
           <Input v-model="formData.niup" label="NIUP" placeholder="Nomor Induk Unit Pendidikan" />
           <div>
-            <label class="clean-label">Jenis Kelamin</label>
-            <select v-model="formData.gender" class="clean-input appearance-none cursor-pointer">
+            <label :for="uid + '-form-gender'" class="clean-label">Jenis Kelamin</label>
+            <select v-model="formData.gender" :id="uid + '-form-gender'" class="clean-input appearance-none cursor-pointer">
               <option value="L">Laki-laki</option>
               <option value="P">Perempuan</option>
             </select>
@@ -292,22 +292,22 @@
         
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="clean-label">NIP</label>
-            <Input v-model="formData.nip" type="text" placeholder="Nomor Induk Pendidik" />
+            <label :for="uid + '-form-nip'" class="clean-label">NIP</label>
+            <Input :id="uid + '-form-nip'" v-model="formData.nip" type="text" placeholder="Nomor Induk Pendidik" />
           </div>
           <div>
-            <label class="clean-label">Pangkat</label>
-            <Input v-model="formData.pangkat" type="text" placeholder="Contoh: SE, S.Pd, M.Pd" />
+            <label :for="uid + '-form-pangkat'" class="clean-label">Pangkat</label>
+            <Input :id="uid + '-form-pangkat'" v-model="formData.pangkat" type="text" placeholder="Contoh: SE, S.Pd, M.Pd" />
           </div>
         </div>
         
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="clean-label">Pendidikan Terakhir</label>
-            <Input v-model="formData.pendidikan" type="text" placeholder="Contoh: S1, S2, Magister" />
+            <label :for="uid + '-form-pendidikan'" class="clean-label">Pendidikan Terakhir</label>
+            <Input :id="uid + '-form-pendidikan'" v-model="formData.pendidikan" type="text" placeholder="Contoh: S1, S2, Magister" />
           </div>
           <div>
-            <label class="clean-label">Foto Guru</label>
+            <label for="foto-guru-btn" class="clean-label">Foto Guru</label>
             <div class="flex flex-wrap items-center gap-2">
               <button
                 type="button"
@@ -352,25 +352,25 @@
         
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="clean-label">Provinsi</label>
-            <select v-model="formData.provinsi" class="clean-input appearance-none cursor-pointer">
+            <label :for="uid + '-form-provinsi'" class="clean-label">Provinsi</label>
+            <select v-model="formData.provinsi" :id="uid + '-form-provinsi'" class="clean-input appearance-none cursor-pointer">
               <option v-for="p in PROVINCES" :key="p" :value="p">{{ p }}</option>
             </select>
           </div>
           <div>
-            <label class="clean-label">Kabupaten/Kota</label>
-            <Input v-model="formData.kabupaten" type="text" placeholder="Kabupaten/Kota" />
+            <label :for="uid + '-form-kabupaten'" class="clean-label">Kabupaten/Kota</label>
+            <Input :id="uid + '-form-kabupaten'" v-model="formData.kabupaten" type="text" placeholder="Kabupaten/Kota" />
           </div>
         </div>
         
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="clean-label">Kecamatan</label>
-            <Input v-model="formData.kecamatan" type="text" placeholder="Kecamatan" />
+            <label :for="uid + '-form-kecamatan'" class="clean-label">Kecamatan</label>
+            <Input :id="uid + '-form-kecamatan'" v-model="formData.kecamatan" type="text" placeholder="Kecamatan" />
           </div>
           <div>
-            <label class="clean-label">Negara</label>
-            <select v-model="formData.negara" class="clean-input appearance-none cursor-pointer">
+            <label :for="uid + '-form-negara'" class="clean-label">Negara</label>
+            <select v-model="formData.negara" :id="uid + '-form-negara'" class="clean-input appearance-none cursor-pointer">
               <option value="Indonesia">Indonesia</option>
             </select>
           </div>
@@ -558,7 +558,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, useId, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useTeacherStore } from '../../stores/teacher'
 import { PROVINCES } from '../../constants/regions'
@@ -572,6 +572,7 @@ import { useExport } from '../../composables/useExport'
 
 const authStore = useAuthStore()
 const teacherStore = useTeacherStore()
+const uid = useId()
 const canWrite = computed(() => authStore.hasAnyRole(['admin', 'kepala_tu', 'staff_tu']))
 const canExport = computed(() => canWrite.value || authStore.hasAnyRole(['kepala_sekolah', 'waka']))
 

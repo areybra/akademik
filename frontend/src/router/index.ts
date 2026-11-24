@@ -13,6 +13,7 @@ import ClassesPage from '../features/classes/ClassesPage.vue'
 import EkskulPage from '../features/ekskul/EkskulPage.vue'
 import PrestasiPage from '../features/prestasi/PrestasiPage.vue'
 import SettingsPage from '../features/settings/SettingsPage.vue'
+import AccountsPage from '../features/accounts/AccountsPage.vue'
 import TeachingPage from '../features/teaching/TeachingPage.vue'
 import ProfilePage from '../features/profile/ProfilePage.vue'
 
@@ -91,6 +92,11 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/settings',
     component: SettingsPage,
+    meta: { requiresAuth: true, roles: ['admin'] }
+  },
+  {
+    path: '/accounts',
+    component: AccountsPage,
     meta: { requiresAuth: true, roles: ['admin'] }
   }
 ]

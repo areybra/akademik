@@ -234,9 +234,33 @@ router.put('/sessions/:id', authenticateToken, authorizeRoles(...TEACHING_ROLES)
     VALUES (?, ?, ?, ?, ?)
     ON CONFLICT(session_id, student_id) DO UPDATE SET status = excluded.status, note = excluded.note
   `);
+  // Absensi harian portal orang tua: satu baris per siswa per tanggal.
+  const findDaily = db.prepare(
+    'SELECT id FROM attendances WHERE student_id = ? AND date = ? ORDER BY rowid ASC LIMIT 1'
+  );
+  const upsertDaily = db.prepare(`
+    INSERT INTO attendances (id, student_id, student_name, date, status, note)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET status = excluded.status, note = excluded.note
+  `);
   const saveAll = db.transaction((list) => {
     for (const row of list) {
       upsert.run(session.id, row.studentId, row.studentName, row.status, row.note);
+
+      const existingDaily = findDaily.get(row.studentId, session.date);
+      if (existingDaily) {
+        db.prepare('UPDATE attendances SET status = ?, note = ? WHERE id = ?')
+          .run(row.status, row.note, existingDaily.id);
+      } else {
+        upsertDaily.run(
+          `att-${row.studentId}-${session.date}`,
+          row.studentId,
+          row.studentName,
+          session.date,
+          row.status,
+          row.note
+        );
+      }
     }
     db.prepare('UPDATE lesson_sessions SET updated_at = ? WHERE id = ?').run(new Date().toISOString(), session.id);
   });

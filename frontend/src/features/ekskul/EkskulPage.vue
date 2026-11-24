@@ -115,10 +115,11 @@
         />
 
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+          <label :for="uid + '-desc-add'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
             Deskripsi
           </label>
           <textarea
+            :id="uid + '-desc-add'"
             v-model="formData.deskripsi"
             rows="4"
             class="w-full px-5 py-4 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-medium focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
@@ -164,10 +165,11 @@
         />
 
         <div>
-          <label class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
+          <label :for="uid + '-desc-edit'" class="block text-[11px] font-black text-surface-500 uppercase tracking-widest mb-2 px-1">
             Deskripsi
           </label>
           <textarea
+            :id="uid + '-desc-edit'"
             v-model="formData.deskripsi"
             rows="4"
             class="w-full px-5 py-4 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-medium focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
@@ -183,7 +185,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, useId } from 'vue'
 import { useEkskulStore } from '../../stores/ekskul'
 import { useAuthStore } from '../../stores/auth'
 import { useFormValidation } from '../../composables/useFormValidation'
@@ -194,6 +196,7 @@ import Modal from '../../components/ui/Modal.vue'
 import Input from '../../components/ui/Input.vue'
 
 const ekskulStore = useEkskulStore()
+const uid = useId()
 const authStore = useAuthStore()
 const { exportToCsv } = useExport()
 

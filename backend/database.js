@@ -165,6 +165,9 @@ if (!userColumns.includes('roles')) {
 if (!userColumns.includes('student_id')) {
   db.exec('ALTER TABLE users ADD COLUMN student_id TEXT');
 }
+if (!userColumns.includes('active')) {
+  db.exec('ALTER TABLE users ADD COLUMN active INTEGER NOT NULL DEFAULT 1');
+}
 
 // Kolom jadwal: hari dan tautan ke akun guru.
 const scheduleColumns = db.prepare('PRAGMA table_info(schedules)').all().map((c) => c.name);

@@ -10,14 +10,15 @@
       </div>
       <div class="flex flex-wrap items-end gap-3">
         <div>
-          <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 px-1">Tanggal</label>
+          <label :for="`${uid}-date`" class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 px-1">Tanggal</label>
           <input
+            :id="`${uid}-date`"
             v-model="selectedDate"
             type="date"
             class="px-3 py-2 rounded-xl border border-line bg-panel text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
           />
         </div>
-        <Button variant="outline" :disabled="teachingStore.loading" @click="load">
+        <Button variant="outline" :disabled="teachingStore.loading" @click="() => load()">
           Muat ulang
         </Button>
       </div>
@@ -295,7 +296,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, useId, watch } from 'vue'
 import Button from '../../components/ui/Button.vue'
 import Modal from '../../components/ui/Modal.vue'
 import { useTeachingStore, type TeachingSlot } from '../../stores/teaching'
@@ -308,6 +309,7 @@ const authStore = useAuthStore()
 
 const today = new Date().toISOString().split('T')[0]
 const selectedDate = ref(today)
+const uid = useId()
 
 const statusOptions = [
   { value: 'hadir' as const, label: 'Hadir', active: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
@@ -326,7 +328,11 @@ const pendingCount = computed(() => teachingStore.slots.filter((slot) => !slot.c
 /* ---------------- Waktu & kunci sesi ---------------- */
 const isAdmin = computed(() => authStore.hasAnyRole(['admin']))
 const now = ref(Date.now())
-const timer = setInterval(() => { now.value = Date.now() }, 30000)
+const timer = setInterval(() => {
+  now.value = Date.now()
+  // Polling ringan memakai timer yang sudah ada; tab tersembunyi tidak memuat data.
+  if (!document.hidden) load(true)
+}, 30000)
 onUnmounted(() => clearInterval(timer))
 
 const startMs = (slot: TeachingSlot) => (slot.startAt ? new Date(slot.startAt).getTime() : 0)
@@ -344,10 +350,10 @@ const endingSoon = computed(() =>
     .sort((a, b) => a.minutes - b.minutes)
 )
 
-const load = () => teachingStore.fetchToday(selectedDate.value)
+const load = (silent = false) => teachingStore.fetchToday(selectedDate.value, silent)
 
-onMounted(load)
-watch(selectedDate, load)
+onMounted(() => load())
+watch(selectedDate, () => load())
 
 /* ---------------- Absensi per sesi ---------------- */
 const attendanceOpen = ref(false)

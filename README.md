@@ -112,6 +112,7 @@ Baca = boleh membuka halaman. Tulis = boleh tambah/ubah/hapus/impor.
   <tr><td>Nilai</td><td>admin, kepsek, waka, TU; siswa/orang tua lihat laporan sendiri</td><td>admin, kepsek, waka, guru_mapel/guru (mapel + kelas diampu), wali_kelas (kelasnya)</td></tr>
   <tr><td>Ekskul & Prestasi</td><td>admin, kepsek, waka, guru, wali_kelas, siswa, orang_tua</td><td>admin, kepsek, waka</td></tr>
   <tr><td>Tagihan</td><td>admin, kepsek, waka, TU, wali_kelas, siswa, orang_tua</td><td>admin, kepala_tu, staff_tu; orang_tua unggah bukti bayar</td></tr>
+  <tr><td>Manajemen Akun (halaman <code>/accounts</code>)</td><td>admin</td><td>admin: akun, tautan orang tua, penugasan mengajar</td></tr>
   <tr><td>Pengguna (API <code>/api/users</code>)</td><td>admin, kepsek, waka, TU</td><td>admin, kepala_tu, staff_tu; hapus akun hanya admin</td></tr>
   <tr><td>Relasi orang tua</td><td>admin, kepsek, waka, TU</td><td>admin, kepala_tu</td></tr>
   <tr><td>Penugasan guru</td><td>admin, kepsek, waka, TU</td><td>admin, kepala_sekolah</td></tr>
@@ -130,14 +131,14 @@ Baca = boleh membuka halaman. Tulis = boleh tambah/ubah/hapus/impor.
 
 | Peran | Menu sidebar |
 |---|---|
-| admin | Dashboard, Pengaturan, Siswa, Kelas, Guru, Jadwal, Absensi, Nilai, Ekskul, Prestasi, Tagihan |
+| admin | Dashboard, Pengaturan, Siswa, Kelas, Guru, Jadwal, Absensi, Nilai, Ekskul, Prestasi, Tagihan, Manajemen Akun |
 | kepsek, waka | Dashboard, Pengaturan, Siswa, Kelas, Guru, Jadwal, Absensi, Nilai, Ekskul, Prestasi, Tagihan |
 | kepala_tu, staff_tu | Dashboard, Pengaturan, Siswa, Kelas, Guru, Jadwal, Absensi, Nilai, Tagihan |
 | guru, guru_mapel | Dashboard, Jadwal (hanya lihat), Mengajar, Ekskul, Prestasi |
 | wali_kelas | Dashboard, Siswa, Kelas, Jadwal (hanya lihat), Mengajar, Ekskul, Prestasi, Tagihan |
 | siswa, orang_tua | Dashboard, Jadwal, Laporan Absensi, Laporan Nilai, Ekskul, Prestasi, Tagihan, Profil |
 
-Jadwal dikelola admin + TU. Kepsek/waka hanya memantau, guru hanya membaca. Halaman **Pengaturan** hanya dibuka admin; API relasi dan pengguna tetap tersedia untuk peran yang berwenang.
+Jadwal dikelola admin + TU. Kepsek/waka hanya memantau, guru hanya membaca. Halaman **Pengaturan** hanya dibuka admin (tema + kontak bantuan); akun, tautan orang tua, dan penugasan mengajar ada di kategori **Akun → Manajemen Akun**. API relasi dan pengguna tetap tersedia untuk peran yang berwenang.
 
 ---
 
@@ -185,7 +186,7 @@ Setiap halaman data menyediakan tombol ekspor CSV: Siswa, Guru, Kelas, Jadwal, A
   <tr><td><code>lesson_attendances(id, session_id, student_id, status)</code></td><td>Kehadiran per sesi mengajar</td></tr>
 </table>
 
-Kelola relasi lewat **Pengaturan** (tab Relasi Orang Tua dan Penugasan Guru) atau API `/api/relations`.
+Kelola relasi lewat **Akun → Manajemen Akun** (tab Tautan Orang Tua & Siswa dan Penugasan Mengajar) atau API `/api/relations`.
 
 ---
 

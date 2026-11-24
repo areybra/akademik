@@ -16,20 +16,20 @@
 
     <div class="grid gap-4 sm:gap-6">
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">WhatsApp 1</label>
-        <input v-model="form.wa[0]" type="text" placeholder="Contoh: +628123456789" class="clean-input w-full" />
+        <label :for="uid + '-wa1'" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">WhatsApp 1</label>
+        <input :id="uid + '-wa1'" v-model="form.wa[0]" type="text" placeholder="Contoh: +628123456789" class="clean-input w-full" />
       </div>
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">WhatsApp 2</label>
-        <input v-model="form.wa[1]" type="text" placeholder="Contoh: +628123456780" class="clean-input w-full" />
+        <label :for="uid + '-wa2'" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">WhatsApp 2</label>
+        <input :id="uid + '-wa2'" v-model="form.wa[1]" type="text" placeholder="Contoh: +628123456780" class="clean-input w-full" />
       </div>
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Instagram 1</label>
-        <input v-model="form.ig[0]" type="text" placeholder="Contoh: smk_nuruljadid" class="clean-input w-full" />
+        <label :for="uid + '-ig1'" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Instagram 1</label>
+        <input :id="uid + '-ig1'" v-model="form.ig[0]" type="text" placeholder="Contoh: smk_nuruljadid" class="clean-input w-full" />
       </div>
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Instagram 2</label>
-        <input v-model="form.ig[1]" type="text" placeholder="Contoh: smk_nj_official" class="clean-input w-full" />
+        <label :for="uid + '-ig2'" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Instagram 2</label>
+        <input :id="uid + '-ig2'" v-model="form.ig[1]" type="text" placeholder="Contoh: smk_nj_official" class="clean-input w-full" />
       </div>
       <div v-if="helpContactsStore.error" class="text-sm text-rose-600">{{ helpContactsStore.error }}</div>
     </div>
@@ -37,10 +37,11 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted, useId } from 'vue'
 import { useHelpContactsStore } from '../../stores/helpContacts'
 
 const helpContactsStore = useHelpContactsStore()
+const uid = useId()
 const form = reactive({ wa: ['', ''], ig: ['', ''] })
 
 const loadSettings = async () => {
