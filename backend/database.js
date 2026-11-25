@@ -165,6 +165,9 @@ if (!userColumns.includes('roles')) {
 if (!userColumns.includes('student_id')) {
   db.exec('ALTER TABLE users ADD COLUMN student_id TEXT');
 }
+if (!userColumns.includes('teacher_id')) {
+  db.exec('ALTER TABLE users ADD COLUMN teacher_id TEXT');
+}
 if (!userColumns.includes('active')) {
   db.exec('ALTER TABLE users ADD COLUMN active INTEGER NOT NULL DEFAULT 1');
 }
@@ -186,6 +189,30 @@ if (!sessionColumns.includes('status')) {
 if (!sessionColumns.includes('submitted_at')) {
   db.exec('ALTER TABLE lesson_sessions ADD COLUMN submitted_at TEXT');
 }
+// Sesi yang dibuka paksa oleh admin tidak boleh dikunci ulang oleh auto-lock.
+if (!sessionColumns.includes('unlocked_at')) {
+  db.exec('ALTER TABLE lesson_sessions ADD COLUMN unlocked_at TEXT');
+}
+
+const gradeColumns = db.prepare('PRAGMA table_info(grades)').all().map((c) => c.name);
+if (!gradeColumns.includes('teacher_id')) {
+  db.exec('ALTER TABLE grades ADD COLUMN teacher_id TEXT');
+}
+
+// Indeks unik baru menolak tautan ganda. Bersihkan dulu baris lama yang
+// bertabrakan sebelum backfill, kalau tidak server gagal start saat DB sudah ada.
+db.exec(`
+  UPDATE users SET teacher_id = NULL
+  WHERE teacher_id IS NOT NULL
+    AND rowid NOT IN (
+      SELECT MIN(rowid) FROM users WHERE teacher_id IS NOT NULL GROUP BY teacher_id
+    );
+  UPDATE users SET student_id = NULL
+  WHERE student_id IS NOT NULL
+    AND rowid NOT IN (
+      SELECT MIN(rowid) FROM users WHERE student_id IS NOT NULL GROUP BY student_id
+    );
+`);
 
 // Backfill: akun siswa ditautkan ke baris students berdasarkan nama yang sama.
 db.exec(`
@@ -193,6 +220,9 @@ db.exec(`
   SET student_id = (
     SELECT s.id FROM students s
     WHERE s.name = users.name
+      AND NOT EXISTS (
+        SELECT 1 FROM users u2 WHERE u2.student_id = s.id AND u2.id <> users.id
+      )
     ORDER BY CASE WHEN s.status = 'siswa aktif' THEN 0 ELSE 1 END
     LIMIT 1
   )
@@ -219,6 +249,122 @@ db.exec(`
 `);
 
 db.exec(`
+  UPDATE users
+  SET teacher_id = (
+    SELECT t.id FROM teachers t
+    WHERE TRIM(t.name) = TRIM(users.name)
+      AND (users.role IN ('guru', 'guru_mapel') OR users.roles LIKE '%guru%')
+      AND (SELECT COUNT(*) FROM teachers t2 WHERE TRIM(t2.name) = TRIM(users.name)) = 1
+      AND NOT EXISTS (
+        SELECT 1 FROM users u2 WHERE u2.teacher_id = t.id AND u2.id <> users.id
+      )
+  )
+  WHERE teacher_id IS NULL
+    AND (users.role IN ('guru', 'guru_mapel') OR users.roles LIKE '%guru%')
+    AND EXISTS (
+      SELECT 1 FROM teachers t
+      WHERE TRIM(t.name) = TRIM(users.name)
+        AND (SELECT COUNT(*) FROM teachers t2 WHERE TRIM(t2.name) = TRIM(users.name)) = 1
+    )
+`);
+
+const duplicateAssignments = db.prepare(`
+  SELECT subject, class FROM teacher_assignments
+  GROUP BY subject, class HAVING COUNT(*) > 1
+`).all();
+let reconciledAssignments = 0;
+const dedupAssignments = db.transaction(() => {
+  const scheduleCount = db.prepare(`
+    SELECT COUNT(*) AS n FROM schedules WHERE class = ? AND subject = ? AND teacher_id = ?
+  `);
+  const moveSchedules = db.prepare(`
+    UPDATE schedules SET teacher_id = ? WHERE class = ? AND subject = ? AND teacher_id = ?
+  `);
+  const moveGrades = db.prepare(`
+    UPDATE grades SET teacher_id = ? WHERE teacher_id = ? AND subject = ?
+      AND student_id IN (SELECT id FROM students WHERE class = ?)
+  `);
+  const removeAssignment = db.prepare('DELETE FROM teacher_assignments WHERE rowid = ?');
+
+  for (const group of duplicateAssignments) {
+    const rows = db.prepare(`
+      SELECT rowid AS rid, teacher_id FROM teacher_assignments
+      WHERE subject = ? AND class = ? ORDER BY rowid
+    `).all(group.subject, group.class);
+    const countFor = (teacherId) => scheduleCount.get(group.class, group.subject, teacherId).n;
+    let keep = rows[0];
+    for (const row of rows.slice(1)) {
+      if (countFor(row.teacher_id) > countFor(keep.teacher_id)) keep = row;
+    }
+    for (const row of rows) {
+      if (row.rid === keep.rid) continue;
+      moveSchedules.run(keep.teacher_id, group.class, group.subject, row.teacher_id);
+      moveGrades.run(keep.teacher_id, row.teacher_id, group.subject, group.class);
+      removeAssignment.run(row.rid);
+      reconciledAssignments++;
+    }
+  }
+});
+dedupAssignments();
+if (reconciledAssignments > 0) {
+  console.log(`Migrasi: ${reconciledAssignments} penugasan ganda digabung; jadwal dan nilai ikut dialihkan.`);
+}
+
+// Migrasi: jadwal mengikuti pemilik penugasan; profil guru dilengkapi mapel dari penugasan lama.
+const assignmentOwners = db.prepare(`
+  SELECT ta.teacher_id, ta.subject, ta.class, u.name AS teacher_name, u.teacher_id AS profile_id
+  FROM teacher_assignments ta
+  JOIN users u ON u.id = ta.teacher_id
+`).all();
+let alignedSchedules = 0;
+let completedProfiles = 0;
+const alignTransactions = db.transaction(() => {
+  const updateSchedule = db.prepare(
+    'UPDATE schedules SET teacher_id = ?, teacher = ? WHERE class = ? AND subject = ?'
+  );
+  const readProfile = db.prepare('SELECT subjects FROM teachers WHERE id = ?');
+  const saveProfile = db.prepare('UPDATE teachers SET subjects = ? WHERE id = ?');
+
+  for (const assignment of assignmentOwners) {
+    alignedSchedules += updateSchedule.run(
+      assignment.teacher_id,
+      assignment.teacher_name,
+      assignment.class,
+      assignment.subject
+    ).changes;
+
+    if (!assignment.profile_id) continue;
+    const row = readProfile.get(assignment.profile_id);
+    if (!row) continue;
+    let subjects;
+    try {
+      subjects = JSON.parse(row.subjects || '[]');
+    } catch {
+      subjects = [];
+    }
+    if (!Array.isArray(subjects)) subjects = [];
+    if (subjects.some((item) => String(item).trim().toLowerCase() === assignment.subject.toLowerCase())) {
+      continue;
+    }
+    subjects.push(assignment.subject);
+    saveProfile.run(JSON.stringify(subjects), assignment.profile_id);
+    completedProfiles++;
+  }
+});
+alignTransactions();
+if (alignedSchedules > 0 || completedProfiles > 0) {
+  console.log(
+    `Migrasi: ${alignedSchedules} jadwal diselaraskan ke guru penugasan; ${completedProfiles} mapel dilengkapi di Data Guru.`
+  );
+}
+
+db.exec(`
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_users_teacher_id ON users(teacher_id) WHERE teacher_id IS NOT NULL;
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_users_student_id ON users(student_id) WHERE student_id IS NOT NULL;
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_assignments_subject_class ON teacher_assignments(subject, class);
+  CREATE INDEX IF NOT EXISTS idx_parent_students_student ON parent_students (student_id);
+  CREATE INDEX IF NOT EXISTS idx_schedules_teacher_day ON schedules (teacher_id, day);
+  CREATE INDEX IF NOT EXISTS idx_grades_teacher ON grades (teacher_id);
   CREATE INDEX IF NOT EXISTS idx_attendances_date ON attendances (date);
   CREATE INDEX IF NOT EXISTS idx_attendances_student ON attendances (student_id);
   CREATE INDEX IF NOT EXISTS idx_grades_student ON grades (student_id);

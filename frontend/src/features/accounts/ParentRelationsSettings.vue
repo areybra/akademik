@@ -10,13 +10,13 @@
 
   <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" @submit.prevent="submit">
     <div class="lg:col-span-2">
-      <label :for="uid + '-parent'" class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+      <label :for="uid + '-parent'" class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">
         Akun orang tua
       </label>
       <select
         :id="uid + '-parent'"
         v-model="form.parentEmail"
-        class="w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+        class="w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-ring"
       >
         <option value="">— Pilih akun orang tua —</option>
         <option v-for="parent in relationStore.parentAccounts" :key="parent.id" :value="parent.email">
@@ -25,13 +25,13 @@
       </select>
     </div>
     <div class="lg:col-span-2">
-      <label :for="uid + '-student'" class="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+      <label :for="uid + '-student'" class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">
         Siswa
       </label>
       <select
         :id="uid + '-student'"
         v-model="form.studentId"
-        class="w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+        class="w-full rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-ring"
       >
         <option value="">— Pilih siswa —</option>
         <option v-for="student in studentStore.students" :key="student.id" :value="student.id">
@@ -53,7 +53,7 @@
   <div class="overflow-x-auto">
     <table class="w-full text-left text-xs">
       <thead>
-        <tr class="border-b border-line text-[10px] uppercase tracking-widest text-slate-400">
+        <tr class="border-b border-line text-[10px] uppercase tracking-widest text-slate-500">
           <th class="py-2 pr-3 font-bold">Orang Tua</th>
           <th class="py-2 pr-3 font-bold">Siswa</th>
           <th class="py-2 text-right font-bold">Aksi</th>
@@ -63,11 +63,11 @@
         <tr v-for="rel in relationStore.parentRelations" :key="rel.parent_id + '-' + rel.student_id">
           <td class="py-2.5 pr-3">
             <p class="font-bold text-slate-800">{{ rel.parent_name }}</p>
-            <p class="text-[10px] text-slate-400">{{ rel.parent_email }}</p>
+            <p class="text-[10px] text-slate-500">{{ rel.parent_email }}</p>
           </td>
           <td class="py-2.5 pr-3 font-semibold text-slate-700">
             {{ rel.student_name }}
-            <span class="text-slate-400 text-xs"> · {{ rel.class }}</span>
+            <span class="text-slate-500 text-xs"> · {{ rel.class }}</span>
           </td>
           <td class="py-2.5 text-right">
             <button
@@ -80,7 +80,7 @@
           </td>
         </tr>
         <tr v-if="relationStore.parentRelations.length === 0">
-          <td colspan="3" class="py-4 text-center text-slate-400">Belum ada relasi orang tua–siswa.</td>
+          <td colspan="3" class="py-4 text-center text-slate-500">Belum ada relasi orang tua–siswa.</td>
         </tr>
       </tbody>
     </table>

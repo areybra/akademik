@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-black text-surface-900 tracking-tight">Manajemen Ekskul</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Manajemen Ekskul</h1>
         <p class="text-surface-500 mt-1 flex items-center gap-2 font-medium">
           <span class="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse"></span>
           {{ ekskulStore.ekskuls.length }} Ekstrakurikuler terdaftar
@@ -21,7 +21,7 @@
     </div>
 
     <!-- Empty State -->
-    <div v-if="ekskulStore.ekskuls.length === 0" class="premium-card p-8 sm:p-12 text-center">
+    <div v-if="ekskulStore.ekskuls.length === 0" class="premium-card p-6 sm:p-10 text-center">
       <div class="w-20 h-20 bg-surface-100 rounded-full flex items-center justify-center mx-auto mb-6 border border-surface-200">
         <svg class="w-10 h-10 text-surface-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -122,7 +122,7 @@
             :id="uid + '-desc-add'"
             v-model="formData.deskripsi"
             rows="4"
-            class="w-full px-5 py-4 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-medium focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
+            class="w-full px-5 py-4 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-medium focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all"
             placeholder="Deskripsi singkat kegiatan ekstrakurikuler"
           ></textarea>
           <p v-if="formErrors.deskripsi" class="mt-1.5 text-xs font-semibold text-rose-600 uppercase tracking-wider">
@@ -172,7 +172,7 @@
             :id="uid + '-desc-edit'"
             v-model="formData.deskripsi"
             rows="4"
-            class="w-full px-5 py-4 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-medium focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all"
+            class="w-full px-5 py-4 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-medium focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all"
             placeholder="Deskripsi singkat kegiatan ekstrakurikuler"
           ></textarea>
           <p v-if="formErrors.deskripsi" class="mt-1.5 text-xs font-semibold text-rose-600 uppercase tracking-wider">

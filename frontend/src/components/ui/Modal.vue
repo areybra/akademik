@@ -23,7 +23,7 @@
                 <h3 :id="titleId" class="text-base font-bold text-slate-900 leading-none">{{ title }}</h3>
                 <p v-if="subtitle" :id="subtitleId" class="text-xs text-slate-500 mt-1 font-medium">{{ subtitle }}</p>
               </div>
-              <button @click="$emit('close')" aria-label="Tutup" class="p-2 shrink-0 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30">
+              <button @click="$emit('close')" aria-label="Tutup" class="p-2 shrink-0 text-slate-500 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>

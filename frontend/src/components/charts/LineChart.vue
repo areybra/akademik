@@ -71,7 +71,7 @@
       </svg>
 
       <span
-        class="absolute right-0 top-0 text-[10px] font-semibold text-slate-400 tabular-nums pointer-events-none"
+        class="absolute right-0 top-0 text-[10px] font-semibold text-slate-500 tabular-nums pointer-events-none"
         aria-hidden="true"
       >
         {{ valueFormatter(maxValue) }}
@@ -108,7 +108,7 @@
       <span
         v-for="(label, index) in labels"
         :key="`label-${label}-${index}`"
-        class="flex-1 text-center text-[10px] font-semibold text-slate-400 truncate"
+        class="flex-1 text-center text-[10px] font-semibold text-slate-500 truncate"
         :class="index % 2 === 1 ? 'hidden sm:block' : ''"
       >
         {{ label }}

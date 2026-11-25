@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../database');
 const authenticateToken = require('../middleware/auth');
 const authorizeRoles = require('../middleware/roleCheck');
-const { isTeacher, gradeScope, canManageStudent, canManageSubject } = require('../scope');
+const { gradeScope, canWriteGrade } = require('../scope');
 
 function mapGrade(g) {
   return {
@@ -12,7 +12,8 @@ function mapGrade(g) {
     studentName: g.student_name,
     subject: g.subject,
     score: g.score,
-    date: g.date
+    date: g.date,
+    teacherId: g.teacher_id || null
   };
 }
 
@@ -98,7 +99,7 @@ router.post('/bulk', authenticateToken, authorizeRoles('admin', 'kepala_sekolah'
   for (const grade of grades) {
     const error = validateGrade(grade);
     if (error) return res.status(400).json({ message: error });
-    if (!canManageSubject(req.user, grade.subject) || !canManageStudent(req.user, grade.studentId, grade.subject)) {
+    if (!canWriteGrade(req.user, grade.studentId, grade.subject)) {
       return res.status(403).json({ message: 'Akses ditolak: bukan siswa/mapel yang Anda ampu' });
     }
     if (lockedSession(grade.studentId, grade.subject, grade.date)) {
@@ -110,18 +111,18 @@ router.post('/bulk', authenticateToken, authorizeRoles('admin', 'kepala_sekolah'
     'SELECT id FROM grades WHERE student_id = ? AND subject = ? AND date = ?'
   );
   const insert = db.prepare(`
-    INSERT INTO grades (id, student_id, student_name, subject, score, date)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO grades (id, student_id, student_name, subject, score, date, teacher_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
-  const update = db.prepare('UPDATE grades SET score = ?, student_name = ? WHERE id = ?');
+  const update = db.prepare('UPDATE grades SET score = ?, student_name = ?, teacher_id = ? WHERE id = ?');
 
   const saveAll = db.transaction((list) => {
     for (const grade of list) {
       const existing = findExisting.get(grade.studentId, grade.subject, grade.date);
       if (existing) {
-        update.run(Number(grade.score), grade.studentName, existing.id);
+        update.run(Number(grade.score), grade.studentName, req.user.id, existing.id);
       } else {
-        insert.run(`grade-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, grade.studentId, grade.studentName, grade.subject, Number(grade.score), grade.date);
+        insert.run(`grade-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, grade.studentId, grade.studentName, grade.subject, Number(grade.score), grade.date, req.user.id);
       }
     }
   });
@@ -142,7 +143,7 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 'w
     return res.status(400).json({ message: validationError });
   }
 
-  if (!canManageStudent(req.user, grade.studentId, grade.subject)) {
+  if (!canWriteGrade(req.user, grade.studentId, grade.subject)) {
     return res.status(403).json({ message: 'Akses ditolak: bukan siswa/mapel yang Anda ampu' });
   }
   if (lockedSession(grade.studentId, grade.subject, grade.date)) {
@@ -152,9 +153,9 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 'w
   const id = `grade-${Date.now()}`;
 
   db.prepare(`
-    INSERT INTO grades (id, student_id, student_name, subject, score, date)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(id, grade.studentId, grade.studentName, grade.subject, Number(grade.score), grade.date);
+    INSERT INTO grades (id, student_id, student_name, subject, score, date, teacher_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(id, grade.studentId, grade.studentName, grade.subject, Number(grade.score), grade.date, req.user.id);
 
   const newGrade = mapGrade(db.prepare('SELECT * FROM grades WHERE id = ?').get(id));
   res.status(201).json(newGrade);
@@ -175,7 +176,10 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 
   if (!Number.isFinite(nextScore) || nextScore < 0 || nextScore > 100) {
     return res.status(400).json({ message: 'Skor nilai harus berada di antara 0 dan 100' });
   }
-  if (!canManageSubject(req.user, nextSubject) || !canManageStudent(req.user, nextStudentId, nextSubject)) {
+  if (
+    !canWriteGrade(req.user, existing.student_id, existing.subject) ||
+    !canWriteGrade(req.user, nextStudentId, nextSubject)
+  ) {
     return res.status(403).json({ message: 'Akses ditolak: bukan siswa/mapel yang Anda ampu' });
   }
   if (lockedSession(nextStudentId, nextSubject, nextDate)) {
@@ -183,7 +187,7 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 
   }
 
   db.prepare(`
-    UPDATE grades SET student_id = ?, student_name = ?, subject = ?, score = ?, date = ?
+    UPDATE grades SET student_id = ?, student_name = ?, subject = ?, score = ?, date = ?, teacher_id = ?
     WHERE id = ?
   `).run(
     nextStudentId,
@@ -191,6 +195,7 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 
     nextSubject,
     nextScore,
     nextDate,
+    req.user.id,
     id
   );
 
@@ -202,7 +207,7 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 
 router.delete('/:id', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 'waka', 'guru_mapel', 'wali_kelas', 'guru'), (req, res) => {
   const existing = db.prepare('SELECT * FROM grades WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ message: 'Data nilai tidak ditemukan' });
-  if (!canManageSubject(req.user, existing.subject) || !canManageStudent(req.user, existing.student_id, existing.subject)) {
+  if (!canWriteGrade(req.user, existing.student_id, existing.subject)) {
     return res.status(403).json({ message: 'Akses ditolak: bukan siswa/mapel yang Anda ampu' });
   }
   if (lockedSession(existing.student_id, existing.subject, existing.date)) {

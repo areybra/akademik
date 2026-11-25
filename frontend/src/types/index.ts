@@ -90,6 +90,7 @@ export interface Schedule {
   subject: string
   teacher: string
   teacherId?: string | null
+  teacherEmail?: string | null
   room: string
   day: string
 }

@@ -1,11 +1,11 @@
 export const CHART_COLORS = {
   indigo: 'var(--chart-accent)',
   indigoSoft: 'var(--chart-accent-soft)',
-  emerald: '#10b981',
-  amber: '#f59e0b',
-  rose: '#f43f5e',
-  sky: '#0ea5e9',
-  violet: '#8b5cf6',
+  gold: 'var(--chart-series-2)',
+  amber: 'var(--chart-series-2)',
+  emerald: 'var(--chart-series-3)',
+  rose: 'var(--chart-series-4)',
+  sky: 'var(--chart-sky)',
   slate: 'var(--chart-label)'
 }
 

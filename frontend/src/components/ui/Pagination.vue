@@ -12,7 +12,7 @@
         <span class="sr-only">Data per halaman</span>
         <select
           :value="pageSize"
-          class="px-2.5 py-1.5 pr-7 bg-panel border border-slate-300 rounded-lg text-xs font-bold text-slate-600 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+          class="px-2.5 py-1.5 pr-7 bg-panel border border-slate-300 rounded-lg text-xs font-bold text-slate-600 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:border-indigo-500 transition-all"
           @change="onPageSizeChange"
         >
           <option v-for="size in pageSizeOptions" :key="size" :value="size">{{ size }} / halaman</option>
@@ -34,7 +34,7 @@
       </button>
 
       <template v-for="(item, index) in visiblePages" :key="index">
-        <span v-if="item === '...'" class="px-1.5 text-slate-400 select-none">…</span>
+        <span v-if="item === '...'" class="px-1.5 text-slate-500 select-none">…</span>
         <button
           v-else
           type="button"

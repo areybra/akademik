@@ -16,6 +16,9 @@ export interface User {
   class: string | null
   roles: string[]
   student_id: string | null
+  teacher_id?: string | null
+  teacher_name?: string | null
+  teacher_niup?: string | null
   active: number | boolean
   student_name?: string | null
   children?: string | null
@@ -31,6 +34,9 @@ export interface UserDetail {
   roles: string[]
   class: string | null
   student_id: string | null
+  teacher_id?: string | null
+  teacher_name?: string | null
+  teacher_niup?: string | null
   active: number | boolean
   student_name?: string | null
   parentStudentIds: string[]
@@ -45,6 +51,7 @@ export interface UserForm {
   roles?: string[]
   class?: string | null
   studentId?: string | null
+  teacherId?: string | null
   parentStudentIds?: string[]
   assignments?: UserAssignment[]
   active?: boolean

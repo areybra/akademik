@@ -7,62 +7,107 @@
     <aside
       class="w-64 flex flex-col h-full bg-sidebar border-r border-sidebar-border z-50 transition-all duration-300 fixed lg:static inset-y-0 left-0 overflow-hidden"
       :class="[
-        isSidebarCollapsed ? 'lg:w-0 lg:border-r-0' : 'lg:w-64',
+        isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64',
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       ]"
       aria-label="Navigasi utama"
     >
       <!-- Logo Section -->
-      <div class="h-16 flex items-center px-6 border-b border-sidebar-border">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center border border-sidebar-border shadow-sm">
-            <img src="../../assets/logo-nj.jpg" alt="SMK Nurul Jadid" class="w-full h-full object-cover" />
-          </div>
-          <span class="text-sm font-bold tracking-tight text-sidebar-ink uppercase">Akademik <span class="text-sidebar-accent">SMK</span></span>
+      <div
+        class="h-14 sm:h-16 flex items-center gap-2 border-b border-sidebar-border px-4 sm:px-6"
+        :class="isSidebarCollapsed ? 'lg:justify-center lg:px-0' : ''"
+      >
+        <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center border border-sidebar-border shadow-sm shrink-0">
+          <img src="../../assets/logo-nj.jpg" alt="SMK Nurul Jadid" class="w-full h-full object-cover" />
         </div>
+        <span
+          class="text-sm font-bold tracking-tight text-sidebar-ink uppercase"
+          :class="isSidebarCollapsed ? 'lg:hidden' : ''"
+        >
+          Akademik <span class="text-sidebar-accent">SMK</span>
+        </span>
+        <button
+          type="button"
+          class="ml-auto p-1.5 text-sidebar-muted hover:text-sidebar-ink hover:bg-sidebar-hover rounded-lg lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="Tutup menu navigasi"
+          @click="isMobileMenuOpen = false"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       <!-- Navigation -->
       <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <template v-for="group in navigationItems" :key="group.category">
-          <h2 class="px-3 py-2 text-[10px] font-bold text-sidebar-muted uppercase tracking-wider mb-1">
+        <template v-for="(group, groupIndex) in navigationItems" :key="group.category">
+          <div
+            v-if="isSidebarCollapsed && groupIndex > 0"
+            class="hidden lg:block h-px bg-sidebar-border mx-2 my-2"
+            aria-hidden="true"
+          ></div>
+          <h2
+            class="px-3 py-2 text-[10px] font-bold text-sidebar-muted uppercase tracking-wider mb-1"
+            :class="isSidebarCollapsed ? 'lg:hidden' : ''"
+          >
             {{ group.category }}
           </h2>
           <RouterLink
             v-for="item in group.items"
             :key="item.path"
             :to="item.path"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             :class="[
-              isActive(item.path) 
-                ? 'bg-sidebar-active text-sidebar-active-ink' 
-                : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-ink'
+              isActive(item.path)
+                ? 'bg-sidebar-active text-sidebar-active-ink'
+                : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-ink',
+              isSidebarCollapsed ? 'lg:justify-center lg:px-0' : ''
             ]"
+            :title="isSidebarCollapsed ? item.label : undefined"
+            :aria-label="item.label"
+            :aria-current="isActive(item.path) ? 'page' : undefined"
             @click="isMobileMenuOpen = false"
           >
-            <div class="w-5 h-5" v-html="item.icon"></div>
-            {{ item.label }}
+            <div class="w-5 h-5 shrink-0" v-html="item.icon"></div>
+            <span :class="isSidebarCollapsed ? 'lg:hidden' : ''">{{ item.label }}</span>
           </RouterLink>
         </template>
       </nav>
 
       <!-- User Profile (Bottom) -->
       <div class="p-4 border-t border-sidebar-border bg-sidebar-footer">
-        <div class="flex items-center gap-3 mb-4">
-          <img :src="authStore.user?.avatar" class="w-9 h-9 rounded-full object-cover border border-sidebar-border" />
-          <div class="min-w-0">
+        <div
+          class="flex items-center gap-3 mb-4"
+          :class="isSidebarCollapsed ? 'lg:justify-center' : ''"
+        >
+          <img
+            v-if="authStore.user?.avatar"
+            :src="authStore.user.avatar"
+            alt=""
+            class="w-9 h-9 shrink-0 rounded-full object-cover border border-sidebar-border"
+          />
+          <div
+            v-else
+            class="w-9 h-9 shrink-0 rounded-full border border-sidebar-border bg-sidebar-active text-sidebar-active-ink flex items-center justify-center text-xs font-bold"
+            aria-hidden="true"
+          >
+            {{ userInitials }}
+          </div>
+          <div class="min-w-0" :class="isSidebarCollapsed ? 'lg:hidden' : ''">
             <p class="text-xs font-semibold text-sidebar-ink truncate">{{ authStore.user?.name }}</p>
             <p class="text-[10px] font-medium text-sidebar-muted uppercase tracking-wider">{{ userRolesLabel }}</p>
           </div>
         </div>
         <button 
           @click="handleLogout"
-          class="w-full h-10 flex items-center justify-center gap-2 px-3 text-xs font-semibold text-sidebar-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
+          class="w-full h-10 flex items-center justify-center gap-2 px-3 text-xs font-semibold text-sidebar-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :title="isSidebarCollapsed ? 'Keluar' : undefined"
+          aria-label="Keluar"
         >
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          Keluar
+          <span :class="isSidebarCollapsed ? 'lg:hidden' : ''">Keluar</span>
         </button>
       </div>
     </aside>
@@ -70,11 +115,11 @@
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Top Bar -->
-      <header class="h-16 flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 bg-panel border-b border-line shrink-0">
+      <header class="h-14 sm:h-16 flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 bg-panel border-b border-line shrink-0">
         <div class="flex items-center gap-4 min-w-0">
           <button
             @click="toggleSidebar"
-            class="hidden lg:inline-flex p-2 shrink-0 text-slate-500 hover:bg-slate-100 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
+            class="hidden lg:inline-flex p-2 shrink-0 text-slate-500 hover:bg-slate-100 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             :aria-label="isSidebarCollapsed ? 'Tampilkan sidebar' : 'Sembunyikan sidebar'"
             :aria-expanded="!isSidebarCollapsed"
             :title="isSidebarCollapsed ? 'Tampilkan sidebar (Ctrl+B)' : 'Sembunyikan sidebar (Ctrl+B)'"
@@ -84,22 +129,18 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4v16" />
             </svg>
           </button>
-          <button @click="isMobileMenuOpen = true" aria-label="Buka menu navigasi" class="lg:hidden p-2 shrink-0 text-slate-500 hover:bg-slate-100 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30">
+          <button @click="isMobileMenuOpen = true" aria-label="Buka menu navigasi" class="lg:hidden p-2 shrink-0 text-slate-500 hover:bg-slate-100 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
              </svg>
           </button>
-          <span class="text-xs font-semibold text-slate-500 uppercase tracking-widest truncate">{{ currentRouteLabel }}</span>
+          <span class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-widest truncate">{{ currentRouteLabel }}</span>
         </div>
         
         <div class="flex items-center gap-4 shrink-0">
-          <div class="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
-            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-            <span class="hidden sm:inline text-[10px] font-bold uppercase tracking-wider">Live</span>
-          </div>
           <div class="hidden sm:block h-8 w-px bg-slate-200"></div>
           <ThemeSwitcher />
-          <button aria-label="Notifikasi" class="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30">
+          <button aria-label="Notifikasi" class="p-2 text-slate-500 hover:text-slate-600 transition-colors rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
@@ -108,7 +149,7 @@
       </header>
 
       <!-- Scrollable Content -->
-      <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar">
+      <div class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 custom-scrollbar">
         <div class="max-w-6xl mx-auto">
           <slot />
         </div>
@@ -209,8 +250,9 @@ const navigationConfig = [
       },
       {
         label: 'Mengajar',
+        monitorLabel: 'Monitoring Mengajar',
         path: '/teaching',
-        roles: ['guru', 'guru_mapel', 'wali_kelas'],
+        roles: ['admin', 'kepala_sekolah', 'waka', 'guru', 'guru_mapel', 'wali_kelas'],
         icon: '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0121 17.5M12 14v7m-6.16-10.922A12.083 12.083 0 003 17.5" /></svg>'
       },
       { 
@@ -285,12 +327,21 @@ const navigationConfig = [
   }
 ]
 
+const isMonitoring = computed(() =>
+  authStore.hasAnyRole(['admin', 'kepala_sekolah', 'waka'] as UserRole[])
+)
+
 const navigationItems = computed(() => {
   const userRoles = authStore.user?.roles || (authStore.user?.role ? [authStore.user.role] : [])
   return navigationConfig
     .map(group => ({
       category: group.category,
-      items: group.items.filter(item => (item.roles as UserRole[]).some((r) => userRoles.includes(r)))
+      items: group.items
+        .filter(item => (item.roles as UserRole[]).some((r) => userRoles.includes(r)))
+        .map(item => ({
+          ...item,
+          label: isMonitoring.value && 'monitorLabel' in item ? item.monitorLabel : item.label
+        }))
     }))
     .filter(group => group.items.length > 0)
 })
@@ -300,10 +351,20 @@ const userRolesLabel = computed(() => {
   return userRoles.join(', ')
 })
 
+const userInitials = computed(() => {
+  const name = authStore.user?.name?.trim() || ''
+  if (!name) return '?'
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join('')
+    .toUpperCase()
+})
+
 const currentRouteLabel = computed(() => {
-  const userRoles = authStore.user?.roles || (authStore.user?.role ? [authStore.user.role] : [])
-  for (const group of navigationConfig) {
-    const item = group.items.find(i => i.path === route.path && (i.roles as UserRole[]).some(r => userRoles.includes(r)))
+  for (const group of navigationItems.value) {
+    const item = group.items.find(i => i.path === route.path)
     if (item) return item.label
   }
   return 'Halaman'

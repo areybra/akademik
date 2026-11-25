@@ -1,17 +1,21 @@
 <template>
   <div v-if="!route.meta.layout || route.meta.layout !== 'auth'" class="min-h-screen">
     <AppLayout>
-      <router-view v-slot="{ Component }">
+      <router-view v-slot="{ Component, route: currentRoute }">
         <transition name="fade" mode="out-in">
-          <component :is="Component" />
+          <div :key="currentRoute.path" class="min-h-full">
+            <component :is="Component" />
+          </div>
         </transition>
       </router-view>
     </AppLayout>
   </div>
   <div v-else class="min-h-screen">
-    <router-view v-slot="{ Component }">
+    <router-view v-slot="{ Component, route: currentRoute }">
       <transition name="fade" mode="out-in">
-        <component :is="Component" />
+        <div :key="currentRoute.path" class="min-h-full">
+          <component :is="Component" />
+        </div>
       </transition>
     </router-view>
   </div>

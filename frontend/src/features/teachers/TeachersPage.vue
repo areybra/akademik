@@ -3,7 +3,7 @@
     <!-- Page Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-xl font-bold text-slate-900 tracking-tight">Manajemen Guru</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Manajemen Guru</h1>
         <p class="text-sm text-slate-500 mt-0.5">Kelola data tenaga pendidik dan bidang studi mereka.</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
@@ -68,7 +68,7 @@
         <button
           type="button"
           class="text-[11px] font-bold uppercase tracking-widest transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          :class="activeFilterCount > 0 ? 'text-indigo-600 hover:text-indigo-700' : 'text-slate-400'"
+          :class="activeFilterCount > 0 ? 'text-indigo-600 hover:text-indigo-700' : 'text-slate-500'"
           :disabled="activeFilterCount === 0"
           @click="resetFilters"
         >
@@ -123,7 +123,7 @@
     </div>
 
     <!-- Data Display -->
-    <div v-if="filteredTeachers.length === 0" class="clean-card p-8 sm:p-12 text-center">
+    <div v-if="filteredTeachers.length === 0" class="clean-card p-6 sm:p-10 text-center">
       <p class="text-slate-500 font-medium">Tidak ada data guru yang sesuai.</p>
     </div>
 
@@ -132,16 +132,17 @@
         <table class="w-full text-left text-sm">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200">
-              <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Profil Guru</th>
-              <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Identitas / NIUP</th>
-              <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px] text-center">L/P</th>
-              <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Spesialisasi</th>
-              <th class="px-6 py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px] text-right">Opsi</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Profil Guru</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Identitas / NIUP</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px] text-center">L/P</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Spesialisasi</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px]">Akun Login</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 font-bold text-slate-700 uppercase tracking-wider text-[10px] text-right">Opsi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="teacher in paginatedTeachers" :key="teacher.id" class="hover:bg-slate-50/50 transition-colors">
-              <td class="px-6 py-4">
+              <td class="px-3 sm:px-6 py-3 sm:py-4">
                 <div class="flex items-center gap-3 min-w-0">
                   <div class="shrink-0">
                     <img
@@ -163,30 +164,37 @@
                   </button>
                 </div>
               </td>
-              <td class="px-6 py-4 text-slate-600 font-medium">{{ teacher.niup }}</td>
-              <td class="px-6 py-4 text-center">
+              <td class="px-3 sm:px-6 py-3 sm:py-4 text-slate-600 font-medium">{{ teacher.niup }}</td>
+              <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
                 <span class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[10px] font-black border border-slate-200">{{ teacher.gender }}</span>
               </td>
-              <td class="px-6 py-4">
+              <td class="px-3 sm:px-6 py-3 sm:py-4">
                 <div class="flex flex-wrap gap-1.5">
                   <span v-for="s in teacher.subjects" :key="s" class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-bold uppercase">{{ s }}</span>
                 </div>
               </td>
-              <td class="px-6 py-4 text-right">
+              <td class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-semibold">
+                <template v-if="accountFor(teacher.id)?.account_email">
+                  <p class="text-slate-700 break-all">{{ accountFor(teacher.id)?.account_email }}</p>
+                  <p class="text-slate-500">Tertaut</p>
+                </template>
+                <span v-else class="text-amber-700">Belum tertaut</span>
+              </td>
+              <td class="px-3 sm:px-6 py-3 sm:py-4 text-right">
                 <div class="flex justify-end items-center gap-1">
-                  <button @click="showDetail(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-all" title="Lihat Detail" aria-label="Lihat detail guru">
+                  <button @click="showDetail(teacher)" class="p-2 text-slate-500 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-all" title="Lihat Detail" aria-label="Lihat detail guru">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   </button>
                   <template v-if="canWrite">
-                    <button @click="openEditModal(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-all" title="Edit Data" aria-label="Edit data guru">
+                    <button @click="openEditModal(teacher)" class="p-2 text-slate-500 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-all" title="Edit Data" aria-label="Edit data guru">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
                     </button>
-                    <button @click="deleteTeacher(teacher.id)" class="p-2 text-slate-400 hover:text-rose-600 rounded hover:bg-rose-50 transition-all" title="Hapus Data" aria-label="Hapus data guru">
+                    <button @click="deleteTeacher(teacher.id)" class="p-2 text-slate-500 hover:text-rose-600 rounded hover:bg-rose-50 transition-all" title="Hapus Data" aria-label="Hapus data guru">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
@@ -220,19 +228,19 @@
             </div>
           </div>
           <div class="flex gap-1">
-            <button @click="showDetail(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 transition-colors" title="Lihat Detail" aria-label="Lihat detail guru">
+            <button @click="showDetail(teacher)" class="p-2 text-slate-500 hover:text-indigo-600 transition-colors" title="Lihat Detail" aria-label="Lihat detail guru">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </button>
             <template v-if="canWrite">
-              <button @click="openEditModal(teacher)" class="p-2 text-slate-400 hover:text-indigo-600 transition-colors" title="Edit Data" aria-label="Edit data guru">
+              <button @click="openEditModal(teacher)" class="p-2 text-slate-500 hover:text-indigo-600 transition-colors" title="Edit Data" aria-label="Edit data guru">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
               </button>
-              <button @click="deleteTeacher(teacher.id)" class="p-2 text-slate-400 hover:text-rose-600 transition-colors" title="Hapus Data" aria-label="Hapus data guru">
+              <button @click="deleteTeacher(teacher.id)" class="p-2 text-slate-500 hover:text-rose-600 transition-colors" title="Hapus Data" aria-label="Hapus data guru">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -312,7 +320,7 @@
               <button
                 type="button"
                 id="foto-guru-btn"
-                class="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold"
+                class="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold"
                 :disabled="uploadingFotoGuru"
                 @click="fotoGuruInput?.click()"
               >
@@ -414,43 +422,43 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
           <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">NIP</p>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">NIP</p>
             <p class="text-sm font-bold text-slate-900 font-mono">{{ display(detailTeacher.nip) }}</p>
           </div>
           <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pangkat</p>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Pangkat</p>
             <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.pangkat) }}</p>
           </div>
           <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pendidikan Terakhir</p>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Pendidikan Terakhir</p>
             <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.pendidikan) }}</p>
           </div>
           <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Jenis Kelamin</p>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Jenis Kelamin</p>
             <p class="text-sm font-bold text-slate-900">{{ detailTeacher.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
           </div>
           <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mata Pelajaran</p>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Mata Pelajaran</p>
             <p class="text-sm font-bold text-slate-900">{{ display((detailTeacher.subjects || []).join(', ')) }}</p>
           </div>
           <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Daftar Kelas</p>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Daftar Kelas</p>
             <p class="text-sm font-bold text-slate-900">{{ display((detailTeacher.classes || []).join(', ')) }}</p>
           </div>
           <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Provinsi</p>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Provinsi</p>
             <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.provinsi) }}</p>
           </div>
           <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Kabupaten/Kota</p>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Kabupaten/Kota</p>
             <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.kabupaten) }}</p>
           </div>
           <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Kecamatan</p>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Kecamatan</p>
             <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.kecamatan) }}</p>
           </div>
           <div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Negara</p>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Negara</p>
             <p class="text-sm font-bold text-slate-900">{{ display(detailTeacher.negara) }}</p>
           </div>
         </div>
@@ -522,7 +530,7 @@
             type="file"
             accept=".csv,text/csv"
             @change="onFileChange"
-            class="block w-full text-sm text-surface-700 bg-panel rounded-xl border border-indigo-200 cursor-pointer file:mr-4 file:py-2.5 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-cta file:text-cta-ink hover:file:bg-cta-hover focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+            class="block w-full text-sm text-surface-700 bg-panel rounded-xl border border-indigo-200 cursor-pointer file:mr-4 file:py-2.5 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-cta file:text-cta-ink hover:file:bg-cta-hover focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <p class="text-[11px] text-indigo-700/70 mt-2">
             Pilih file berformat <strong>.csv</strong> hasil pengisian template di atas.
@@ -561,6 +569,7 @@
 import { ref, reactive, computed, onMounted, useId, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useTeacherStore } from '../../stores/teacher'
+import { useRelationStore } from '../../stores/relation'
 import { PROVINCES } from '../../constants/regions'
 import type { Teacher } from '../../types'
 import Button from '../../components/ui/Button.vue'
@@ -572,6 +581,7 @@ import { useExport } from '../../composables/useExport'
 
 const authStore = useAuthStore()
 const teacherStore = useTeacherStore()
+const relationStore = useRelationStore()
 const uid = useId()
 const canWrite = computed(() => authStore.hasAnyRole(['admin', 'kepala_tu', 'staff_tu']))
 const canExport = computed(() => canWrite.value || authStore.hasAnyRole(['kepala_sekolah', 'waka']))
@@ -587,10 +597,13 @@ const exportTeachers = () => {
   exportToCsv(headers, rows, 'ekspor-guru')
 }
 
+const accountFor = (teacherId: string) => relationStore.teacherDirectory.find((item) => item.id === teacherId)
+
 onMounted(async () => {
   if (teacherStore.teachers.length === 0) {
     await teacherStore.fetchTeachers()
   }
+  await relationStore.fetchTeacherDirectory()
 })
 
 const searchQuery = ref('')

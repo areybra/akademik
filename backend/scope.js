@@ -163,14 +163,30 @@ function canManageSubject(user, subject) {
   return !!db.prepare('SELECT 1 FROM teacher_assignments WHERE teacher_id = ? AND subject = ?').get(user.id, subject);
 }
 
-// Guru boleh mengajar jadwal bila tertaut langsung atau mengampu kelas+mapel.
+// Guru hanya boleh mengajar slot yang memang ditautkan ke akunnya.
 function canTeachSchedule(user, schedule) {
   if (hasFullAccess(user)) return true;
-  if (schedule.teacher_id && schedule.teacher_id === user.id) return true;
-  if (schedule.teacher && schedule.teacher === user.name) return true;
+  return !!schedule.teacher_id && schedule.teacher_id === user.id;
+}
+
+// Nilai hanya ditulis oleh guru yang mengampu kelas dan mapel siswa tersebut.
+function canWriteGrade(user, studentId, subject) {
+  if (hasFullAccess(user)) return true;
   return !!db
-    .prepare('SELECT 1 FROM teacher_assignments WHERE teacher_id = ? AND class = ? AND subject = ?')
-    .get(user.id, schedule.class, schedule.subject);
+    .prepare(`SELECT 1 FROM teacher_assignments ta
+              JOIN students s ON s.class = ta.class
+              WHERE ta.teacher_id = ? AND s.id = ? AND ta.subject = ?`)
+    .get(user.id, studentId, subject);
+}
+
+// Rekap harian ditulis admin/TU dan wali kelas untuk kelasnya sendiri.
+function canWriteDailyAttendance(user, studentId) {
+  const roles = getRoles(user);
+  if (roles.some((role) => ['admin', 'kepala_tu', 'staff_tu'].includes(role))) return true;
+  if (roles.includes('wali_kelas') && user.class) {
+    return !!db.prepare('SELECT 1 FROM students WHERE id = ? AND class = ?').get(studentId, user.class);
+  }
+  return false;
 }
 
 // Orang tua hanya boleh mengunggah bukti untuk tagihan anaknya.
@@ -192,5 +208,7 @@ module.exports = {
   canManageStudent,
   canManageSubject,
   canTeachSchedule,
+  canWriteGrade,
+  canWriteDailyAttendance,
   isChildOf
 };

@@ -19,6 +19,17 @@ export interface TeacherAssignment {
   class: string
 }
 
+export interface TeacherDirectoryItem {
+  id: string
+  name: string
+  niup: string
+  subjects: string[]
+  classes: string[]
+  account_id: string | null
+  account_name: string | null
+  account_email: string | null
+}
+
 export interface ParentAccount {
   id: string
   name: string
@@ -36,6 +47,7 @@ export interface ParentRelation {
 
 export const useRelationStore = defineStore('relation', () => {
   const teachers = ref<TeacherAccount[]>([])
+  const teacherDirectory = ref<TeacherDirectoryItem[]>([])
   const assignments = ref<TeacherAssignment[]>([])
   const parentAccounts = ref<ParentAccount[]>([])
   const parentRelations = ref<ParentRelation[]>([])
@@ -49,6 +61,15 @@ export const useRelationStore = defineStore('relation', () => {
       error.value = fetchError
     } else if (data) {
       teachers.value = data
+    }
+  }
+
+  const fetchTeacherDirectory = async () => {
+    const { data, error: fetchError } = await fetchWithAuth('/relations/teacher-directory')
+    if (fetchError) {
+      error.value = fetchError
+    } else if (data) {
+      teacherDirectory.value = data
     }
   }
 
@@ -80,10 +101,11 @@ export const useRelationStore = defineStore('relation', () => {
     return true
   }
 
-  const removeAssignment = async (id: string) => {
+  const removeAssignment = async (id: string, force = false) => {
     loading.value = true
     error.value = null
-    const { error: fetchError } = await fetchWithAuth(`/relations/teacher-assignments/${id}`, {
+    const suffix = force ? '?force=1' : ''
+    const { error: fetchError } = await fetchWithAuth(`/relations/teacher-assignments/${id}${suffix}`, {
       method: 'DELETE'
     })
     loading.value = false
@@ -92,6 +114,22 @@ export const useRelationStore = defineStore('relation', () => {
       return false
     }
     assignments.value = assignments.value.filter((item) => item.id !== id)
+    return true
+  }
+
+  const moveAssignment = async (id: string, teacherEmail: string) => {
+    loading.value = true
+    error.value = null
+    const { error: fetchError } = await fetchWithAuth(`/relations/teacher-assignments/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ teacherEmail })
+    })
+    loading.value = false
+    if (fetchError) {
+      error.value = fetchError
+      return false
+    }
+    await fetchAssignments()
     return true
   }
 
@@ -146,15 +184,18 @@ export const useRelationStore = defineStore('relation', () => {
 
   return {
     teachers,
+    teacherDirectory,
     assignments,
     parentAccounts,
     parentRelations,
     loading,
     error,
     fetchTeachers,
+    fetchTeacherDirectory,
     fetchAssignments,
     addAssignment,
     removeAssignment,
+    moveAssignment,
     fetchParentAccounts,
     fetchParents,
     addParentRelation,

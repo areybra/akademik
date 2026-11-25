@@ -19,7 +19,7 @@
       </svg>
       <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
         <span class="text-xl font-bold text-slate-900 tabular-nums leading-none">{{ centerValue }}</span>
-        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mt-1">{{ centerLabel }}</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mt-1">{{ centerLabel }}</span>
       </div>
     </div>
 
@@ -32,7 +32,7 @@
         <span class="w-2 h-2 rounded-full shrink-0" :style="{ backgroundColor: segment.color }"></span>
         <span class="text-slate-600 truncate flex-1" :title="segment.label">{{ segment.label }}</span>
         <span class="font-bold tabular-nums text-slate-800">{{ valueFormatter(segment.value) }}</span>
-        <span class="w-10 text-right text-slate-400 tabular-nums">{{ segment.percent }}%</span>
+        <span class="w-10 text-right text-slate-500 tabular-nums">{{ segment.percent }}%</span>
       </li>
     </ul>
   </div>

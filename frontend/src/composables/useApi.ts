@@ -7,14 +7,12 @@ export const useApi = () => {
     const authStore = useAuthStore()
     const token = localStorage.getItem('token')
 
-    const defaultHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
-
     const providedHeaders = (options.headers as Record<string, string> | undefined) ?? {}
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
 
+    // FormData wajib dibiarkan tanpa Content-Type agar browser menulis boundary sendiri.
     const headers: Record<string, string> = {
-      ...defaultHeaders,
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...providedHeaders,
     }
 

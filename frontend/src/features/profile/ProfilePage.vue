@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6 pb-16">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Profil</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Profil</h1>
       <p class="text-sm text-slate-500 mt-1">Data singkat anak dan kelasnya.</p>
     </div>
 

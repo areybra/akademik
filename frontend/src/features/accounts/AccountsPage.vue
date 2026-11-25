@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6 pb-20 max-w-5xl">
     <div>
-      <h1 class="text-xl font-bold text-slate-900 tracking-tight">Manajemen Akun</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Manajemen Akun</h1>
       <p class="text-sm text-slate-500 mt-0.5">
         Kelola akun pengguna, tautan orang tua dengan anak, dan penugasan mengajar guru.
       </p>

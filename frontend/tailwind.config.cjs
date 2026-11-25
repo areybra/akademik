@@ -25,8 +25,9 @@ module.exports = {
         slate: tone,
         surface: tone,
 
-        // Skala aksen: latar tint, border, teks aksen, dan sorotan.
-        // `brand` dipertahankan sebagai alias agar halaman lama ikut bertema.
+        // Skala aksen: biru logo sekolah.
+        // Nama `indigo` dan `brand` dipertahankan agar kelas lama
+        // otomatis mengikuti aksen baru tanpa penulisan ulang.
         indigo: accent,
         brand: accent,
 
@@ -42,6 +43,7 @@ module.exports = {
         line: withAlpha('--line'),
         ink: withAlpha('--ink'),
         muted: withAlpha('--muted'),
+        ring: withAlpha('--ring'),
 
         cta: {
           DEFAULT: withAlpha('--cta'),

@@ -55,7 +55,7 @@
             <input v-model="form.extraRoles" type="checkbox" name="extraRoles" :value="role.value" class="accent-indigo-600" />
             {{ role.label }}
           </label>
-          <span v-if="form.role === 'guru'" class="text-[11px] text-slate-400 self-center">
+          <span v-if="form.role === 'guru'" class="text-[11px] text-slate-500 self-center">
             Role utama sudah guru.
           </span>
         </div>
@@ -88,9 +88,9 @@
           >
             <input v-model="form.parentStudentIds" type="checkbox" name="parentStudentIds" :value="student.id" class="accent-indigo-600" />
             <span class="min-w-0 flex-1 truncate">{{ student.name }}</span>
-            <span class="text-[10px] text-slate-400">{{ student.class }}</span>
+            <span class="text-[10px] text-slate-500">{{ student.class }}</span>
           </label>
-          <p v-if="filteredStudents.length === 0" class="px-3 py-3 text-xs text-slate-400">
+          <p v-if="filteredStudents.length === 0" class="px-3 py-3 text-xs text-slate-500">
             Siswa tidak ditemukan.
           </p>
         </div>
@@ -98,6 +98,15 @@
 
       <!-- Guru / guru mapel -->
       <div v-if="isTeacherRole" role="group" :aria-labelledby="`${uid}-assignments`" class="rounded-xl border border-line bg-slate-50/60 p-3 space-y-2">
+        <div>
+          <label :for="`${uid}-teacher`" class="clean-label">Data guru yang tertaut</label>
+          <select :id="`${uid}-teacher`" v-model="form.teacherId" class="clean-input appearance-none cursor-pointer">
+            <option value="">Tautkan otomatis dari nama (kosongkan bila tidak ada)</option>
+            <option v-for="item in relationStore.teacherDirectory" :key="item.id" :value="item.id">
+              {{ item.name }} · {{ item.niup }}
+            </option>
+          </select>
+        </div>
         <div class="flex items-center justify-between gap-2">
           <span :id="`${uid}-assignments`" class="clean-label mb-0">Mapel &amp; kelas yang diampu</span>
           <button type="button" class="text-[11px] font-bold text-indigo-600 hover:underline" @click="addAssignment">
@@ -115,7 +124,7 @@
             Hapus
           </button>
         </div>
-        <p v-if="form.assignments.length === 0" class="text-xs text-slate-400">Belum ada penugasan.</p>
+        <p v-if="form.assignments.length === 0" class="text-xs text-slate-500">Belum ada penugasan.</p>
       </div>
 
       <!-- Wali kelas -->
@@ -132,7 +141,7 @@
       </datalist>
 
       <p v-if="error" class="rounded-lg bg-rose-50 px-3 py-2 text-[11px] font-medium text-rose-700">{{ error }}</p>
-      <p v-if="user" class="text-[11px] text-slate-400">
+      <p v-if="user" class="text-[11px] text-slate-500">
         Perubahan role atau kelas baru berlaku setelah pengguna login ulang. Relasi langsung berlaku.
       </p>
     </div>
@@ -145,6 +154,7 @@ import Modal from '../../components/ui/Modal.vue'
 import { useUserStore, type UserDetail, type UserForm } from '../../stores/users'
 import { useStudentStore } from '../../stores/student'
 import { useScheduleStore } from '../../stores/schedule'
+import { useRelationStore } from '../../stores/relation'
 
 const ROLE_OPTIONS = [
   { value: 'admin', label: 'Admin' },
@@ -179,6 +189,7 @@ const emit = defineEmits(['close', 'saved'])
 const userStore = useUserStore()
 const studentStore = useStudentStore()
 const scheduleStore = useScheduleStore()
+const relationStore = useRelationStore()
 
 const form = reactive({
   name: '',
@@ -188,6 +199,7 @@ const form = reactive({
   extraRoles: [] as string[],
   className: '',
   studentId: '',
+  teacherId: '',
   parentStudentIds: [] as string[],
   assignments: [] as Array<{ subject: string; class: string }>,
   studentQuery: '',
@@ -263,6 +275,7 @@ const resetForm = () => {
   form.extraRoles = []
   form.className = ''
   form.studentId = ''
+  form.teacherId = ''
   form.parentStudentIds = []
   form.assignments = []
   form.studentQuery = ''
@@ -282,6 +295,7 @@ const initForm = () => {
   )
   form.className = detail.class || ''
   form.studentId = detail.student_id || ''
+  form.teacherId = detail.teacher_id || ''
   form.parentStudentIds = [...detail.parentStudentIds]
   form.assignments = detail.assignments.map((item) => ({ subject: item.subject, class: item.class }))
 }
@@ -293,6 +307,7 @@ watch(
     initForm()
     if (studentStore.students.length === 0) await studentStore.fetchStudents()
     if (scheduleStore.schedules.length === 0) await scheduleStore.fetchSchedules()
+    if (relationStore.teacherDirectory.length === 0) await relationStore.fetchTeacherDirectory()
     if (isTeacherRole.value && form.assignments.length === 0) addAssignment()
   }
 )
@@ -342,6 +357,7 @@ const buildPayload = (): UserForm => {
     roles: activeRoles.value,
     class: needsWali.value ? form.className.trim() || null : null,
     studentId: needsStudent.value ? form.studentId : null,
+    teacherId: isTeacherRole.value ? form.teacherId || null : null,
     parentStudentIds: needsParent.value ? [...form.parentStudentIds] : [],
     assignments: isTeacherRole.value
       ? form.assignments

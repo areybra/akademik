@@ -42,15 +42,15 @@ const props = withDefaults(defineProps<Props>(), {
 defineEmits(['click'])
 
 const variantClasses = {
-  primary: 'bg-cta text-cta-ink shadow-sm hover:bg-cta-hover focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2',
+  primary: 'bg-cta text-cta-ink shadow-sm hover:bg-cta-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
   secondary: 'bg-panel text-slate-700 border border-slate-300 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-slate-500/30 focus-visible:ring-offset-2',
-  outline: 'bg-transparent text-indigo-600 border border-indigo-200 hover:bg-indigo-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2',
-  ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2',
+  outline: 'bg-transparent text-indigo-600 border border-indigo-200 hover:bg-indigo-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+  ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
   danger: 'bg-danger text-danger-ink shadow-sm hover:bg-danger-hover focus-visible:ring-2 focus-visible:ring-rose-500/40 focus-visible:ring-offset-2'
 }
 
 const sizeClasses = {
-  sm: 'px-3 py-1.5 text-xs rounded-button min-h-[32px]',
+  sm: 'px-3 py-1.5 text-xs rounded-button min-h-[40px] sm:min-h-[32px]',
   md: 'px-4 py-2 text-sm rounded-button min-h-[40px]',
   lg: 'px-6 py-2.5 text-sm rounded-button min-h-[44px]'
 }

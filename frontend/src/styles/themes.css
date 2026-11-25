@@ -1,14 +1,18 @@
 /* ============================================================
    Tema Akademik SMK
-   Enam palet (3 terang, 3 gelap) yang dipilih melalui atribut
-   data-theme pada elemen <html>.
+   Dua tema: terang (light-blue) dan gelap (dark-navy).
+   Aksen mengikuti biru logo sekolah, emas dipakai sebagai aksen
+   sekunder. Warna status tetap terpisah dari aksen agar makna
+   tidak bertabrakan.
 
    Semua nilai warna utama disimpan sebagai triplet RGB agar
    modifier opacity Tailwind (mis. bg-panel/80) tetap bekerja.
    ============================================================ */
 
-/* Status colors — dipakai lintas tema untuk makna yang konsisten
-   (hijau = hadir/lunas, kuning = menunggu, merah = alpa/gagal). */
+/* Status colors: makna tetap sama di kedua tema
+   (hijau = hadir/lunas, kuning = menunggu, merah = alpa/gagal,
+   biru = informasi). Langkah 600 dipakai sebagai teks di atas
+   tint maupun panel, jadi nilainya dipilih yang lolos 4.5:1. */
 :root {
   --emerald-50: 236 253 245;
   --emerald-100: 209 250 229;
@@ -16,11 +20,11 @@
   --emerald-300: 110 231 183;
   --emerald-400: 52 211 153;
   --emerald-500: 16 185 129;
-  --emerald-600: 5 150 105;
-  --emerald-700: 4 120 87;
-  --emerald-800: 6 95 70;
-  --emerald-900: 6 78 59;
-  --emerald-950: 2 44 34;
+  --emerald-600: 4 120 87;
+  --emerald-700: 6 95 70;
+  --emerald-800: 6 78 59;
+  --emerald-900: 2 44 34;
+  --emerald-950: 1 30 23;
 
   --amber-50: 255 251 235;
   --amber-100: 254 243 199;
@@ -28,11 +32,11 @@
   --amber-300: 252 211 77;
   --amber-400: 251 191 36;
   --amber-500: 245 158 11;
-  --amber-600: 217 119 6;
-  --amber-700: 180 83 9;
-  --amber-800: 146 64 14;
-  --amber-900: 120 53 15;
-  --amber-950: 69 26 3;
+  --amber-600: 180 83 9;
+  --amber-700: 146 64 14;
+  --amber-800: 120 53 15;
+  --amber-900: 69 26 3;
+  --amber-950: 40 16 2;
 
   --rose-50: 255 241 242;
   --rose-100: 255 228 230;
@@ -40,11 +44,11 @@
   --rose-300: 253 164 175;
   --rose-400: 251 113 133;
   --rose-500: 244 63 94;
-  --rose-600: 225 29 72;
-  --rose-700: 190 18 60;
-  --rose-800: 159 18 57;
-  --rose-900: 136 19 55;
-  --rose-950: 76 5 25;
+  --rose-600: 190 18 60;
+  --rose-700: 159 18 57;
+  --rose-800: 136 19 55;
+  --rose-900: 76 5 25;
+  --rose-950: 40 3 15;
 
   --sky-50: 240 249 255;
   --sky-100: 224 242 254;
@@ -52,33 +56,33 @@
   --sky-300: 125 211 252;
   --sky-400: 56 189 248;
   --sky-500: 14 165 233;
-  --sky-600: 2 132 199;
-  --sky-700: 3 105 161;
-  --sky-800: 7 89 133;
-  --sky-900: 12 74 110;
-  --sky-950: 8 47 73;
+  --sky-600: 3 105 161;
+  --sky-700: 7 89 133;
+  --sky-800: 12 74 110;
+  --sky-900: 8 47 73;
+  --sky-950: 3 26 43;
 
   /* Warna aksi destruktif (tombol hapus) — sama di semua tema. */
-  --danger: 225 29 72;
-  --danger-hover: 190 18 60;
+  --danger: 190 18 60;
+  --danger-hover: 159 18 57;
   --danger-ink: 255 255 255;
 }
 
 /* ------------------------------------------------------------
-   1. Soft Cool Slate & Royal Indigo (default)
+   1. Royal Blue & Gold (terang)
    ------------------------------------------------------------ */
-[data-theme='light-indigo'] {
+[data-theme='light-blue'] {
   color-scheme: light;
 
-  --canvas: 241 245 249;
+  --canvas: 245 247 251;
   --panel: 255 255 255;
-  --line: 221 229 239;
+  --line: 226 232 240;
   --ink: 15 23 42;
-  --muted: 100 116 139;
+  --muted: 95 111 133;
 
-  --tone-50: 241 245 249;
-  --tone-100: 233 238 245;
-  --tone-200: 221 229 239;
+  --tone-50: 245 247 251;
+  --tone-100: 238 242 249;
+  --tone-200: 226 232 240;
   --tone-300: 203 213 225;
   --tone-400: 148 163 184;
   --tone-500: 95 111 133;
@@ -88,334 +92,110 @@
   --tone-900: 15 23 42;
   --tone-950: 2 6 23;
 
-  --accent-50: 238 242 255;
-  --accent-100: 224 231 255;
-  --accent-200: 199 210 254;
-  --accent-300: 165 180 252;
-  --accent-400: 129 140 248;
-  --accent-500: 79 70 229;
-  --accent-600: 79 70 229;
-  --accent-700: 67 56 202;
-  --accent-800: 55 48 163;
-  --accent-900: 49 46 129;
-  --accent-950: 30 27 75;
+  --accent-50: 239 246 255;
+  --accent-100: 219 234 254;
+  --accent-200: 191 219 254;
+  --accent-300: 147 197 253;
+  --accent-400: 96 165 250;
+  --accent-500: 59 130 246;
+  --accent-600: 37 99 235;
+  --accent-700: 29 78 216;
+  --accent-800: 30 64 175;
+  --accent-900: 30 58 138;
+  --accent-950: 23 37 84;
 
   --sidebar: 255 255 255;
   --sidebar-ink: 15 23 42;
-  --sidebar-muted: 100 116 139;
-  --sidebar-accent: 79 70 229;
-  --sidebar-active: 238 242 255;
-  --sidebar-active-ink: 67 56 202;
-  --sidebar-hover: 241 245 249;
+  --sidebar-muted: 95 111 133;
+  --sidebar-accent: 180 83 9;
+  --sidebar-active: 239 246 255;
+  --sidebar-active-ink: 29 78 216;
+  --sidebar-hover: 245 247 251;
   --sidebar-border: 226 232 240;
   --sidebar-footer: 248 250 252;
 
-  --cta: 79 70 229;
-  --cta-hover: 67 56 202;
+  --cta: 29 78 216;
+  --cta-hover: 30 64 175;
   --cta-ink: 255 255 255;
 
-  --chart-accent: #4f46e5;
-  --chart-accent-soft: #a5b4fc;
+  --ring: 37 99 235;
+
+  --chart-accent: #2563eb;
+  --chart-accent-soft: #93c5fd;
+  --chart-series-2: #b45309;
+  --chart-series-3: #047857;
+  --chart-series-4: #be123c;
+  --chart-sky: #0369a1;
   --chart-grid: #e2e8f0;
-  --chart-track: #eef2f7;
-  --chart-label: #94a3b8;
+  --chart-track: #eef3fa;
+  --chart-label: #475569;
   --chart-tooltip-bg: #0f172a;
   --chart-tooltip-ink: #f8fafc;
 }
 
 /* ------------------------------------------------------------
-   2. Academic Navy & Warm Amber
+   2. Midnight Navy & Gold (gelap)
    ------------------------------------------------------------ */
-[data-theme='light-navy'] {
-  color-scheme: light;
-
-  --canvas: 248 250 252;
-  --panel: 255 255 255;
-  --line: 226 232 240;
-  --ink: 30 41 59;
-  --muted: 100 116 139;
-
-  --tone-50: 248 250 252;
-  --tone-100: 238 242 247;
-  --tone-200: 226 232 240;
-  --tone-300: 203 213 225;
-  --tone-400: 148 163 184;
-  --tone-500: 95 111 133;
-  --tone-600: 71 85 105;
-  --tone-700: 51 65 85;
-  --tone-800: 30 41 59;
-  --tone-900: 15 23 42;
-  --tone-950: 2 6 23;
-
-  --accent-50: 255 251 235;
-  --accent-100: 254 243 199;
-  --accent-200: 253 230 138;
-  --accent-300: 252 211 77;
-  --accent-400: 245 158 11;
-  --accent-500: 245 158 11;
-  --accent-600: 180 83 9;
-  --accent-700: 146 64 14;
-  --accent-800: 120 53 15;
-  --accent-900: 69 26 3;
-  --accent-950: 40 16 2;
-
-  --sidebar: 30 58 138;
-  --sidebar-ink: 255 255 255;
-  --sidebar-muted: 191 219 254;
-  --sidebar-accent: 252 211 77;
-  --sidebar-active: 43 75 168;
-  --sidebar-active-ink: 255 255 255;
-  --sidebar-hover: 38 70 156;
-  --sidebar-border: 47 79 173;
-  --sidebar-footer: 26 51 122;
-
-  --cta: 245 158 11;
-  --cta-hover: 251 191 36;
-  --cta-ink: 30 41 59;
-
-  --chart-accent: #f59e0b;
-  --chart-accent-soft: #fcd34d;
-  --chart-grid: #e2e8f0;
-  --chart-track: #eef2f7;
-  --chart-label: #94a3b8;
-  --chart-tooltip-bg: #0f172a;
-  --chart-tooltip-ink: #f8fafc;
-}
-
-/* ------------------------------------------------------------
-   3. Sage Mist & Deep Emerald
-   ------------------------------------------------------------ */
-[data-theme='light-sage'] {
-  color-scheme: light;
-
-  --canvas: 244 247 245;
-  --panel: 255 255 255;
-  --line: 226 232 240;
-  --ink: 30 41 59;
-  --muted: 100 116 139;
-
-  --tone-50: 244 247 245;
-  --tone-100: 235 240 237;
-  --tone-200: 226 232 240;
-  --tone-300: 203 213 225;
-  --tone-400: 148 163 184;
-  --tone-500: 95 111 133;
-  --tone-600: 71 85 105;
-  --tone-700: 51 65 85;
-  --tone-800: 30 41 59;
-  --tone-900: 15 23 42;
-  --tone-950: 2 6 23;
-
-  --accent-50: 236 253 245;
-  --accent-100: 209 250 229;
-  --accent-200: 167 243 208;
-  --accent-300: 110 231 183;
-  --accent-400: 52 211 153;
-  --accent-500: 5 150 105;
-  --accent-600: 4 120 87;
-  --accent-700: 6 95 70;
-  --accent-800: 6 78 59;
-  --accent-900: 2 44 34;
-  --accent-950: 1 30 23;
-
-  --sidebar: 255 255 255;
-  --sidebar-ink: 30 41 59;
-  --sidebar-muted: 100 116 139;
-  --sidebar-accent: 5 150 105;
-  --sidebar-active: 236 253 245;
-  --sidebar-active-ink: 4 120 87;
-  --sidebar-hover: 244 247 245;
-  --sidebar-border: 226 232 240;
-  --sidebar-footer: 244 247 245;
-
-  --cta: 4 120 87;
-  --cta-hover: 6 95 70;
-  --cta-ink: 255 255 255;
-
-  --chart-accent: #059669;
-  --chart-accent-soft: #6ee7b7;
-  --chart-grid: #e2e8f0;
-  --chart-track: #eef2f0;
-  --chart-label: #94a3b8;
-  --chart-tooltip-bg: #0f172a;
-  --chart-tooltip-ink: #f8fafc;
-}
-
-/* ------------------------------------------------------------
-   4. Midnight Slate & Indigo
-   ------------------------------------------------------------ */
-[data-theme='dark-indigo'] {
+[data-theme='dark-navy'] {
   color-scheme: dark;
 
-  --canvas: 15 23 42;
-  --panel: 30 41 59;
+  --canvas: 11 18 32;
+  --panel: 22 35 58;
   --line: 42 58 82;
-  --ink: 248 250 252;
-  --muted: 148 163 184;
+  --ink: 245 248 255;
+  --muted: 169 183 201;
 
-  --tone-50: 15 23 42;
-  --tone-100: 23 34 58;
-  --tone-200: 42 58 82;
-  --tone-300: 59 76 102;
-  --tone-400: 100 116 139;
-  --tone-500: 148 163 184;
-  --tone-600: 182 194 212;
-  --tone-700: 203 213 225;
-  --tone-800: 226 232 240;
-  --tone-900: 248 250 252;
+  --tone-50: 11 18 32;
+  --tone-100: 16 26 44;
+  --tone-200: 27 42 64;
+  --tone-300: 42 58 82;
+  --tone-400: 82 100 128;
+  --tone-500: 169 183 201;
+  --tone-600: 196 207 221;
+  --tone-700: 220 229 239;
+  --tone-800: 237 242 248;
+  --tone-900: 245 248 255;
   --tone-950: 255 255 255;
 
-  --accent-50: 30 27 75;
-  --accent-100: 42 37 96;
-  --accent-200: 55 48 163;
-  --accent-300: 67 56 202;
-  --accent-400: 129 140 248;
-  --accent-500: 99 102 241;
-  --accent-600: 165 180 252;
-  --accent-700: 199 210 254;
-  --accent-800: 224 231 255;
-  --accent-900: 238 242 255;
-  --accent-950: 245 247 255;
+  --accent-50: 16 30 51;
+  --accent-100: 22 41 74;
+  --accent-200: 30 58 95;
+  --accent-300: 147 197 253;
+  --accent-400: 96 165 250;
+  --accent-500: 59 130 246;
+  --accent-600: 96 165 250;
+  --accent-700: 147 197 253;
+  --accent-800: 191 219 254;
+  --accent-900: 219 234 254;
+  --accent-950: 239 246 255;
 
-  --sidebar: 30 41 59;
-  --sidebar-ink: 248 250 252;
-  --sidebar-muted: 148 163 184;
-  --sidebar-accent: 199 210 254;
-  --sidebar-active: 44 53 99;
-  --sidebar-active-ink: 224 231 255;
-  --sidebar-hover: 39 51 74;
+  --sidebar: 15 27 46;
+  --sidebar-ink: 245 248 255;
+  --sidebar-muted: 169 183 201;
+  --sidebar-accent: 252 211 77;
+  --sidebar-active: 27 44 73;
+  --sidebar-active-ink: 191 219 254;
+  --sidebar-hover: 22 36 60;
   --sidebar-border: 42 58 82;
-  --sidebar-footer: 23 34 58;
+  --sidebar-footer: 13 23 39;
 
-  --cta: 79 70 229;
-  --cta-hover: 67 56 202;
+  --cta: 37 99 235;
+  --cta-hover: 29 78 216;
   --cta-ink: 255 255 255;
 
-  --chart-accent: #818cf8;
-  --chart-accent-soft: #6366f1;
-  --chart-grid: #2a3a52;
-  --chart-track: #22304a;
-  --chart-label: #94a3b8;
-  --chart-tooltip-bg: #0b1220;
-  --chart-tooltip-ink: #f8fafc;
-}
+  --ring: 96 165 250;
 
-/* ------------------------------------------------------------
-   5. Deep Teal & Emerald
-   ------------------------------------------------------------ */
-[data-theme='dark-teal'] {
-  color-scheme: dark;
-
-  --canvas: 11 25 30;
-  --panel: 19 42 50;
-  --line: 30 61 72;
-  --ink: 241 245 249;
-  --muted: 143 170 179;
-
-  --tone-50: 11 25 30;
-  --tone-100: 15 33 40;
-  --tone-200: 30 61 72;
-  --tone-300: 42 76 88;
-  --tone-400: 94 123 133;
-  --tone-500: 143 170 179;
-  --tone-600: 179 200 207;
-  --tone-700: 205 219 223;
-  --tone-800: 226 236 239;
-  --tone-900: 241 245 249;
-  --tone-950: 255 255 255;
-
-  --accent-50: 6 40 31;
-  --accent-100: 6 62 46;
-  --accent-200: 4 120 87;
-  --accent-300: 5 150 105;
-  --accent-400: 52 211 153;
-  --accent-500: 16 185 129;
-  --accent-600: 110 231 183;
-  --accent-700: 167 243 208;
-  --accent-800: 209 250 229;
-  --accent-900: 236 253 245;
-  --accent-950: 240 253 250;
-
-  --sidebar: 19 42 50;
-  --sidebar-ink: 241 245 249;
-  --sidebar-muted: 143 170 179;
-  --sidebar-accent: 110 231 183;
-  --sidebar-active: 22 58 56;
-  --sidebar-active-ink: 167 243 208;
-  --sidebar-hover: 24 51 60;
-  --sidebar-border: 30 61 72;
-  --sidebar-footer: 15 33 40;
-
-  --cta: 4 120 87;
-  --cta-hover: 6 95 70;
-  --cta-ink: 255 255 255;
-
-  --chart-accent: #34d399;
-  --chart-accent-soft: #10b981;
-  --chart-grid: #1e3d48;
-  --chart-track: #17343d;
-  --chart-label: #8faab3;
-  --chart-tooltip-bg: #081418;
-  --chart-tooltip-ink: #f1f5f9;
-}
-
-/* ------------------------------------------------------------
-   6. Charcoal Plum & Violet
-   ------------------------------------------------------------ */
-[data-theme='dark-plum'] {
-  color-scheme: dark;
-
-  --canvas: 24 22 34;
-  --panel: 36 33 49;
-  --line: 56 51 73;
-  --ink: 245 243 255;
-  --muted: 161 158 181;
-
-  --tone-50: 24 22 34;
-  --tone-100: 30 27 44;
-  --tone-200: 56 51 73;
-  --tone-300: 74 68 96;
-  --tone-400: 111 106 133;
-  --tone-500: 161 158 181;
-  --tone-600: 189 185 206;
-  --tone-700: 213 210 227;
-  --tone-800: 232 230 242;
-  --tone-900: 245 243 255;
-  --tone-950: 255 255 255;
-
-  --accent-50: 42 30 77;
-  --accent-100: 59 42 107;
-  --accent-200: 91 33 182;
-  --accent-300: 109 40 217;
-  --accent-400: 167 139 250;
-  --accent-500: 139 92 246;
-  --accent-600: 196 181 253;
-  --accent-700: 221 214 254;
-  --accent-800: 237 233 254;
-  --accent-900: 245 243 255;
-  --accent-950: 250 248 255;
-
-  --sidebar: 36 33 49;
-  --sidebar-ink: 245 243 255;
-  --sidebar-muted: 161 158 181;
-  --sidebar-accent: 196 181 253;
-  --sidebar-active: 58 46 92;
-  --sidebar-active-ink: 221 214 254;
-  --sidebar-hover: 45 41 62;
-  --sidebar-border: 56 51 73;
-  --sidebar-footer: 30 27 44;
-
-  --cta: 124 58 237;
-  --cta-hover: 109 40 217;
-  --cta-ink: 255 255 255;
-
-  --chart-accent: #a78bfa;
-  --chart-accent-soft: #8b5cf6;
-  --chart-grid: #383349;
-  --chart-track: #2d293e;
-  --chart-label: #a19eb5;
-  --chart-tooltip-bg: #100e18;
-  --chart-tooltip-ink: #f5f3ff;
+  --chart-accent: #60a5fa;
+  --chart-accent-soft: #3b82f6;
+  --chart-series-2: #fbbf24;
+  --chart-series-3: #34d399;
+  --chart-series-4: #fda4af;
+  --chart-sky: #7dd3fc;
+  --chart-grid: #24344d;
+  --chart-track: #1a2a42;
+  --chart-label: #a9b7c9;
+  --chart-tooltip-bg: #060b14;
+  --chart-tooltip-ink: #f5f8ff;
 }
 
 /* ------------------------------------------------------------
@@ -466,9 +246,9 @@
   --sky-300: 27 74 110;
   --sky-400: 56 189 248;
   --sky-500: 14 165 233;
-  --sky-600: 56 189 248;
-  --sky-700: 125 211 252;
-  --sky-800: 186 230 253;
-  --sky-900: 224 242 254;
-  --sky-950: 240 249 255;
+  --sky-600: 125 211 252;
+  --sky-700: 186 230 253;
+  --sky-800: 224 242 254;
+  --sky-900: 240 249 255;
+  --sky-950: 248 252 255;
 }

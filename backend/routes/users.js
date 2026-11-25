@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const db = require('../database');
 const authenticateToken = require('../middleware/auth');
 const authorizeRoles = require('../middleware/roleCheck');
+const { canTeachSubject } = require('../lib/capability');
 
 const ROLE_VALUES = [
   'admin',
@@ -29,10 +30,11 @@ class ValidationError extends Error {
   }
 }
 
-const USER_SELECT = `SELECT u.id, u.name, u.email, u.role, u.roles, u.class, u.student_id, u.active,
-       s.name AS student_name
+const USER_SELECT = `SELECT u.id, u.name, u.email, u.role, u.roles, u.class, u.student_id, u.teacher_id, u.active,
+       s.name AS student_name, t.name AS teacher_name, t.niup AS teacher_niup
   FROM users u
-  LEFT JOIN students s ON s.id = u.student_id`;
+  LEFT JOIN students s ON s.id = u.student_id
+  LEFT JOIN teachers t ON t.id = u.teacher_id`;
 
 const parseJsonArray = (value) => {
   if (Array.isArray(value)) return value;
@@ -104,6 +106,19 @@ const assertStudentExists = (studentId) => {
   }
 };
 
+const normalizeTeacherId = (value, roles, name) => {
+  if (!roles.some((item) => TEACHER_ROLES.includes(item))) return null;
+  const teacherId = String(value ?? '').trim();
+  if (teacherId) {
+    if (!db.prepare('SELECT 1 FROM teachers WHERE id = ?').get(teacherId)) {
+      throw new ValidationError('Data guru tidak ditemukan');
+    }
+    return teacherId;
+  }
+  const matches = db.prepare('SELECT id FROM teachers WHERE TRIM(name) = TRIM(?)').all(name);
+  return matches.length === 1 ? matches[0].id : null;
+};
+
 const normalizeStudentIds = (raw) => {
   if (raw === undefined || raw === null) return [];
   if (!Array.isArray(raw)) throw new ValidationError('parentStudentIds harus berupa array');
@@ -156,6 +171,9 @@ const detailOf = (id) => {
     class: row.class,
     student_id: row.student_id,
     student_name: row.student_name || null,
+    teacher_id: row.teacher_id,
+    teacher_name: row.teacher_name || null,
+    teacher_niup: row.teacher_niup || null,
     active: row.active,
     parentStudentIds: db
       .prepare('SELECT student_id FROM parent_students WHERE parent_id = ? ORDER BY student_id')
@@ -169,6 +187,11 @@ const insertAssignments = (teacherId, assignments) => {
   const stmt = db.prepare('INSERT INTO teacher_assignments (id, teacher_id, subject, class) VALUES (?, ?, ?, ?)');
   const seen = new Set();
   for (const item of assignments) {
+    if (!canTeachSubject(teacherId, item.subject)) {
+      throw new ValidationError(
+        `Mapel ${item.subject} tidak ada di daftar mapel yang mampu diajar akun ini. Tambahkan dulu di Data Guru.`
+      );
+    }
     const id = assignmentId(teacherId, item.subject, item.class);
     if (seen.has(id)) continue;
     seen.add(id);
@@ -207,8 +230,8 @@ router.get(
   route((_req, res) => {
     const rows = db
       .prepare(
-        `SELECT u.id, u.name, u.email, u.role, u.roles, u.class, u.student_id, u.active,
-                s.name AS student_name,
+        `SELECT u.id, u.name, u.email, u.role, u.roles, u.class, u.student_id, u.teacher_id, u.active,
+                s.name AS student_name, t.name AS teacher_name, t.niup AS teacher_niup,
                 (SELECT GROUP_CONCAT(st.name, ', ')
                    FROM parent_students ps JOIN students st ON st.id = ps.student_id
                   WHERE ps.parent_id = u.id) AS children,
@@ -217,6 +240,7 @@ router.get(
                   WHERE ta.teacher_id = u.id) AS assignments
            FROM users u
            LEFT JOIN students s ON s.id = u.student_id
+           LEFT JOIN teachers t ON t.id = u.teacher_id
           ORDER BY u.name`
       )
       .all();
@@ -237,7 +261,7 @@ router.get(
   authenticateToken,
   route((req, res) => {
     const user = db
-      .prepare('SELECT id, name, email, role, class, roles, student_id, avatar, active FROM users WHERE id = ?')
+      .prepare('SELECT id, name, email, role, class, roles, student_id, teacher_id, avatar, active FROM users WHERE id = ?')
       .get(req.user.id);
     if (!user) return res.status(404).json({ message: 'User tidak ditemukan' });
     res.json({ ...user, roles: rolesOf(user) });
@@ -273,6 +297,7 @@ router.post(
     const role = normalizePrimaryRole(body.role);
     const roles = buildRoles(role, body.roles);
     const className = body.class === undefined || body.class === null ? null : String(body.class).trim() || null;
+    const teacherId = normalizeTeacherId(body.teacherId, roles, name);
 
     let studentId = null;
     if (roles.includes('siswa')) {
@@ -301,9 +326,9 @@ router.post(
 
     const create = db.transaction(() => {
       db.prepare(
-        `INSERT INTO users (id, name, email, password, role, class, roles, student_id, active)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`
-      ).run(id, name, email, hashed, role, className, JSON.stringify(roles), studentId);
+        `INSERT INTO users (id, name, email, password, role, class, roles, student_id, teacher_id, active)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`
+      ).run(id, name, email, hashed, role, className, JSON.stringify(roles), studentId, teacherId);
 
       if (roles.includes('orang_tua')) insertParents(id, parentStudentIds);
       if (roles.some((item) => TEACHER_ROLES.includes(item))) insertAssignments(id, assignments);
@@ -366,6 +391,12 @@ router.put(
       studentId = null;
     }
 
+    const teacherId = normalizeTeacherId(
+      body.teacherId !== undefined ? body.teacherId : row.teacher_id,
+      roles,
+      name
+    );
+
     let active = row.active;
     if (body.active !== undefined) {
       if (typeof body.active !== 'boolean') throw new ValidationError('active harus boolean');
@@ -378,13 +409,27 @@ router.put(
     const nextParentIds = body.parentStudentIds !== undefined ? normalizeStudentIds(body.parentStudentIds) : null;
     const nextAssignments = body.assignments !== undefined ? normalizeAssignments(body.assignments) : null;
 
+    if (nextAssignments === null && teacherId && teacherId !== row.teacher_id) {
+      const profile = db.prepare('SELECT subjects FROM teachers WHERE id = ?').get(teacherId);
+      const capable = JSON.parse(profile?.subjects || '[]').map((item) => String(item).trim().toLowerCase());
+      const incompatible = listAssignments(row.id).filter(
+        (item) => !capable.includes(item.subject.trim().toLowerCase())
+      );
+      if (incompatible.length > 0) {
+        const list = incompatible.map((item) => `${item.subject} di ${item.class}`).join(', ');
+        throw new ValidationError(
+          `Data guru baru belum mencantumkan mapel penugasan berikut: ${list}. Lengkapi Data Guru atau sesuaikan penugasan.`
+        );
+      }
+    }
+
     const update = db.transaction(() => {
       db.prepare(
         `UPDATE users
             SET name = ?, email = ?, password = ?, role = ?, class = ?, roles = ?,
-                student_id = ?, active = ?
+                student_id = ?, teacher_id = ?, active = ?
           WHERE id = ?`
-      ).run(name, email, password, role, className, JSON.stringify(roles), studentId, active, row.id);
+      ).run(name, email, password, role, className, JSON.stringify(roles), studentId, teacherId, active, row.id);
 
       if (nextParentIds !== null) {
         db.prepare('DELETE FROM parent_students WHERE parent_id = ?').run(row.id);

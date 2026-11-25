@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-black text-surface-900 tracking-tight">Manajemen Prestasi</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Manajemen Prestasi</h1>
         <p class="text-surface-500 mt-1 flex items-center gap-2 font-medium">
           <span class="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse"></span>
           Rekap prestasi siswa di bidang non-akademik
@@ -29,7 +29,7 @@
         <select
           :id="uid + '-kelas'"
           v-model="kelasFilter"
-          class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+          class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
         >
           <option value="">Semua Kelas</option>
           <option v-for="k in kelasOptions" :key="k" :value="k">{{ k }}</option>
@@ -42,7 +42,7 @@
         <select
           :id="uid + '-juara-filter'"
           v-model="juaraFilter"
-          class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+          class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
         >
           <option value="">Semua Juara</option>
           <option v-for="j in juaraOptions" :key="j" :value="j">{{ j }}</option>
@@ -55,7 +55,7 @@
         <select
           :id="uid + '-tahun'"
           v-model="tahunFilter"
-          class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+          class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
         >
           <option value="">Semua Tahun</option>
           <option v-for="t in tahunOptions" :key="t" :value="t">{{ t }}</option>
@@ -64,7 +64,7 @@
     </div>
 
     <!-- Empty State -->
-    <div v-if="filteredPrestasis.length === 0" class="premium-card p-8 sm:p-12 text-center">
+    <div v-if="filteredPrestasis.length === 0" class="premium-card p-6 sm:p-10 text-center">
       <div class="w-20 h-20 bg-surface-100 rounded-full flex items-center justify-center mx-auto mb-6 border border-surface-200">
         <svg class="w-10 h-10 text-surface-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5v10a2 2 0 002 2h10a2 2 0 002-2V5m-2 0l3-3m-3 3l3 3" />
@@ -210,7 +210,7 @@
             <select
               :id="uid + '-juara'"
               v-model="formData.juara"
-              class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+              class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
               required
             >
               <option value="Juara 1">Juara 1</option>

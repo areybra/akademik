@@ -1,13 +1,12 @@
 <template>
-  <!-- ================= ORANG TUA / SISWA ================= -->
   <div v-if="isPersonal" class="space-y-6 pb-16">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Nilai</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Nilai</h1>
         <p class="text-sm text-slate-500 mt-1">Ringkasan nilai per mata pelajaran.</p>
       </div>
       <div v-if="personalAverage !== null" class="rounded-xl border border-line bg-panel px-4 py-2 text-right">
-        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Rata-rata</p>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Rata-rata</p>
         <p class="text-xl font-bold text-slate-900 tabular-nums">{{ formatScore(personalAverage) }}</p>
       </div>
     </div>
@@ -32,7 +31,7 @@
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
             <h2 class="truncate text-sm font-bold text-slate-900">{{ item.subject }}</h2>
-            <p class="mt-0.5 text-[10px] text-slate-400">
+            <p class="mt-0.5 text-[10px] text-slate-500">
               {{ item.count }} nilai
               <span v-if="item.delta !== 0" :class="item.delta > 0 ? 'text-emerald-600' : 'text-rose-500'">
                 · {{ item.delta > 0 ? 'naik' : 'turun' }} {{ Math.abs(item.delta) }}
@@ -50,7 +49,7 @@
         <div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-100">
           <div class="h-full rounded-full transition-all" :class="predicateMeta(item.score).bar" :style="{ width: `${item.score}%` }"></div>
         </div>
-        <p class="mt-2 text-[10px] text-slate-400">
+        <p class="mt-2 text-[10px] text-slate-500">
           Rata-rata {{ formatScore(item.average) }} · nilai terakhir {{ formatDate(item.date) }}
         </p>
       </article>
@@ -66,10 +65,10 @@
   <div v-else class="space-y-8 pb-16">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Manajemen Nilai</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Manajemen Nilai</h1>
         <p class="text-sm text-slate-500 mt-1">Rekapitulasi pencapaian akademik siswa.</p>
       </div>
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:justify-end">
+      <div class="flex flex-wrap items-center gap-2 md:justify-end">
         <Button v-if="canEdit" variant="primary" @click="openAddModal">Input Nilai</Button>
         <Button v-if="canExport" variant="outline" class="no-print" @click="exportGrades">Ekspor CSV</Button>
       </div>
@@ -81,7 +80,7 @@
         <select
           :id="uid + '-class'"
           v-model="selectedClass"
-          class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/30 appearance-none cursor-pointer"
+          class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer"
         >
           <option value="">Semua Kelas</option>
           <option v-for="c in classesList" :key="c.id" :value="c.name">
@@ -94,7 +93,7 @@
         <select
           :id="uid + '-subject-filter'"
           v-model="selectedSubject"
-          class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/30 appearance-none cursor-pointer"
+          class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer"
         >
           <option value="">Semua Mata Pelajaran</option>
           <option v-for="subject in subjectOptions" :key="subject" :value="subject">{{ subject }}</option>
@@ -107,12 +106,12 @@
         <table class="w-full text-left">
           <thead>
             <tr class="bg-surface-50 border-b border-surface-200/60">
-              <th class="px-4 sm:px-6 py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest">Informasi Siswa</th>
-              <th class="px-4 sm:px-6 py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest">Mata Pelajaran</th>
-              <th class="px-4 sm:px-6 py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest text-center">Skor</th>
-              <th class="px-4 sm:px-6 py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest text-center">Predikat</th>
-              <th class="px-4 sm:px-6 py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest text-center">Tanggal</th>
-              <th v-if="canEdit" class="px-4 sm:px-6 py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest text-right">Aksi</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest">Informasi Siswa</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest">Mata Pelajaran</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest text-center">Skor</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest text-center">Predikat</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest text-center">Tanggal</th>
+              <th v-if="canEdit" class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-black text-surface-500 uppercase tracking-widest text-right">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-surface-100">
@@ -155,7 +154,7 @@
               </td>
             </tr>
             <tr v-if="filteredGrades.length === 0">
-              <td :colspan="canEdit ? 6 : 5" class="px-4 py-8 text-center text-sm text-slate-400">
+              <td :colspan="canEdit ? 6 : 5" class="px-4 py-8 text-center text-sm text-slate-500">
                 Belum ada nilai untuk kriteria ini.
               </td>
             </tr>
@@ -179,7 +178,7 @@
             :id="uid + '-student'"
             v-model="formData.studentId"
             @change="onStudentChange"
-            class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/30 appearance-none cursor-pointer"
+            class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer"
           >
             <option value="">Cari Nama Siswa...</option>
             <option v-for="student in students" :key="student.id" :value="student.id">
@@ -194,7 +193,7 @@
             :id="uid + '-subject'"
             v-model="formData.subject"
             list="grade-subject-options"
-            class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            class="w-full px-4 py-3 bg-surface-100/50 border border-surface-200/60 rounded-xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <datalist id="grade-subject-options">
             <option v-for="subject in subjectOptions" :key="subject" :value="subject" />
@@ -263,7 +262,7 @@ const predicateMeta = (score: number) => {
   if (score >= 90) return { label: 'Sangat baik', badge: 'bg-emerald-50 text-emerald-700 border border-emerald-100', bar: 'bg-emerald-500' }
   if (score >= 80) return { label: 'Baik', badge: 'bg-sky-50 text-sky-700 border border-sky-100', bar: 'bg-sky-500' }
   if (score >= 70) return { label: 'Cukup', badge: 'bg-amber-50 text-amber-700 border border-amber-100', bar: 'bg-amber-500' }
-  if (score >= 60) return { label: 'Perlu latihan', badge: 'bg-orange-50 text-orange-700 border border-orange-100', bar: 'bg-orange-500' }
+  if (score >= 60) return { label: 'Perlu latihan', badge: 'bg-amber-100 text-amber-800 border border-amber-200', bar: 'bg-amber-600' }
   return { label: 'Perlu bimbingan', badge: 'bg-rose-50 text-rose-700 border border-rose-100', bar: 'bg-rose-500' }
 }
 
@@ -316,7 +315,7 @@ const getScoreClass = (score: number) => {
   if (score >= 90) return 'bg-emerald-50 text-emerald-600 border-emerald-100'
   if (score >= 80) return 'bg-sky-50 text-sky-600 border-sky-100'
   if (score >= 70) return 'bg-amber-50 text-amber-600 border-amber-100'
-  if (score >= 60) return 'bg-orange-50 text-orange-600 border-orange-100'
+  if (score >= 60) return 'bg-amber-100 text-amber-800 border-amber-200'
   return 'bg-rose-50 text-rose-600 border-rose-100'
 }
 

@@ -1,8 +1,7 @@
 <template>
-  <!-- Mode inline: dipakai di halaman Pengaturan -->
   <div v-if="variant === 'inline'" class="space-y-5" role="radiogroup" aria-label="Pilih tema tampilan">
     <div v-for="group in groups" :key="group.label">
-      <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">{{ group.label }}</p>
+      <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">{{ group.label }}</p>
       <div class="grid gap-3 sm:grid-cols-2">
         <button
           v-for="theme in group.themes"
@@ -23,7 +22,7 @@
   <div v-else ref="rootRef" class="relative">
     <button
       type="button"
-      class="inline-flex items-center justify-center gap-2 p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30"
+      class="inline-flex items-center justify-center gap-2 p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       :aria-label="`Ganti tema tampilan (aktif: ${activeTheme.name})`"
       aria-haspopup="true"
       :aria-expanded="isOpen"
@@ -48,7 +47,7 @@
         @keydown="onMenuKeydown"
       >
         <div v-for="group in groups" :key="`menu-${group.label}`" class="mb-3 last:mb-0">
-          <p class="px-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ group.label }}</p>
+          <p class="px-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ group.label }}</p>
           <button
             v-for="theme in group.themes"
             :key="`menu-${theme.id}`"
@@ -157,14 +156,14 @@ onBeforeUnmount(() => {
 })
 
 const cardClass = (id: string) => [
-  'group text-left rounded-xl border p-3 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40',
+  'group text-left rounded-xl border p-3 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
   isActive(id)
     ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-500/20'
     : 'border-slate-200 bg-panel hover:border-slate-300 hover:bg-slate-50'
 ]
 
 const rowClass = (id: string) => [
-  'flex w-full items-center gap-3 rounded-lg border px-2 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40',
+  'flex w-full items-center gap-3 rounded-lg border px-2 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
   isActive(id)
     ? 'border-brand-500 bg-brand-50'
     : 'border-transparent hover:bg-slate-50'

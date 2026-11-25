@@ -23,6 +23,7 @@ export interface TeachingSlot {
   complete: boolean
   status: 'draft' | 'submitted'
   submittedAt: string | null
+  unlockedAt: string | null
   startAt: string | null
   endAt: string | null
   missingInput: boolean
@@ -51,6 +52,7 @@ export interface LessonSession {
   updatedAt: string
   status: 'draft' | 'submitted'
   submittedAt: string | null
+  unlockedAt: string | null
   records: SessionRecord[]
   students: SessionStudent[]
 }

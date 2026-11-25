@@ -4,29 +4,22 @@
     <!-- Header -->
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
           Selamat Datang, {{ authStore.user?.name }}
         </h1>
         <p class="text-sm text-slate-500 mt-1">
           {{ audienceSubtitle }}
-          <span v-if="referenceLabel" class="text-slate-400">Data absensi {{ referenceLabel }}.</span>
+          <span v-if="referenceLabel" class="text-slate-500">Data absensi {{ referenceLabel }}.</span>
         </p>
       </div>
 
       <div class="flex items-center gap-3">
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-          <span class="relative flex w-2 h-2">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
-            <span class="relative inline-flex w-2 h-2 rounded-full bg-emerald-500"></span>
-          </span>
-          Live
-        </span>
-        <span class="text-[11px] font-medium text-slate-400 tabular-nums">
+        <span class="text-[11px] font-medium text-slate-500 tabular-nums">
           Diperbarui {{ formatDateTime(dashboardStore.lastUpdated) }}
         </span>
         <button
           type="button"
-          class="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-50"
+          class="p-2 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-50"
           :disabled="dashboardStore.refreshing"
           aria-label="Muat ulang data dashboard"
           title="Muat ulang"
@@ -50,20 +43,20 @@
     </div>
 
     <!-- KPI -->
-    <div v-if="!summary && dashboardStore.loading" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-      <div v-for="index in 4" :key="`kpi-skeleton-${index}`" class="clean-card p-4 animate-pulse">
+    <div v-if="!summary && dashboardStore.loading" class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+      <div v-for="index in 4" :key="`kpi-skeleton-${index}`" class="clean-card p-3.5 sm:p-4 animate-pulse">
         <div class="h-3 w-24 bg-slate-100 rounded"></div>
         <div class="h-7 w-20 bg-slate-100 rounded mt-3"></div>
         <div class="h-3 w-32 bg-slate-100 rounded mt-4"></div>
       </div>
     </div>
 
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-      <div v-for="stat in stats" :key="stat.label" class="clean-card p-4">
+    <div v-else class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+      <div v-for="stat in stats" :key="stat.label" class="clean-card p-3.5 sm:p-4">
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{{ stat.label }}</p>
-            <p class="text-2xl font-bold text-slate-900 mt-1 tabular-nums leading-none truncate">{{ stat.value }}</p>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">{{ stat.label }}</p>
+            <p class="text-xl sm:text-2xl font-bold text-slate-900 mt-1 tabular-nums leading-none truncate">{{ stat.value }}</p>
           </div>
           <div :class="['w-9 h-9 rounded-lg flex items-center justify-center shrink-0', stat.iconBg, stat.iconClass]">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,7 +95,7 @@
           <span class="w-24 text-[11px] font-bold text-slate-600 tabular-nums">{{ slot.time }}</span>
           <div class="min-w-0 flex-1">
             <p class="truncate text-xs font-bold text-slate-800">{{ slot.subject }}</p>
-            <p class="text-[10px] text-slate-400">{{ slot.class }} · {{ slot.room }}</p>
+            <p class="text-[10px] text-slate-500">{{ slot.class }} · {{ slot.room }}</p>
           </div>
           <span class="rounded-full px-2.5 py-1 text-[10px] font-bold" :class="teachingStatus(slot.status).class">
             {{ teachingStatus(slot.status).label }}
@@ -282,7 +275,7 @@
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-semibold text-slate-800 truncate">{{ row.name }}</p>
-              <p class="text-[10px] text-slate-400 truncate">{{ row.class || '—' }}</p>
+              <p class="text-[10px] text-slate-500 truncate">{{ row.class || '—' }}</p>
             </div>
             <span class="text-xs font-bold text-slate-800 tabular-nums">{{ formatScore(row.average) }}</span>
           </li>
@@ -400,7 +393,7 @@ const majorItems = computed(
 const majorMax = computed(() => Math.max(1, ...majorItems.value.map((item) => item.value)))
 
 const genderSegments = computed(() => {
-  const colors = [CHART_COLORS.indigo, '#ec4899']
+  const colors = [CHART_COLORS.indigo, CHART_COLORS.gold]
   return (summary.value?.students.byGender ?? []).map((item, index) => ({
     label: item.label,
     value: item.count,
@@ -515,8 +508,8 @@ const stats = computed(() => {
     value: formatScore(data.grades.average),
     hint: `${data.grades.total} nilai tercatat`,
     icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-    iconBg: 'bg-violet-50',
-    iconClass: 'text-violet-600',
+    iconBg: 'bg-amber-50',
+    iconClass: 'text-amber-700',
     sparkline: [] as number[],
     sparkColor: CHART_COLORS.indigo
   }

@@ -1,15 +1,14 @@
 <template>
-  <!-- ================= ORANG TUA / SISWA ================= -->
   <div v-if="isPersonal" class="space-y-6 pb-16">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Kehadiran</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Kehadiran</h1>
         <p class="text-sm text-slate-500 mt-1">{{ personalSubtitle }}</p>
       </div>
       <input
         v-model="month"
         type="month"
-        class="rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+        class="rounded-xl border border-line bg-panel px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-ring"
       />
     </div>
 
@@ -30,7 +29,7 @@
 
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
       <div v-for="item in personalCounts" :key="item.status" class="clean-card p-4">
-        <p class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <p class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
           <span class="h-2 w-2 rounded-full" :class="item.dot"></span>
           {{ item.label }}
         </p>
@@ -45,7 +44,7 @@
       </div>
 
       <div class="mt-4 grid grid-cols-7 gap-1.5 text-center">
-        <span v-for="day in dayNames" :key="day" class="pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <span v-for="day in dayNames" :key="day" class="pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
           {{ day }}
         </span>
         <span v-for="blank in leadingBlanks" :key="`blank-${blank}`"></span>
@@ -90,11 +89,11 @@
   <div v-else class="space-y-8 pb-16">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Presensi Kehadiran</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Presensi Kehadiran</h1>
         <p class="text-sm text-slate-500 mt-1">Pemantauan kehadiran siswa harian.</p>
       </div>
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:justify-end">
-        <div v-if="canEdit" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+      <div class="flex flex-wrap items-center gap-2 md:justify-end">
+        <div v-if="canEdit" class="flex flex-wrap items-center gap-2">
           <p v-if="!selectedClass" class="text-[11px] font-medium text-slate-500 sm:max-w-[220px] sm:text-right">
             Pilih kelas dulu untuk menyimpan rekap.
           </p>
@@ -113,7 +112,7 @@
           :id="uid + '-date'"
           v-model="selectedDate"
           type="date"
-          class="w-full px-4 py-3 bg-slate-50 border border-line rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+          class="w-full px-4 py-3 bg-slate-50 border border-line rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
       <div class="space-y-2">
@@ -121,7 +120,7 @@
         <select
           :id="uid + '-class'"
           v-model="selectedClass"
-          class="w-full px-4 py-3 bg-slate-50 border border-line rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none"
+          class="w-full px-4 py-3 bg-slate-50 border border-line rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
         >
           <option value="">Semua Kelas</option>
           <option v-for="c in classesList" :key="c.id" :value="c.name">
@@ -134,7 +133,7 @@
         <select
           :id="uid + '-status'"
           v-model="statusFilter"
-          class="w-full px-4 py-3 bg-slate-50 border border-line rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none cursor-pointer"
+          class="w-full px-4 py-3 bg-slate-50 border border-line rounded-xl text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer"
         >
           <option value="">Semua Status</option>
           <option value="hadir">Hadir</option>
@@ -164,10 +163,10 @@
         <table class="w-full text-left">
           <thead>
             <tr class="bg-slate-50 border-b border-line">
-              <th class="px-4 sm:px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest w-16">No</th>
-              <th class="px-4 sm:px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Nama Siswa</th>
-              <th class="px-4 sm:px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
-              <th class="px-4 sm:px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Keterangan</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest w-16">No</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Nama Siswa</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
+              <th class="px-3 sm:px-6 py-3 sm:py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Keterangan</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-line">
@@ -189,7 +188,7 @@
                   :value="getAttendanceStatus(student.id)"
                   @change="setAttendanceStatus(student.id, ($event.target as HTMLSelectElement).value as any)"
                   :disabled="!canEdit"
-                  class="px-3 py-2 bg-slate-50 border border-line rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 appearance-none min-w-[110px] cursor-pointer"
+                  class="px-3 py-2 bg-slate-50 border border-line rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 appearance-none min-w-[110px] cursor-pointer"
                   :class="{
                     'text-emerald-600 !bg-emerald-50 !border-emerald-100': getAttendanceStatus(student.id) === 'hadir',
                     'text-amber-600 !bg-amber-50 !border-amber-100': getAttendanceStatus(student.id) === 'izin',
@@ -208,12 +207,12 @@
                   type="text"
                   placeholder="Catatan..."
                   :disabled="!canEdit"
-                  class="w-full max-w-[200px] px-3 py-2 bg-slate-50 border border-line rounded-lg text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50"
+                  class="w-full max-w-[200px] px-3 py-2 bg-slate-50 border border-line rounded-lg text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
                 />
               </td>
             </tr>
             <tr v-if="filteredStudents.length === 0">
-              <td colspan="4" class="px-4 py-6 text-center text-sm text-slate-400">Tidak ada siswa pada filter ini.</td>
+              <td colspan="4" class="px-4 py-6 text-center text-sm text-slate-500">Tidak ada siswa pada filter ini.</td>
             </tr>
           </tbody>
         </table>
@@ -244,7 +243,7 @@ const isPersonal = computed(() => authStore.hasAnyRole(['orang_tua', 'siswa']))
 const personalSubtitle = computed(() =>
   authStore.hasAnyRole(['orang_tua']) ? 'Kalender kehadiran anak per bulan.' : 'Kalender kehadiran Anda per bulan.'
 )
-const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_sekolah', 'waka', 'guru_mapel', 'wali_kelas', 'guru']))
+const canEdit = computed(() => authStore.hasAnyRole(['admin', 'kepala_tu', 'staff_tu', 'wali_kelas']))
 const canExport = computed(() => canEdit.value || authStore.hasAnyRole(['kepala_tu', 'staff_tu']))
 
 /* ---------------- Mode personal ---------------- */
@@ -326,7 +325,7 @@ const dayClass = (day: { status: string | null; date: string }) => {
   if (day.status === 'hadir') return 'border-emerald-200 bg-emerald-50 text-emerald-800'
   if (day.status === 'izin') return 'border-amber-200 bg-amber-50 text-amber-800'
   if (day.status === 'alfa') return 'border-rose-200 bg-rose-50 text-rose-800'
-  return isToday ? 'border-indigo-300 bg-indigo-50/40 text-slate-700' : 'border-line bg-panel text-slate-400'
+  return isToday ? 'border-indigo-300 bg-indigo-50/40 text-slate-700' : 'border-line bg-panel text-slate-500'
 }
 
 const formatDate = (value: string) =>

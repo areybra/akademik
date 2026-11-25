@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../database');
 const authenticateToken = require('../middleware/auth');
 const authorizeRoles = require('../middleware/roleCheck');
-const { attendanceScope, canManageStudent } = require('../scope');
+const { attendanceScope, canWriteDailyAttendance } = require('../scope');
 
 function mapAttendance(a) {
   return {
@@ -79,7 +79,7 @@ router.get('/stats/today', authenticateToken, (req, res) => {
 });
 
 // POST /api/attendances — simpan satu/banyak absensi
-router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 'waka', 'guru_mapel', 'wali_kelas', 'guru'), (req, res) => {
+router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu', 'wali_kelas'), (req, res) => {
   const payload = Array.isArray(req.body.attendances)
     ? req.body.attendances
     : req.body.attendances === undefined && req.body.studentId
@@ -104,9 +104,9 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 'w
     return res.status(400).json({ message: 'Setiap absensi wajib berisi siswa dan tanggal' });
   }
 
-  const denied = normalized.find((a) => !canManageStudent(req.user, a.studentId, null));
+  const denied = normalized.find((a) => !canWriteDailyAttendance(req.user, a.studentId));
   if (denied) {
-    return res.status(403).json({ message: 'Akses ditolak: ada siswa di luar kelas yang Anda ampu' });
+    return res.status(403).json({ message: 'Akses ditolak: rekap harian hanya untuk admin, staf TU, dan wali kelas kelasnya' });
   }
 
   const existingStmt = db.prepare(
@@ -135,11 +135,11 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 'w
 });
 
 // DELETE /api/attendances/:id
-router.delete('/:id', authenticateToken, authorizeRoles('admin', 'kepala_sekolah', 'waka', 'guru_mapel', 'wali_kelas', 'guru'), (req, res) => {
+router.delete('/:id', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_tu', 'wali_kelas'), (req, res) => {
   const existing = db.prepare('SELECT * FROM attendances WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ message: 'Data absensi tidak ditemukan' });
-  if (!canManageStudent(req.user, existing.student_id, null)) {
-    return res.status(403).json({ message: 'Akses ditolak: siswa di luar kelas yang Anda ampu' });
+  if (!canWriteDailyAttendance(req.user, existing.student_id)) {
+    return res.status(403).json({ message: 'Akses ditolak: rekap harian hanya untuk admin, staf TU, dan wali kelas kelasnya' });
   }
 
   db.prepare('DELETE FROM attendances WHERE id = ?').run(req.params.id);

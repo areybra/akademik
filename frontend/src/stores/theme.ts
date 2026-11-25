@@ -18,84 +18,53 @@ export interface ThemeDefinition {
 
 export const THEMES: ThemeDefinition[] = [
   {
-    id: 'light-indigo',
-    name: 'Soft Cool Slate & Royal Indigo',
-    headline: 'Bersih & Modern',
+    id: 'light-blue',
+    name: 'Royal Blue & Gold',
+    headline: 'Bersih & Berwibawa',
     mode: 'light',
-    canvas: '#F1F5F9',
+    canvas: '#F5F7FB',
     panel: '#FFFFFF',
-    accent: '#4F46E5',
+    accent: '#2563EB',
     accentInk: '#FFFFFF',
     ink: '#0F172A',
-    muted: '#64748B'
+    muted: '#5F6F85'
   },
   {
-    id: 'light-navy',
-    name: 'Academic Navy & Warm Amber',
-    headline: 'Berwibawa & Selaras Logo',
-    mode: 'light',
-    canvas: '#F8FAFC',
-    panel: '#FFFFFF',
-    accent: '#F59E0B',
-    accentInk: '#1E293B',
-    ink: '#1E293B',
-    muted: '#64748B'
-  },
-  {
-    id: 'light-sage',
-    name: 'Sage Mist & Deep Emerald',
-    headline: 'Segar & Edukatif',
-    mode: 'light',
-    canvas: '#F4F7F5',
-    panel: '#FFFFFF',
-    accent: '#059669',
-    accentInk: '#FFFFFF',
-    ink: '#1E293B',
-    muted: '#64748B'
-  },
-  {
-    id: 'dark-indigo',
-    name: 'Midnight Slate & Indigo',
-    headline: 'Modern & Profesional',
+    id: 'dark-navy',
+    name: 'Midnight Navy & Gold',
+    headline: 'Tenang & Kontras',
     mode: 'dark',
-    canvas: '#0F172A',
-    panel: '#1E293B',
-    accent: '#6366F1',
-    accentInk: '#FFFFFF',
-    ink: '#F8FAFC',
-    muted: '#94A3B8'
-  },
-  {
-    id: 'dark-teal',
-    name: 'Deep Teal & Emerald',
-    headline: 'Tenang & Edukatif',
-    mode: 'dark',
-    canvas: '#0B191E',
-    panel: '#132A32',
-    accent: '#10B981',
-    accentInk: '#FFFFFF',
-    ink: '#F1F5F9',
-    muted: '#8FAAB3'
-  },
-  {
-    id: 'dark-plum',
-    name: 'Charcoal Plum & Violet',
-    headline: 'Elegan & Hangat',
-    mode: 'dark',
-    canvas: '#181622',
-    panel: '#242131',
-    accent: '#8B5CF6',
-    accentInk: '#FFFFFF',
-    ink: '#F5F3FF',
-    muted: '#A19EB5'
+    canvas: '#0B1220',
+    panel: '#16233A',
+    accent: '#60A5FA',
+    accentInk: '#0B1220',
+    ink: '#F5F8FF',
+    muted: '#A9B7C9'
   }
 ]
 
-export const DEFAULT_THEME_ID = 'light-indigo'
+export const DEFAULT_THEME_ID = 'light-blue'
 export const THEME_STORAGE_KEY = 'akademik-theme'
+
+// Nilai tema lama tetap diterima agar pilihan pengguna tidak hilang
+// saat daftar tema disederhanakan menjadi terang dan gelap.
+const LEGACY_THEME_MAP: Record<string, string> = {
+  'light-indigo': 'light-blue',
+  'light-navy': 'light-blue',
+  'light-sage': 'light-blue',
+  'dark-indigo': 'dark-navy',
+  'dark-teal': 'dark-navy',
+  'dark-plum': 'dark-navy'
+}
 
 const isThemeId = (value: string | null): value is string =>
   Boolean(value) && THEMES.some((theme) => theme.id === value)
+
+const normalizeThemeId = (value: string | null) => {
+  if (isThemeId(value)) return value
+  if (value && LEGACY_THEME_MAP[value]) return LEGACY_THEME_MAP[value]
+  return DEFAULT_THEME_ID
+}
 
 const applyTheme = (id: string) => {
   if (typeof document === 'undefined') return
@@ -106,7 +75,12 @@ const applyTheme = (id: string) => {
 
 export const useThemeStore = defineStore('theme', () => {
   const stored = typeof window !== 'undefined' ? localStorage.getItem(THEME_STORAGE_KEY) : null
-  const current = ref(isThemeId(stored) ? stored : DEFAULT_THEME_ID)
+  const initial = normalizeThemeId(stored)
+  const current = ref(initial)
+
+  if (stored && stored !== initial) {
+    localStorage.setItem(THEME_STORAGE_KEY, initial)
+  }
 
   const activeTheme = computed(
     () => THEMES.find((theme) => theme.id === current.value) ?? THEMES[0]

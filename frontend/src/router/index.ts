@@ -57,7 +57,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/teaching',
     component: TeachingPage,
-    meta: { requiresAuth: true, roles: ['guru', 'guru_mapel', 'wali_kelas'] }
+    meta: { requiresAuth: true, roles: ['admin', 'kepala_sekolah', 'waka', 'guru', 'guru_mapel', 'wali_kelas'] }
   },
   {
     path: '/profile',

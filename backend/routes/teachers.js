@@ -4,6 +4,7 @@ const db = require('../database');
 const authenticateToken = require('../middleware/auth');
 const authorizeRoles = require('../middleware/roleCheck');
 const upload = require('../middleware/upload');
+const { normalizeSubjects } = require('../lib/capability');
 
 // Helper: parse JSON fields
 function parseTeacher(t) {
@@ -12,6 +13,17 @@ function parseTeacher(t) {
     subjects: JSON.parse(t.subjects || '[]'),
     classes: JSON.parse(t.classes || '[]')
   };
+}
+
+// Mapel yang masih dipakai penugasan milik akun guru yang tertaut ke data guru ini.
+function usedSubjects(teacherId) {
+  return db.prepare(`
+    SELECT ta.subject, ta.class
+    FROM teacher_assignments ta
+    JOIN users u ON u.id = ta.teacher_id
+    WHERE u.teacher_id = ?
+    ORDER BY ta.class, ta.subject
+  `).all(teacherId);
 }
 
 // GET /api/teachers
@@ -50,7 +62,7 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staff_
     db.prepare(`
       INSERT INTO teachers (id, name, niup, nip, gender, pangkat, pendidikan, subjects, classes, foto_guru, provinsi, kabupaten, kecamatan, negara)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(id, name, niup, nip, gender, pangkat || '', pendidikan || '', JSON.stringify(subjects || []), JSON.stringify(classes || []), foto_guru || '', provinsi || 'Indonesia', kabupaten || 'Indonesia', kecamatan || 'Indonesia', negara || 'Indonesia');
+    `).run(id, name, niup, nip, gender, pangkat || '', pendidikan || '', JSON.stringify(normalizeSubjects(subjects)), JSON.stringify(classes || []), foto_guru || '', provinsi || 'Indonesia', kabupaten || 'Indonesia', kecamatan || 'Indonesia', negara || 'Indonesia');
 
     const newTeacher = parseTeacher(db.prepare('SELECT * FROM teachers WHERE id = ?').get(id));
     res.status(201).json(newTeacher);
@@ -71,6 +83,21 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staf
   if (!existing) return res.status(404).json({ message: 'Guru tidak ditemukan' });
 
   const existingParsed = parseTeacher(existing);
+  const nextSubjects = subjects === undefined ? existingParsed.subjects : normalizeSubjects(subjects);
+  if (subjects !== undefined) {
+    const removed = existingParsed.subjects.filter(
+      (item) => !nextSubjects.some((next) => next.toLowerCase() === String(item).toLowerCase())
+    );
+    const used = usedSubjects(id).filter(
+      (row) => removed.some((item) => item.toLowerCase() === row.subject.toLowerCase())
+    );
+    if (used.length > 0) {
+      const list = [...new Set(used.map((row) => `${row.subject} di ${row.class}`))].join(', ');
+      return res.status(400).json({
+        message: `Mapel masih dipakai penugasan: ${list}. Ubah penugasan dulu sebelum menghapus mapel dari Data Guru.`
+      });
+    }
+  }
 
   try {
     db.prepare(`
@@ -83,7 +110,7 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'staf
       gender ?? existingParsed.gender,
       pangkat ?? existingParsed.pangkat,
       pendidikan ?? existingParsed.pendidikan,
-      JSON.stringify(subjects ?? existingParsed.subjects),
+      JSON.stringify(nextSubjects),
       JSON.stringify(classes ?? existingParsed.classes),
       foto_guru ?? existingParsed.foto_guru,
       provinsi ?? existingParsed.provinsi,
@@ -140,6 +167,16 @@ router.post('/bulk', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'st
     for (const t of teachers) {
       const exists = db.prepare('SELECT id FROM teachers WHERE niup = ?').get(t.niup);
       const id = exists ? exists.id : `teacher-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const nextSubjects = normalizeSubjects(t.subjects);
+      if (exists) {
+        const seen = new Set(nextSubjects.map((subject) => subject.toLowerCase()));
+        for (const row of usedSubjects(id)) {
+          if (!seen.has(row.subject.toLowerCase())) {
+            seen.add(row.subject.toLowerCase());
+            nextSubjects.push(row.subject);
+          }
+        }
+      }
       upsertTeacher.run(
         id,
         t.name,
@@ -148,7 +185,7 @@ router.post('/bulk', authenticateToken, authorizeRoles('admin', 'kepala_tu', 'st
         t.gender,
         t.pangkat || '',
         t.pendidikan || '',
-        JSON.stringify(t.subjects || []),
+        JSON.stringify(nextSubjects),
         JSON.stringify(t.classes || []),
         t.foto_guru || '',
         t.provinsi || 'Indonesia',

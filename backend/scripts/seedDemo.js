@@ -19,13 +19,15 @@ const daysAgo = (n) => {
 
 const users = [
   { email: 'admin@example.com', password: 'Password123', name: 'Administrator', role: 'admin' },
-  { email: 'guru@smk.id', password: 'guru123', name: 'Budi Santoso, S.Kom.', role: 'guru' },
+  { email: 'guru@smk.id', password: 'guru123', name: 'Budi Santoso, S.Kom.', role: 'guru', teacher_id: 'teacher-001' },
   { email: 'siswa@smk.id', password: 'siswa123', name: 'Ahmad Fauzi', role: 'siswa', student_id: 'std-001' },
   { email: 'ortu@smk.id', password: 'ortu123', name: 'Siti Aminah', role: 'orang_tua' },
   { id: 'user-kepsek', email: 'kepsek@smk.id', password: 'Password123', name: 'Kepala Sekolah', role: 'kepala_sekolah' },
   { id: 'user-waka', email: 'waka@smk.id', password: 'Password123', name: 'Wakil Kepala Sekolah', role: 'waka' },
-  { id: 'user-wali1', email: 'wali1@smk.id', password: 'Password123', name: 'Wali Kelas X RPL 1', role: 'wali_kelas', class: 'X RPL 1', roles: ['wali_kelas', 'guru_mapel'] },
-  { id: 'user-guru1', email: 'guru1@smk.id', password: 'Password123', name: 'Guru Mapel', role: 'guru_mapel' },
+  { id: 'user-wali1', email: 'wali1@smk.id', password: 'Password123', name: 'Rina Marlina, S.Pd.', role: 'wali_kelas', class: 'X RPL 1', roles: ['wali_kelas', 'guru_mapel'], teacher_id: 'teacher-002' },
+  { id: 'user-guru1', email: 'guru1@smk.id', password: 'Password123', name: 'Agus Setiawan, M.Pd.', role: 'guru_mapel', teacher_id: 'teacher-003' },
+  { id: 'user-guru2', email: 'guru2@smk.id', password: 'Password123', name: 'Nurul Hidayah, S.Pd.', role: 'guru_mapel', roles: ['guru_mapel'], teacher_id: 'teacher-004' },
+  { id: 'user-guru3', email: 'guru3@smk.id', password: 'Password123', name: 'Hendra Gunawan, S.T.', role: 'guru_mapel', roles: ['guru_mapel'], teacher_id: 'teacher-005' },
   { id: 'user-kepalatu', email: 'kepalatu@smk.id', password: 'Password123', name: 'Kepala Tata Usaha', role: 'kepala_tu' },
   { id: 'user-stafftu', email: 'stafftu@smk.id', password: 'Password123', name: 'Staff Tata Usaha', role: 'staff_tu' }
 ];
@@ -47,7 +49,7 @@ const students = [
 
 const teachers = [
   ['teacher-001', 'Budi Santoso, S.Kom.', 'GJ2001', 'Laki-laki', ['Informatika', 'Pemrograman Web'], ['X RPL 1', 'XI RPL 1']],
-  ['teacher-002', 'Rina Marlina, S.Pd.', 'GJ2002', 'Perempuan', ['Matematika'], ['X RPL 1', 'XII TKJ 1']],
+  ['teacher-002', 'Rina Marlina, S.Pd.', 'GJ2002', 'Perempuan', ['Matematika'], ['X RPL 1', 'XI RPL 1', 'XII TKJ 1']],
   ['teacher-003', 'Agus Setiawan, M.Pd.', 'GJ2003', 'Laki-laki', ['Bahasa Indonesia'], ['X RPL 1', 'XI RPL 1', 'XII TKJ 1']],
   ['teacher-004', 'Nurul Hidayah, S.Pd.', 'GJ2004', 'Perempuan', ['Bahasa Inggris'], ['XI RPL 1', 'XII TKJ 1']],
   ['teacher-005', 'Hendra Gunawan, S.T.', 'GJ2005', 'Laki-laki', ['Jaringan Komputer'], ['XII TKJ 1']]
@@ -83,7 +85,7 @@ const attendanceStatuses = ['hadir', 'hadir', 'hadir', 'hadir', 'izin', 'hadir',
 function seedUsers() {
   const find = db.prepare('SELECT id FROM users WHERE email = ?');
   const insert = db.prepare(
-    'INSERT OR IGNORE INTO users (id, name, email, password, role, class, roles, student_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    'INSERT OR IGNORE INTO users (id, name, email, password, role, class, roles, student_id, teacher_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
   );
   let added = 0;
   for (const u of users) {
@@ -96,7 +98,8 @@ function seedUsers() {
       u.role,
       u.class || null,
       JSON.stringify(u.roles || [u.role]),
-      u.student_id || null
+      u.student_id || null,
+      u.teacher_id || null
     ).changes;
   }
   return added;
@@ -123,11 +126,18 @@ function seedTeachers() {
 }
 
 function seedSchedules() {
-  const insert = db.prepare(
-    'INSERT OR IGNORE INTO schedules (id, class, time, subject, teacher, room, day) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  const insert = db.prepare(`
+    INSERT OR IGNORE INTO schedules (id, class, time, subject, teacher, teacher_id, room, day)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const accountByTeacher = new Map(
+    db.prepare('SELECT t.name, u.id FROM teachers t JOIN users u ON u.teacher_id = t.id').all()
+      .map((row) => [row.name, row.id])
   );
   let added = 0;
-  for (const s of [...schedules, ...scheduleVariants]) added += insert.run(...s).changes;
+  for (const s of [...schedules, ...scheduleVariants]) {
+    added += insert.run(s[0], s[1], s[2], s[3], s[4], accountByTeacher.get(s[4]) || null, s[5], s[6]).changes;
+  }
   // Baris lama bisa punya day kosong; isi agar muncul di filter hari.
   db.prepare("UPDATE schedules SET day = 'Senin' WHERE day IS NULL OR day = '' OR day = 'Belum ditentukan'").run();
   return added;
@@ -152,7 +162,7 @@ function seedLessonSessions() {
     const isoDate = ymd(date);
     const day = DAY_NAMES[date.getDay()];
     for (const row of schedulesOfDay.all(day)) {
-      const teacher = findTeacher.get(row.teacher);
+      const teacher = row.teacher_id ? { id: row.teacher_id } : findTeacher.get(row.teacher);
       const sessionId = `sess-${row.id}-${isoDate}`;
       added += insertSession.run(
         sessionId, row.id, isoDate, row.class, row.subject,
@@ -289,6 +299,8 @@ function seedRelations() {
   const findUser = db.prepare('SELECT id FROM users WHERE email = ?');
   const ortu = findUser.get('ortu@smk.id');
   const guru1 = findUser.get('guru1@smk.id');
+  const guru2 = findUser.get('guru2@smk.id');
+  const guru3 = findUser.get('guru3@smk.id');
   const guru = findUser.get('guru@smk.id');
 
   const linkParent = db.prepare(
@@ -303,15 +315,38 @@ function seedRelations() {
   const assign = db.prepare(
     'INSERT OR IGNORE INTO teacher_assignments (id, teacher_id, subject, class) VALUES (?, ?, ?, ?)'
   );
+  // Satu mapel + kelas hanya boleh punya satu guru penanggung jawab nilai.
   const rows = [];
-  if (guru1) {
-    rows.push([guru1.id, 'Informatika', 'X RPL 1'], [guru1.id, 'Pemrograman Web', 'X RPL 1']);
+  if (guru) {
+    rows.push(
+      [guru.id, 'Informatika', 'X RPL 1'],
+      [guru.id, 'Pemrograman Web', 'X RPL 1'],
+      [guru.id, 'Informatika', 'XI RPL 1'],
+      [guru.id, 'Pemrograman Web', 'XI RPL 1']
+    );
   }
   if (wali) {
-    rows.push([wali.id, 'Informatika', 'X RPL 1'], [wali.id, 'Pemrograman Web', 'X RPL 1']);
+    rows.push(
+      [wali.id, 'Matematika', 'X RPL 1'],
+      [wali.id, 'Matematika', 'XI RPL 1'],
+      [wali.id, 'Matematika', 'XII TKJ 1']
+    );
   }
-  if (guru) {
-    rows.push([guru.id, 'Informatika', 'X RPL 1'], [guru.id, 'Pemrograman Web', 'X RPL 1'], [guru.id, 'Pemrograman Web', 'XI RPL 1']);
+  if (guru1) {
+    rows.push(
+      [guru1.id, 'Bahasa Indonesia', 'X RPL 1'],
+      [guru1.id, 'Bahasa Indonesia', 'XI RPL 1'],
+      [guru1.id, 'Bahasa Indonesia', 'XII TKJ 1']
+    );
+  }
+  if (guru2) {
+    rows.push(
+      [guru2.id, 'Bahasa Inggris', 'XI RPL 1'],
+      [guru2.id, 'Bahasa Inggris', 'XII TKJ 1']
+    );
+  }
+  if (guru3) {
+    rows.push([guru3.id, 'Jaringan Komputer', 'XII TKJ 1']);
   }
   for (const [teacherId, subject, className] of rows) {
     const id = `assign-${teacherId}-${subject}-${className}`.replace(/\s+/g, '-').toLowerCase();
@@ -346,5 +381,7 @@ console.log('  kepsek@smk.id / Password123');
 console.log('  waka@smk.id / Password123');
 console.log('  wali1@smk.id / Password123');
 console.log('  guru1@smk.id / Password123');
+console.log('  guru2@smk.id / Password123');
+console.log('  guru3@smk.id / Password123');
 console.log('  kepalatu@smk.id / Password123');
 console.log('  stafftu@smk.id / Password123');

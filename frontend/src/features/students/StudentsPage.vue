@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-black text-surface-900 tracking-tight">Manajemen Siswa</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Manajemen Siswa</h1>
         <p class="text-surface-500 mt-1 flex items-center gap-2 font-medium">
           <span class="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse"></span>
           {{ filteredStudentsList.length }} Siswa terverifikasi dalam database
@@ -71,7 +71,7 @@
           <select
             :id="uid + '-level-filter'"
             v-model="levelFilter"
-            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
             <option value="">Semua Tingkat</option>
             <option v-for="l in allLevels" :key="l" :value="l">Kelas {{ l }}</option>
@@ -84,7 +84,7 @@
           <select
             :id="uid + '-major-filter'"
             v-model="majorFilter"
-            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
             <option value="">Semua Jurusan</option>
             <option v-for="m in allMajors" :key="m" :value="m">
@@ -99,7 +99,7 @@
           <select
             :id="uid + '-gender-filter'"
             v-model="genderFilter"
-            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
             <option value="">Semua Gender</option>
             <option value="L">Laki-laki</option>
@@ -111,7 +111,7 @@
           <select
             :id="uid + '-status-filter'"
             v-model="statusFilter"
-            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
             <option value="">Semua Status</option>
             <option value="siswa aktif">Siswa Aktif</option>
@@ -124,7 +124,7 @@
           <select
             :id="uid + '-province-filter'"
             v-model="provinceFilter"
-            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
             <option value="">Semua Provinsi</option>
             <option v-for="p in allProvinces" :key="p" :value="p">{{ p }}</option>
@@ -135,7 +135,7 @@
           <select
             :id="uid + '-kabupaten-filter'"
             v-model="kabupatenFilter"
-            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+            class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
           >
             <option value="">Semua Kabupaten/Kota</option>
             <option v-for="k in kabupatenOptions" :key="k" :value="k">{{ k }}</option>
@@ -145,7 +145,7 @@
     </div>
 
     <!-- Content Area -->
-    <div v-if="filteredStudentsList.length === 0" class="premium-card p-8 sm:p-12 text-center">
+    <div v-if="filteredStudentsList.length === 0" class="premium-card p-6 sm:p-10 text-center">
        <div class="w-20 h-20 bg-surface-100 rounded-full flex items-center justify-center mx-auto mb-6 border border-surface-200">
          <svg class="w-10 h-10 text-surface-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -312,7 +312,7 @@
            <select
              :id="uid + '-form-class'"
              v-model="formData.class"
-             class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+             class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
              required
            >
              <option v-for="c in sortedClasses" :key="c" :value="c">{{ c }}</option>
@@ -326,7 +326,7 @@
              <select
                :id="uid + '-form-gender'"
                v-model="formData.gender"
-               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
                required
              >
                <option value="L">Laki-laki</option>
@@ -340,7 +340,7 @@
                v-model="formData.tmp_lahir"
                type="text"
                placeholder="Tempat lahir"
-               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
                required
              />
            </div>
@@ -353,7 +353,7 @@
                :id="uid + '-form-tgl-lahir'"
                v-model="formData.tgl_lahir"
                type="date"
-               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
                required
              />
            </div>
@@ -364,7 +364,7 @@
                v-model="formData.nisn"
                type="text"
                placeholder="Nomor Induk Siswa Nasional"
-               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
              />
            </div>
          </div>
@@ -375,7 +375,7 @@
              <select
                :id="uid + '-form-provinsi'"
                v-model="formData.provinsi"
-               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
                required
              >
                <option value="Indonesia">Indonesia</option>
@@ -417,7 +417,7 @@
                v-model="formData.kabupaten"
                type="text"
                placeholder="Kabupaten/Kota"
-               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
              />
            </div>
          </div>
@@ -430,7 +430,7 @@
                v-model="formData.kecamatan"
                type="text"
                placeholder="Kecamatan"
-               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
              />
            </div>
            <div>
@@ -438,7 +438,7 @@
              <select
                :id="uid + '-form-negara'"
                v-model="formData.negara"
-               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all appearance-none cursor-pointer"
+               class="w-full px-5 py-3.5 bg-surface-100/50 border border-surface-200/60 rounded-2xl text-surface-900 font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:border-brand-500 transition-all appearance-none cursor-pointer"
              >
                <option value="Indonesia">Indonesia</option>
              </select>
@@ -633,7 +633,7 @@
              type="file"
              accept=".csv,text/csv"
              @change="onFileChange"
-             class="block w-full text-sm text-surface-700 bg-panel rounded-xl border border-indigo-200 cursor-pointer file:mr-4 file:py-2.5 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-cta file:text-cta-ink hover:file:bg-cta-hover focus:outline-none focus:ring-4 focus:ring-indigo-500/20"
+             class="block w-full text-sm text-surface-700 bg-panel rounded-xl border border-indigo-200 cursor-pointer file:mr-4 file:py-2.5 file:px-4 file:border-0 file:text-sm file:font-bold file:bg-cta file:text-cta-ink hover:file:bg-cta-hover focus:outline-none focus:ring-2 focus:ring-ring"
            />
            <p class="text-[11px] text-indigo-700/70 mt-2">
              Pilih file berformat <strong>.csv</strong> hasil pengisian template di atas.

@@ -1,6 +1,6 @@
 <template>
   <section class="space-y-4">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Daftar Akun</h2>
         <p class="text-xs text-slate-500 mt-1">
@@ -32,7 +32,7 @@
           </select>
         </div>
       </div>
-      <p class="text-[11px] text-slate-400">
+      <p class="text-[11px] text-slate-500">
         {{ filteredUsers.length }} dari {{ userStore.users.length }} akun ditampilkan.
       </p>
     </div>
@@ -49,7 +49,7 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead>
-            <tr class="border-b border-line text-[10px] uppercase tracking-widest text-slate-400">
+            <tr class="border-b border-line text-[10px] uppercase tracking-widest text-slate-500">
               <th class="px-4 py-2.5 font-bold">Nama</th>
               <th class="px-4 py-2.5 font-bold">Role</th>
               <th class="px-4 py-2.5 font-bold">Relasi</th>
@@ -61,7 +61,7 @@
             <tr v-for="user in filteredUsers" :key="user.id" class="align-top hover:bg-slate-50/60">
               <td class="px-4 py-3">
                 <p class="font-bold text-slate-800">{{ user.name }}</p>
-                <p class="text-[10px] text-slate-400 break-all">{{ user.email }}</p>
+                <p class="text-[10px] text-slate-500 break-all">{{ user.email }}</p>
               </td>
               <td class="px-4 py-3">
                 <div class="flex flex-wrap items-center gap-1">
@@ -123,7 +123,7 @@
               </td>
             </tr>
             <tr v-if="filteredUsers.length === 0">
-              <td colspan="5" class="px-4 py-6 text-center text-slate-400">
+              <td colspan="5" class="px-4 py-6 text-center text-slate-500">
                 Tidak ada akun yang cocok dengan filter.
               </td>
             </tr>
@@ -202,6 +202,9 @@ const relationLabel = (user: User) => {
   if (roles.includes('orang_tua')) parts.push(`Anak: ${user.children || 'belum ditautkan'}`)
   if (roles.includes('siswa')) parts.push(`Siswa: ${user.student_name || 'belum ditautkan'}`)
   if (roles.includes('wali_kelas')) parts.push(`Wali kelas: ${user.class || 'belum diisi'}`)
+  if (roles.includes('guru') || roles.includes('guru_mapel')) {
+    parts.push(`Data guru: ${user.teacher_name || 'belum tertaut'}`)
+  }
   if (user.assignments) parts.push(`Mapel: ${user.assignments}`)
   return parts.length > 0 ? parts.join(' · ') : '—'
 }

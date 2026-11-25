@@ -83,7 +83,7 @@ const run = async () => {
     email: teacherEmail,
     password: PASSWORD,
     role: 'guru_mapel',
-    assignments: [{ subject: 'Matematika', class: 'XI RPL 1' }]
+    assignments: [{ subject: 'Bahasa Inggris', class: 'XI RPL 1' }]
   });
   check('POST /users guru_mapel = 201', createTeacher.status, 201);
   check('akun guru punya 1 penugasan', createTeacher.body?.assignments?.length, 1);

@@ -1,8 +1,9 @@
 <template>
+  <div>
   <!-- ================= ORANG TUA / SISWA ================= -->
   <div v-if="isPersonal" class="space-y-6 pb-16">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Tagihan</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Tagihan</h1>
       <p class="text-sm text-slate-500 mt-1">Sisa tagihan dan riwayat pembayaran.</p>
     </div>
 
@@ -64,7 +65,7 @@
   <div v-else class="space-y-6 sm:space-y-8 pb-16">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Tagihan SPP / Triwulan</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Tagihan SPP / Triwulan</h1>
         <p class="text-sm text-slate-500 mt-1">Kelola atau lihat status pembayaran siswa sesuai peran.</p>
       </div>
 
@@ -110,7 +111,7 @@
         </div>
 
         <div class="space-y-4">
-          <div v-if="filteredBills.length === 0" class="clean-card p-8 sm:p-12 text-center text-slate-500">
+          <div v-if="filteredBills.length === 0" class="clean-card p-6 sm:p-10 text-center text-slate-500">
             Belum ada tagihan untuk ditampilkan.
           </div>
 
@@ -246,6 +247,7 @@
       <input type="file" @change="handleProofFile" class="w-full" />
     </div>
   </Modal>
+  </div>
 </template>
 
 <script setup lang="ts">
